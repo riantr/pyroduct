@@ -20,7 +20,7 @@ ledger, evidence binding, and a principled refusal to close.
 | Repository | `git@gitee.com:ren-yongxiang/pyroduct.git` |
 | Author | `riantr` |
 | License | MIT |
-| `moon.mod` version | **0.1.0** |
+| `moon.mod` version | **0.1.1** |
 | Module name | `riantr/pyroduct` |
 | Source layout | 15 packages in one module（11 个库／CLI + 4 个示例），一个关注点一个包 |
 | `.mbt` file count | **41 production files** (+ 8 test files) |
@@ -230,7 +230,8 @@ pyroduct/                  <- the module (riantr/pyroduct, 11 packages)
     irm/                   <- 外部 DGP + 外部 DoubleMLIRM
     cross_check/           <- 外部 DGP 上两实现互校
     consumer/              <- 库使用者的最小闭环
-  moon.mod                 <- module manifest（riantr/pyroduct@0.1.0）
+  moon.pkg                 <- 根包（只承载本 README；mooncakes 的 docs 按包渲染文档）
+  moon.mod                 <- module manifest（riantr/pyroduct@0.1.1）
   README.mbt.md            <- this file
 ```
 

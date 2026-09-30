@@ -2,6 +2,7 @@
 package "riantr/pyroduct/dmlref"
 
 import {
+  "riantr/moonbit_doubleML",
   "riantr/pyroduct/ml",
 }
 
@@ -14,11 +15,15 @@ pub fn compare_with(String, Array[Double], Array[Double], Array[Array[Double]], 
 
 pub fn demo_dataset() -> (Array[Double], Array[Double], Array[Array[Double]], Double)
 
+pub fn external_plr(Int, Int, Double, Int, Int, Double) -> Compare
+
 pub fn fit_ours(Array[Double], Array[Double], Array[Array[Double]], Int, Int, Double) -> @ml.DmlResult
 
 pub fn fit_reference(Array[Double], Array[Double], Array[Array[Double]], Int) -> RefFit
 
 pub fn render_report() -> String
+
+pub fn rows_of(@moonbit_doubleML.Matrix) -> Array[Array[Double]]
 
 // Errors
 

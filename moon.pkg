@@ -1,0 +1,6 @@
+// 模块根包：本目录只承载 README.mbt.md。
+//
+// 为什么需要它：mooncakes 的文档页按**包**渲染 markdown 文档，模块根不是包时，
+// README 只会出现在 manifest 里而不会显示在 docs 页面上（参考包 riantr/moonbit_doubleML
+// 的模块根正是它的库包，所以它的 README 能显示）。
+formatter(ignore: [ "README.mbt.md" ])

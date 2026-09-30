@@ -212,7 +212,7 @@ pyroduct/                  <- the module (riantr/pyroduct, 11 packages)
 - 外部参考实现：[`riantr/moonbit_doubleML`](https://gitee.com/ren-yongxiang/moonbit_doubleml)
   —— `doubleml-for-py` 的纯 MoonBit 移植（MIT；上游 BSD-3-Clause）。本仓库只在
   `dmlref` 中使用它的 `DoubleMLPLR` 做互校，不构成对其代码的再分发依赖。
-- 本仓库 License：MIT。
+- 本仓库 License：MIT（见仓库根目录 `LICENSE`）。
 
 #Used By
 

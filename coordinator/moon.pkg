@@ -1,0 +1,8 @@
+// 科研 Agent 协调器：任务与制品、规划与调度、内容记忆、外部证据绑定、署名与信用、
+// 商谈段/决策段的分离，以及一个可重放、可落盘的运行时。
+import {
+  "moonseek/lava_conduit/multi",
+  "moonseek/lava_conduit/ml",
+  "moonseek/lava_conduit/evolution",
+  "moonbitlang/core/string",
+}

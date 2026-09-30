@@ -1,0 +1,5 @@
+// 群体状态机：把主体状态机（src）与多主体规则（multi）再抬一层，单位换成"群体"。
+import {
+  "moonseek/lava_conduit/src" @sm,
+  "moonseek/lava_conduit/multi",
+}

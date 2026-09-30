@@ -1,0 +1,53 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonseek/lava_conduit/dmlref"
+
+import {
+  "moonseek/lava_conduit/ml",
+}
+
+// Values
+pub fn compare_matched(Array[Double], Array[Double], Array[Array[Double]], Double, Int, Double) -> Compare
+
+pub fn compare_rich(Array[Double], Array[Double], Array[Array[Double]], Double, Int, Double) -> Compare
+
+pub fn compare_with(String, Array[Double], Array[Double], Array[Array[Double]], Double, Int, Int, Double, Double) -> Compare
+
+pub fn demo_dataset() -> (Array[Double], Array[Double], Array[Array[Double]], Double)
+
+pub fn fit_ours(Array[Double], Array[Double], Array[Array[Double]], Int, Int, Double) -> @ml.DmlResult
+
+pub fn fit_reference(Array[Double], Array[Double], Array[Array[Double]], Int) -> RefFit
+
+pub fn render_report() -> String
+
+// Errors
+
+// Types and methods
+pub struct Compare {
+  label : String
+  n : Int
+  folds : Int
+  theta_ref : Double
+  theta_ours : Double
+  se_ref : Double
+  se_ours : Double
+  ci_low : Double
+  ci_high : Double
+  d_theta : Double
+  d_se : Double
+  truth : Double
+  agree : Bool
+}
+
+pub struct RefFit {
+  theta : Double
+  se : Double
+  ci_low : Double
+  ci_high : Double
+  n : Int
+  folds : Int
+}
+
+// Type aliases
+
+// Traits

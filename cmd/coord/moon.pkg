@@ -1,0 +1,10 @@
+// 协调器 CLI（native）：跑示例研究并把整机检查点写进磁盘。
+import {
+  "moonseek/lava_conduit/coordinator",
+  "moonbitlang/async",
+  "moonbitlang/async/fs",
+}
+
+supported_targets = "+native"
+
+pkgtype(kind: "executable")

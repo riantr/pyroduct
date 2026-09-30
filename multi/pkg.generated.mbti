@@ -1,0 +1,172 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonseek/lava_conduit/multi"
+
+import {
+  "moonseek/lava_conduit/src",
+}
+
+// Values
+pub fn cheng_gap(Subject, Subject) -> Int
+
+pub fn citation_of(String) -> String
+
+pub fn citations() -> Array[(String, String)]
+
+pub fn encounter(Subject, Subject, DiscourseType, ValidityClaim) -> EncounterOutcome
+
+pub fn genealogy() -> Array[GenealogyEntry]
+
+pub fn in_phase(ValidityClaim) -> Bool
+
+pub fn is_coherent(EncounterOutcome) -> Bool
+
+pub fn network(Array[Subject]) -> NetworkReport
+
+pub fn open_problems() -> Array[OpenProblem]
+
+pub fn phase_of(ClaimKind) -> ClaimPhase
+
+pub fn render_genealogy() -> String
+
+pub fn render_multi_report() -> String
+
+pub fn render_open_problems() -> String
+
+pub fn render_rules() -> String
+
+pub fn render_scenarios() -> String
+
+pub fn rendezvous() -> @src.SubjectState
+
+pub fn requires_joint_review(ClaimKind) -> Bool
+
+pub fn rule(String) -> Rule?
+
+pub fn rules() -> Array[Rule]
+
+pub fn scenarios() -> Array[(String, EncounterOutcome)]
+
+pub fn subject(Int, @src.SubjectState, TruthRegime, Int, Int, Int) -> Subject
+
+pub fn vertical_ready(Array[Subject]) -> Bool
+
+pub fn with_reason(Subject, Int) -> Subject
+
+// Errors
+
+// Types and methods
+pub struct Cheng {
+  toward_other : Int
+  toward_self : Int
+}
+pub fn Cheng::is_complete(Self) -> Bool
+
+pub(all) enum ClaimKind {
+  Truthfulness
+  Legitimacy
+  Authenticity
+  Sincerity
+} derive(Eq)
+pub fn ClaimKind::equal(Self, Self) -> Bool
+pub fn ClaimKind::label(Self) -> String
+pub fn ClaimKind::not_equal(Self, Self) -> Bool
+
+pub(all) enum ClaimPhase {
+  Before
+  During
+  After
+} derive(Eq)
+pub fn ClaimPhase::equal(Self, Self) -> Bool
+pub fn ClaimPhase::label(Self) -> String
+pub fn ClaimPhase::not_equal(Self, Self) -> Bool
+
+pub(all) enum DiscourseType {
+  Theoretical
+  Practical
+  Aesthetic
+  Faith
+} derive(Eq)
+pub fn DiscourseType::equal(Self, Self) -> Bool
+pub fn DiscourseType::label(Self) -> String
+pub fn DiscourseType::not_equal(Self, Self) -> Bool
+
+pub struct EncounterOutcome {
+  verdict : Verdict
+  a : Subject
+  b : Subject
+  disclosed : String
+  concealed : String
+  revisable : Bool
+  note : String
+}
+
+pub struct GenealogyEntry {
+  tradition : String
+  view : String
+}
+
+pub struct NetworkReport {
+  peer_edges : Int
+  norm_edges : Int
+  clashing_pairs : Int
+  consensus_possible : Bool
+  vertical_ok : Bool
+  min_reason : Int
+}
+
+pub struct OpenProblem {
+  question : String
+  note : String
+}
+
+pub struct Rule {
+  code : String
+  name : String
+  text : String
+  basis : String
+}
+
+pub struct Subject {
+  id : Int
+  state : @src.SubjectState
+  regime : TruthRegime
+  cheng : Cheng
+  reason : Int
+  residue : Int
+}
+
+pub(all) enum TruthRegime {
+  Immanent
+  Logos
+  SuperSubjective
+  InterSubjective
+  ChengRan
+} derive(Eq)
+pub fn TruthRegime::basis(Self) -> String
+pub fn TruthRegime::equal(Self, Self) -> Bool
+pub fn TruthRegime::label(Self) -> String
+pub fn TruthRegime::needs_cheng(Self) -> Bool
+pub fn TruthRegime::not_equal(Self, Self) -> Bool
+pub fn TruthRegime::seeks_consensus(Self) -> Bool
+pub fn TruthRegime::third(Self) -> String
+
+pub(all) struct ValidityClaim {
+  kind : ClaimKind
+  phase : ClaimPhase
+}
+
+pub(all) enum Verdict {
+  OutOfPhase
+  NotSought
+  RegimeClash
+  Monologic
+  Provisional
+  Attuned
+} derive(Eq)
+pub fn Verdict::equal(Self, Self) -> Bool
+pub fn Verdict::label(Self) -> String
+pub fn Verdict::not_equal(Self, Self) -> Bool
+
+// Type aliases
+
+// Traits

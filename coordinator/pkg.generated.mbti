@@ -1,0 +1,319 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonseek/lava_conduit/coordinator"
+
+import {
+  "moonseek/lava_conduit/evolution",
+  "moonseek/lava_conduit/multi",
+}
+
+// Values
+pub fn agent_of(Plan, Int) -> Int
+
+pub fn assign(Question, Array[Worker]) -> Int?
+
+pub fn author_order(Array[Contribution]) -> Array[Int]
+
+pub fn contribution(Int, Int, Role, Int) -> Contribution
+
+pub fn credit_of_task(Array[Contribution], Int) -> Array[Int]
+
+pub fn dataset(Int, String, Int, UInt64, String) -> Dataset
+
+pub fn decide(Deliberation, Int, Int, String, Int) -> Decision?
+
+pub fn decision_ok(Decision) -> Bool
+
+pub fn demo_candidate() -> @evolution.Genome
+
+pub fn demo_datasets() -> Array[Dataset]
+
+pub fn demo_parent() -> @evolution.Genome
+
+pub fn demo_questions() -> Array[Question]
+
+pub fn demo_tasks() -> Array[Task]
+
+pub fn demo_workers() -> Array[Worker]
+
+pub fn demo_world() -> Array[@evolution.Opponent]
+
+pub fn evidence_verdict(Binding) -> EvidenceVerdict
+
+pub fn experiment(String, Dataset, @evolution.Genome, @evolution.Genome, Array[@evolution.Opponent]) -> Binding
+
+pub fn new_runtime() -> Runtime
+
+pub fn parse_notebook(String) -> Notebook
+
+pub fn question(Int, String, @multi.DiscourseType) -> Question
+
+pub fn ready(Array[Task], Array[Int]) -> Array[Int]
+
+pub fn render_decision(Decision) -> String
+
+pub fn render_plan(Plan, Array[Task]) -> String
+
+pub fn render_report() -> String
+
+pub fn render_statement(Array[Contribution]) -> String
+
+pub fn reopen(Decision, Int) -> Deliberation
+
+pub fn replicate(Binding, Dataset, @evolution.Genome, @evolution.Genome, Array[@evolution.Opponent]) -> Binding
+
+pub fn replication_of(Int, Dataset, Binding, Bool) -> Replication
+
+pub fn restore(String) -> Runtime
+
+pub fn result(Int, Int, Int, @multi.ClaimKind, @multi.ClaimPhase, String, Int, Int, Int, Int, Int) -> Result
+
+pub fn schedule(Array[Task], Array[Question], Array[Worker], Int) -> Plan
+
+pub fn task(Int, Int, String, Array[Int], Array[Int], Int, Int) -> Task
+
+pub fn topological(Array[Task]) -> (Array[Int], Bool)
+
+pub fn totals(Array[Contribution]) -> Array[(Int, Int)]
+
+pub fn worker(Int, String, @multi.TruthRegime, Int, Int, Int) -> Worker
+
+// Errors
+
+// Types and methods
+pub struct Artifact {
+  id : Int
+  kind : ArtifactKind
+  name : String
+  task : Int
+  digest : String
+}
+
+pub(all) enum ArtifactKind {
+  Paper
+  Figure
+  Code
+  Data
+  Note
+} derive(Eq)
+pub fn ArtifactKind::equal(Self, Self) -> Bool
+pub fn ArtifactKind::label(Self) -> String
+pub fn ArtifactKind::not_equal(Self, Self) -> Bool
+
+pub struct Binding {
+  claim_text : String
+  dataset : Int
+  digest : String
+  effect : Int
+  ci_low : Int
+  ci_high : Int
+  replicas : Int
+  warrant : Warrant
+}
+pub fn Binding::pinned_to(Self, Dataset) -> Bool
+
+pub struct Citation {
+  key : String
+  title : String
+  locator : String
+}
+
+pub(all) enum Commitment {
+  Draft
+  Adopted
+  Superseded
+  Withdrawn
+} derive(Eq)
+pub fn Commitment::equal(Self, Self) -> Bool
+pub fn Commitment::label(Self) -> String
+pub fn Commitment::not_equal(Self, Self) -> Bool
+
+pub struct Contribution {
+  agent : Int
+  task : Int
+  role : Role
+  weight : Int
+}
+
+pub struct Dataset {
+  id : Int
+  name : String
+  rows : Int
+  seed : UInt64
+  digest : String
+}
+
+pub struct Decision {
+  question : Int
+  chosen : Int
+  commitment : Commitment
+  revisable : Bool
+  residual_owner : Int
+  reopen_when : String
+  at : Int
+}
+
+pub(all) struct Deliberation {
+  question : Int
+  options : Array[Int]
+  open_remainder : String
+}
+
+pub(all) enum EvidenceVerdict {
+  Supported
+  Refuted
+  Inconclusive
+  Replicated
+} derive(Eq)
+pub fn EvidenceVerdict::equal(Self, Self) -> Bool
+pub fn EvidenceVerdict::label(Self) -> String
+pub fn EvidenceVerdict::not_equal(Self, Self) -> Bool
+
+pub(all) struct Finding {
+  id : Int
+  question : Int
+  text : String
+  claim : @multi.ClaimKind
+  phase : @multi.ClaimPhase
+  result : Int
+  residual : Int
+  status : FindingStatus
+  supersedes : Int?
+  author : Int
+  at : Int
+}
+
+pub(all) enum FindingStatus {
+  Pending
+  Established
+  Overturned
+  Replaced
+  Retracted
+} derive(Eq)
+pub fn FindingStatus::equal(Self, Self) -> Bool
+pub fn FindingStatus::label(Self) -> String
+pub fn FindingStatus::not_equal(Self, Self) -> Bool
+
+pub struct Message {
+  at : Int
+  from : Int
+  to : Int
+  discourse : @multi.DiscourseType
+  claim : @multi.ClaimKind
+  body : String
+}
+
+pub struct Notebook {
+  findings : Array[Finding]
+}
+pub fn Notebook::add(Self, Finding) -> Int
+pub fn Notebook::current(Self, Int) -> Finding?
+pub fn Notebook::find(Self, Int) -> Finding?
+pub fn Notebook::history(Self, Int) -> Array[Int]
+pub fn Notebook::mark(Self, Int, FindingStatus) -> Unit
+pub fn Notebook::new() -> Self
+pub fn Notebook::serialize(Self) -> String
+
+pub struct Plan {
+  order : Array[Int]
+  assigned : Array[(Int, Int)]
+  feasible : Bool
+  notes : Array[String]
+}
+
+pub struct Question {
+  id : Int
+  text : String
+  discourse : @multi.DiscourseType
+}
+
+pub struct Replication {
+  id : Int
+  result : Int
+  dataset : Int
+  effect : Int
+  ci_low : Int
+  ci_high : Int
+  agrees : Bool
+}
+
+pub struct Result {
+  id : Int
+  task : Int
+  question : Int
+  claim : @multi.ClaimKind
+  phase : @multi.ClaimPhase
+  summary : String
+  dataset : Int
+  effect : Int
+  ci_low : Int
+  ci_high : Int
+  replicas : Int
+}
+pub fn Result::is_bound(Self) -> Bool
+
+pub(all) enum Role {
+  Question
+  Data
+  Method
+  Analysis
+  Writing
+  Review
+} derive(Eq)
+pub fn Role::equal(Self, Self) -> Bool
+pub fn Role::label(Self) -> String
+pub fn Role::not_equal(Self, Self) -> Bool
+
+pub struct Runtime {
+  mut clock : Int
+  log : Array[Message]
+  done : Array[Int]
+  notebook : Notebook
+  results : Array[Result]
+  artifacts : Array[Artifact]
+}
+pub fn Runtime::checkpoint(Self) -> String
+pub fn Runtime::new() -> Self
+pub fn Runtime::round_trips(Self) -> Bool
+pub fn Runtime::step(Self, Array[Task], Array[Question], Array[Worker], Array[Dataset], Array[@evolution.Opponent], @evolution.Genome, @evolution.Genome) -> StepReport?
+
+pub struct StepReport {
+  at : Int
+  task : Int
+  agent : Int
+  discourse : String
+  verdict : String
+  result : Int
+  finding : Int
+}
+
+pub struct Task {
+  id : Int
+  question : Int
+  title : String
+  deps : Array[Int]
+  needs : Array[Int]
+  budget : Int
+  deadline : Int
+}
+
+pub(all) enum Warrant {
+  FromData
+  FromReplication
+  FromDialogue
+} derive(Eq)
+pub fn Warrant::equal(Self, Self) -> Bool
+pub fn Warrant::label(Self) -> String
+pub fn Warrant::not_equal(Self, Self) -> Bool
+
+pub struct Worker {
+  id : Int
+  name : String
+  regime : @multi.TruthRegime
+  reason : Int
+  cheng : Int
+  budget : Int
+}
+
+// Type aliases
+
+// Traits

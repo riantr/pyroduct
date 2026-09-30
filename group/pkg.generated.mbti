@@ -1,0 +1,128 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonseek/lava_conduit/group"
+
+import {
+  "moonseek/lava_conduit/multi",
+}
+
+// Values
+pub fn all_attuned(Array[@multi.Subject]) -> Bool
+
+pub fn all_phases() -> Array[GroupPhase]
+
+pub fn all_states() -> Array[GroupState]
+
+pub fn clashing_pairs(Array[@multi.Subject]) -> Int
+
+pub fn course() -> Array[GroupState]
+
+pub fn emerge(Array[@multi.Subject]) -> GroupState
+
+pub fn emergence_table() -> Array[(String, GroupState)]
+
+pub fn feedback(GroupState, @multi.Subject) -> @multi.Subject
+
+pub fn feedback_demo(GroupState) -> String
+
+pub fn initial() -> GroupState
+
+pub fn is_well_formed(GroupState, Array[@multi.Subject]) -> Bool
+
+pub fn reachable(GroupState, GroupState) -> Bool
+
+pub fn render_emergence() -> String
+
+pub fn render_group_report() -> String
+
+pub fn resting() -> GroupState
+
+pub fn successors(GroupState) -> Array[(GroupTrigger, GroupState)]
+
+pub fn textual_basis() -> Array[(String, String)]
+
+pub fn transitions() -> Array[GroupTransition]
+
+// Errors
+
+// Types and methods
+pub(all) enum GroupPhase {
+  Gathering
+  Bodied
+  Ordering
+  Diverging
+  Excess
+  SelfBound
+  Impaired
+  Cultivating
+  Resting
+} derive(Eq)
+pub fn GroupPhase::equal(Self, Self) -> Bool
+pub fn GroupPhase::label(Self) -> String
+pub fn GroupPhase::not_equal(Self, Self) -> Bool
+
+pub(all) enum GroupState {
+  Scattered
+  Converging
+  CommonTongue
+  Discourse
+  Normed
+  Consensus
+  Dissensus
+  Confronting
+  Partitioned
+  Projected
+  Monologic
+  Disciplined
+  Concealed
+  Wounded
+  Dispersed
+  Returning
+  Practicing
+  Widening
+  Attuned
+  Settled
+} derive(Eq)
+pub fn GroupState::claims_closure(Self) -> Bool
+pub fn GroupState::designation(Self) -> String
+pub fn GroupState::equal(Self, Self) -> Bool
+pub fn GroupState::gloss(Self) -> String
+pub fn GroupState::not_equal(Self, Self) -> Bool
+pub fn GroupState::phase(Self) -> GroupPhase
+
+pub struct GroupTransition {
+  from : GroupState
+  trigger : GroupTrigger
+  to : GroupState
+}
+
+pub(all) enum GroupTrigger {
+  Appear
+  Attention
+  SharedMedium
+  RaiseClaims
+  NormFromTradition
+  NormFromReason
+  Agree
+  Differ
+  Clash
+  CloseHorizon
+  Absolutize
+  OneVoice
+  Bind
+  Suppress
+  Reopen
+  BreakUp
+  TurnBack
+  RemoveReefs
+  Widen
+  MutualCheng
+  Settle
+  Reenter
+} derive(Eq)
+pub fn GroupTrigger::equal(Self, Self) -> Bool
+pub fn GroupTrigger::label(Self) -> String
+pub fn GroupTrigger::not_equal(Self, Self) -> Bool
+
+// Type aliases
+
+// Traits

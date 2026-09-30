@@ -1,0 +1,4 @@
+// 多主体行为规则层：主体如何对待主体性，以及由此导出的遭遇规则。
+import {
+  "moonseek/lava_conduit/src" @sm,
+}

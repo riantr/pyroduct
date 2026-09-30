@@ -1,7 +1,15 @@
 import {
   "moonseek/lava_conduit/src" @sm,
   "moonseek/lava_conduit/ml",
+  "moonseek/lava_conduit/multi",
+  "moonseek/lava_conduit/group",
+  "moonseek/lava_conduit/society",
+  "moonseek/lava_conduit/evolution",
+  "moonseek/lava_conduit/coordinator",
+  "moonseek/lava_conduit/dmlref",
   "moonbitlang/core/env",
 }
 
 pkgtype(kind: "executable")
+
+supported_targets = "native+wasm+wasm-gc+js"

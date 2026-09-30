@@ -257,3 +257,14 @@ pub fn one_sided_residual(
     degree: config.degree,
   }
 }
+
+///|
+/// 构造一个 DML 配置（字段只读，故包外经由本函数构造）。
+pub fn DmlConfig::new(
+  degree : Int,
+  lambda : Double,
+  folds : Int,
+  seed : UInt64,
+) -> DmlConfig {
+  { degree, lambda, folds, seed, }
+}

@@ -1,0 +1,13 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonseek/lava_conduit/tools/pdfdump"
+
+// Values
+pub fn truth_pdf_facts() -> String
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

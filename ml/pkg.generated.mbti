@@ -56,6 +56,7 @@ pub struct DmlConfig {
   folds : Int
   seed : UInt64
 }
+pub fn DmlConfig::new(Int, Double, Int, UInt64) -> Self
 
 pub struct DmlResult {
   theta : Double

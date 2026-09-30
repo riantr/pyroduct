@@ -1,0 +1,102 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonseek/lava_conduit/society"
+
+// Values
+pub fn ailment() -> Array[State]
+
+pub fn all_phases() -> Array[Phase]
+
+pub fn all_states() -> Array[State]
+
+pub fn basis() -> Array[(String, String)]
+
+pub fn course() -> Array[State]
+
+pub fn gap() -> State
+
+pub fn initial() -> State
+
+pub fn no_final_closure() -> Bool
+
+pub fn reachable(State, State) -> Bool
+
+pub fn render_mermaid() -> String
+
+pub fn render_report() -> String
+
+pub fn successors(State) -> Array[(Trigger, State)]
+
+pub fn transitions() -> Array[Transition]
+
+// Errors
+
+// Types and methods
+pub(all) enum Phase {
+  Life
+  Language
+  Speech
+  Rule
+  Aporia
+  Instrument
+  Domination
+  Rebuild
+} derive(Eq)
+pub fn Phase::equal(Self, Self) -> Bool
+pub fn Phase::label(Self) -> String
+pub fn Phase::not_equal(Self, Self) -> Bool
+
+pub(all) enum State {
+  World
+  Suprasubjective
+  Intersubjective
+  Claim
+  Discourse
+  Justification
+  Consensus
+  Norm
+  Gap
+  System
+  Colony
+  Distortion
+  Reconstruction
+} derive(Eq)
+pub fn State::designation(Self) -> String
+pub fn State::equal(Self, Self) -> Bool
+pub fn State::gloss(Self) -> String
+pub fn State::not_equal(Self, Self) -> Bool
+pub fn State::phase(Self) -> Phase
+pub fn State::residue(Self) -> Int
+
+pub struct Transition {
+  from : State
+  trigger : Trigger
+  to : State
+}
+
+pub(all) enum Trigger {
+  SpeakLanguage
+  BuildIntersubjective
+  RaiseClaims
+  EnterDiscourse
+  Filter
+  Justify
+  Subsume
+  Store
+  EnactNorm
+  LabelPast
+  DemandThird
+  Serve
+  Expand
+  Colonize
+  Distort
+  Hinder
+  Reconstruct
+  Circulate
+} derive(Eq)
+pub fn Trigger::equal(Self, Self) -> Bool
+pub fn Trigger::label(Self) -> String
+pub fn Trigger::not_equal(Self, Self) -> Bool
+
+// Type aliases
+
+// Traits

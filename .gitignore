@@ -2,6 +2,9 @@
 _build/
 target/
 
+# local dependency cache
+.mooncakes/
+
 # tool / session artifacts
 .openseek/
 .worktrees/

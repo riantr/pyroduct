@@ -10,6 +10,13 @@
 ///   moon run cmd/main -- principle 修订所依据的主体通用性原则
 ///   moon run cmd/main -- ml       机器学习/DoubleML 与状态机的接口 + 因果实验
 ///   moon run cmd/main -- ml-export 导出状态机生成的数据集（CSV，前若干行）
+///   moon run cmd/main -- multi    多主体行为规则（R1–R12）+ 场景演示
+///   moon run cmd/main -- group    群体状态机（模型延伸：成员 → 群体的涌现）
+///   moon run cmd/main -- society 双层次社会交往模型（论文自身的理论构造：生活世界／系统／交往）
+///   moon run cmd/main -- society-mermaid 上者的 Mermaid 状态图
+///   moon run cmd/main -- evolution 进化：变异空间／适应度目标／闸门／持久化／遗传
+///   moon run cmd/main -- coordinator 科研 Agent 协调器：制品／规划／证据／决策／记忆／署名／运行时
+///   moon run cmd/main -- dmlref 与外部参考实现（riantr/moonbit_doubleML）对照
 ///   moon run cmd/main -- all       报告 + 历程 + Mermaid
 fn main {
   let args = @env.args()
@@ -23,6 +30,13 @@ fn main {
     "principle" => println(@sm.revision_principle())
     "ml" => println(@ml.render_ml_report(@ml.default_ml_plan()))
     "ml-export" => println(@ml.csv_preview(@ml.make_dataset(200, 1.5, 7), 12))
+    "multi" => println(@multi.render_multi_report())
+    "group" => println(@group.render_group_report())
+    "society" => println(@society.render_report())
+    "society-mermaid" => println(@society.render_mermaid())
+    "evolution" => println(@evolution.render_report())
+    "coordinator" => println(@coordinator.render_report())
+    "dmlref" => println(@dmlref.render_report())
     "all" => {
       println(@sm.render_report())
       println("")

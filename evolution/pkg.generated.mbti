@@ -1,0 +1,220 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonseek/lava_conduit/evolution"
+
+import {
+  "moonseek/lava_conduit/ml",
+  "moonseek/lava_conduit/multi",
+}
+
+// Values
+pub fn all_regimes() -> Array[@multi.TruthRegime]
+
+pub fn breed(Genome, Int, Array[Opponent], Criterion) -> Array[Offer]
+
+pub fn causal_criterion(Int) -> Criterion
+
+pub fn causal_effect(Genome, Genome, Array[Opponent], Int, @ml.DmlConfig) -> CausalVerdict
+
+pub fn causal_verdict(Genome, Genome, Array[Opponent]) -> CausalVerdict
+
+pub fn constitution() -> Array[(String, String)]
+
+pub fn constitution_violations(Genome) -> Array[String]
+
+pub fn constitutional(Genome) -> Bool
+
+pub fn default_agent() -> Genome
+
+pub fn default_world() -> Array[Opponent]
+
+pub fn descend(Genome, Candidate) -> Genome
+
+pub fn diff_count(Genome, Genome) -> Int
+
+pub fn evaluate(Genome, Array[Opponent]) -> Fitness
+
+pub fn evolve(Genome, Array[Opponent], Criterion, Int) -> Ledger
+
+pub fn genome(Voice, @multi.TruthRegime, Int, Int, Int, Int) -> Genome
+
+pub fn judge(Genome, Int, Candidate, Array[Opponent], Criterion) -> Decision
+
+pub fn make_episodes(Genome, Genome, Array[Opponent], Int, UInt64) -> Episodes
+
+pub fn mutations(Genome) -> Array[Candidate]
+
+pub fn opponent(String, @multi.TruthRegime, Int, Int, Int, Int) -> Opponent
+
+pub fn parse(String) -> Ledger
+
+pub fn permille(Double) -> Int
+
+pub fn quality(Genome, Array[Opponent]) -> Double
+
+pub fn render_causal() -> String
+
+pub fn render_ledger(Ledger) -> String
+
+pub fn render_objectives() -> String
+
+pub fn render_report() -> String
+
+pub fn render_variation() -> String
+
+pub fn score(Fitness, Objective) -> Int
+
+pub fn show_pm(Int) -> String
+
+pub fn thrifty_objective() -> Objective
+
+pub fn truth_objective() -> Objective
+
+// Errors
+
+// Types and methods
+pub struct Candidate {
+  locus : Locus
+  what : String
+  genome : Genome
+}
+
+pub struct CausalPlan {
+  objective : Objective
+  episodes : Int
+  config : @ml.DmlConfig
+}
+
+pub struct CausalVerdict {
+  theta : Double
+  se : Double
+  ci_low : Double
+  ci_high : Double
+  naive : Double
+  truth : Double
+  n : Int
+}
+
+pub(all) enum Criterion {
+  Weighted(Objective)
+  Causal(CausalPlan)
+}
+
+pub struct Decision {
+  verdict : Judgement
+  reason : String
+  fitness : Fitness
+  score : Int
+  effect : Int
+  effect_lo : Int
+}
+
+pub struct Episodes {
+  y : Array[Double]
+  t : Array[Double]
+  x : Array[Array[Double]]
+  theta_true : Double
+  n : Int
+}
+
+pub struct Fitness {
+  consensus : Int
+  stability : Int
+  residue : Int
+  cost : Int
+} derive(Eq)
+pub fn Fitness::equal(Self, Self) -> Bool
+pub fn Fitness::not_equal(Self, Self) -> Bool
+
+pub struct Genome {
+  voice : Voice
+  regime : @multi.TruthRegime
+  toward_other : Int
+  toward_self : Int
+  carry : Int
+  reason : Int
+} derive(Eq)
+pub fn Genome::decode(String) -> Self
+pub fn Genome::encode(Self) -> String
+pub fn Genome::equal(Self, Self) -> Bool
+pub fn Genome::not_equal(Self, Self) -> Bool
+
+pub(all) enum Judgement {
+  Accepted
+  RejectedConstitutional
+  RevertedRegression
+  Tie
+} derive(Eq)
+pub fn Judgement::equal(Self, Self) -> Bool
+pub fn Judgement::label(Self) -> String
+pub fn Judgement::not_equal(Self, Self) -> Bool
+
+pub struct Ledger {
+  seed : Genome
+  objective : String
+  trails : Array[Trail]
+}
+pub fn Ledger::accepted_count(Self) -> Int
+pub fn Ledger::current(Self) -> Genome
+pub fn Ledger::rejected_count(Self) -> Int
+pub fn Ledger::rejected_example(Self) -> String?
+pub fn Ledger::serialize(Self) -> String
+
+pub(all) enum Locus {
+  Prompt
+  Strategy
+  Memory
+  Code
+} derive(Eq)
+pub fn Locus::equal(Self, Self) -> Bool
+pub fn Locus::label(Self) -> String
+pub fn Locus::not_equal(Self, Self) -> Bool
+
+pub struct Objective {
+  name : String
+  w_consensus : Int
+  w_stability : Int
+  w_residue : Int
+  w_cost : Int
+}
+
+pub struct Offer {
+  candidate : Candidate
+  decision : Decision
+}
+
+pub struct Opponent {
+  name : String
+  regime : @multi.TruthRegime
+  toward_other : Int
+  toward_self : Int
+  reason : Int
+  residue : Int
+}
+
+pub struct Trail {
+  generation : Int
+  step : Int
+  parent : Int?
+  locus : Locus
+  what : String
+  why : String
+  verdict : Judgement
+  score : Int
+  effect : Int
+  effect_lo : Int
+  fitness : Fitness
+  genome : Genome
+}
+
+pub(all) enum Voice {
+  Declarative
+  Suggestive
+  Withholding
+} derive(Eq)
+pub fn Voice::equal(Self, Self) -> Bool
+pub fn Voice::label(Self) -> String
+pub fn Voice::not_equal(Self, Self) -> Bool
+
+// Type aliases
+
+// Traits

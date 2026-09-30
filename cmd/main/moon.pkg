@@ -1,12 +1,12 @@
 import {
-  "moonseek/lava_conduit/src" @sm,
-  "moonseek/lava_conduit/ml",
-  "moonseek/lava_conduit/multi",
-  "moonseek/lava_conduit/group",
-  "moonseek/lava_conduit/society",
-  "moonseek/lava_conduit/evolution",
-  "moonseek/lava_conduit/coordinator",
-  "moonseek/lava_conduit/dmlref",
+  "riantr/pyroduct/src" @sm,
+  "riantr/pyroduct/ml",
+  "riantr/pyroduct/multi",
+  "riantr/pyroduct/group",
+  "riantr/pyroduct/society",
+  "riantr/pyroduct/evolution",
+  "riantr/pyroduct/coordinator",
+  "riantr/pyroduct/dmlref",
   "moonbitlang/core/env",
 }
 

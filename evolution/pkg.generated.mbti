@@ -1,9 +1,9 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "moonseek/lava_conduit/evolution"
+package "riantr/pyroduct/evolution"
 
 import {
-  "moonseek/lava_conduit/ml",
-  "moonseek/lava_conduit/multi",
+  "riantr/pyroduct/ml",
+  "riantr/pyroduct/multi",
 }
 
 // Values

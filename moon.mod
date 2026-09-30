@@ -1,6 +1,25 @@
-name = "moonseek/lava_conduit"
+name = "riantr/pyroduct"
 
 version = "0.1.0"
+
+readme = "README.mbt.md"
+
+repository = "https://gitee.com/ren-yongxiang/pyroduct.git"
+
+license = "MIT"
+
+keywords = [
+  "state-machine",
+  "hermeneutics",
+  "multi-agent",
+  "doubleml",
+  "causal-inference",
+  "research-coordinator",
+  "语料建模",
+  "科研协调",
+]
+
+description = "把《伽达默尔与哈贝马斯真理观比较》与《通往宁静之路》建模为可运行、可测试的 MoonBit 状态机族（主体／多主体／群体／双层次社会交往），外加进化层与科研 Agent 协调器，并附自研 DoubleML 与 riantr/moonbit_doubleML 的互校。"
 
 // 《通往宁静之路》主体状态机 → 多主体行为规则 → 群体状态机／双层次社会交往模型
 // → 进化层（变异／适应度／更新闸门／持久化／遗传，闸门可用 DoubleML 判因果效应）

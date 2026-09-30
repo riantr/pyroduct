@@ -1,5 +1,5 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "moonseek/lava_conduit/src"
+package "riantr/pyroduct/src"
 
 import {
   "moonbitlang/core/debug",

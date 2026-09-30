@@ -1,5 +1,5 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "moonseek/lava_conduit/society"
+package "riantr/pyroduct/society"
 
 // Values
 pub fn ailment() -> Array[State]

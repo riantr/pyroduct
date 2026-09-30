@@ -1,5 +1,5 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "moonseek/lava_conduit/tools/pdfdump"
+package "riantr/pyroduct/tools/pdfdump"
 
 // Values
 pub fn truth_pdf_facts() -> String

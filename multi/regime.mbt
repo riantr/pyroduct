@@ -203,7 +203,7 @@ pub fn Cheng::is_complete(self : Cheng) -> Bool {
 }
 
 ///|
-/// 每个体制在 truth.txt 里的出处与原文要点。
+/// 每个体制在论文正文里的出处与原文要点。
 pub fn TruthRegime::basis(self : TruthRegime) -> String {
   match self {
     Immanent =>

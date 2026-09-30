@@ -203,3 +203,44 @@ pub fn demo_dataset() -> (
   let data = @ml.make_dataset(400, 1.5, 7)
   (data.y, data.t, data.x, data.theta_true)
 }
+
+///|
+/// 参考实现的 `Matrix` → 行数组（我们的 `ml` 用行数组）。
+pub fn rows_of(m : @dml.Matrix) -> Array[Array[Double]] {
+  let out : Array[Array[Double]] = []
+  for i = 0; i < m.rows(); i = i + 1 {
+    let row : Array[Double] = []
+    for j = 0; j < m.cols(); j = j + 1 {
+      row.push(m.get(i, j))
+    }
+    out.push(row)
+  }
+  out
+}
+
+///|
+/// 在**参考实现自带的 DGP**（`plr_CCDDHNR2018`，Chernozhukov et al. 2018）上对照两实现。
+///
+/// 与 `compare_matched` 的区别只在数据来源：这里用它发布的 DGP，而不是我们状态机
+/// 生成的数据——因此这是「拿它的示例数据，跑我们的估计器」。
+pub fn external_plr(
+  n : Int,
+  dim_x : Int,
+  theta : Double,
+  seed : Int,
+  folds : Int,
+  tolerance : Double,
+) -> Compare {
+  let data = @dml.make_plr_CCDDHNR2018(n, dim_x, theta, seed)
+  compare_with(
+    "外部 DGP（plr_CCDDHNR2018）",
+    data.y_get(),
+    data.d_get(),
+    rows_of(data.x_get()),
+    data.theta_get(),
+    folds,
+    1,
+    0.0,
+    tolerance,
+  )
+}

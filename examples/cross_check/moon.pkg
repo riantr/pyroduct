@@ -1,0 +1,8 @@
+// 示例 3：同一份「外部 DGP」数据，两个独立实现各估一次。
+import {
+  "riantr/pyroduct/dmlref",
+}
+
+supported_targets = "native+wasm+wasm-gc+js"
+
+pkgtype(kind: "executable")

@@ -1,0 +1,8 @@
+// 示例 2：参考实现的 DGP + 参考实现的 IRM。
+import {
+  "riantr/moonbit_doubleML" @dml,
+}
+
+supported_targets = "native+wasm+wasm-gc+js"
+
+pkgtype(kind: "executable")

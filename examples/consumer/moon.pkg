@@ -1,0 +1,8 @@
+// 示例 4：库使用者的最小闭环——只依赖本库的公开 API。
+import {
+  "riantr/pyroduct/src" @sm,
+  "riantr/pyroduct/multi",
+  "riantr/pyroduct/society",
+}
+
+pkgtype(kind: "executable")

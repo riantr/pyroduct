@@ -22,12 +22,12 @@ ledger, evidence binding, and a principled refusal to close.
 | License | MIT |
 | `moon.mod` version | **0.1.0** |
 | Module name | `riantr/pyroduct` |
-| Source layout | 11 packages in one module, one concern per package |
-| `.mbt` file count | **37 production files** (+ 8 test files) |
-| Packages | `src` / `multi` / `group` / `society` / `ml` / `evolution` / `coordinator` / `dmlref` / `cmd/main` / `cmd/coord` / `tools/pdfdump` |
+| Source layout | 15 packages in one module（11 个库／CLI + 4 个示例），一个关注点一个包 |
+| `.mbt` file count | **41 production files** (+ 8 test files) |
+| Packages | 库：`src` · `multi` · `group` · `society` · `ml` · `evolution` · `coordinator` · `dmlref`；CLI：`cmd/main` · `cmd/coord`；其他：`tools/pdfdump` · `examples/{plr,irm,cross_check,consumer}` |
 | Third-party deps | `moonbitlang/async@0.22.4` (only `cmd/coord`) · `riantr/moonbit_doubleML@0.64.0` (only `dmlref`) |
 | Backends | `wasm` (default `moon test`) · `native` (`cmd/coord`, real disk I/O) — `wasm-gc` / `js` 未实测 |
-| Tests | **75 / 75** (`moon test`) |
+| Tests | **77 / 77** (`moon test`) |
 | Keywords | state machine · hermeneutics · Gadamer · Habermas · multi-agent · DoubleML · causal inference · research coordinator · 语料建模 · 科研协调 |
 
 #Features
@@ -89,6 +89,11 @@ $ moon run cmd/main -- society       # 双层次社会交往模型
 $ moon run cmd/main -- evolution     # 变异／适应度／闸门／持久化／遗传
 $ moon run cmd/main -- coordinator   # 科研 Agent 协调器（八节）
 $ moon run cmd/main -- dmlref        # 与外部参考实现对照
+
+$ moon run examples/plr              # 示例：外部 DGP + 外部 DoubleMLPLR
+$ moon run examples/irm              # 示例：外部 DGP + 外部 DoubleMLIRM
+$ moon run examples/cross_check      # 示例：外部 DGP 上两实现互校
+$ moon run examples/consumer         # 示例：库使用者的最小闭环
 
 $ moon run --target native cmd/coord # 真实落盘
 步数 3｜时钟 3｜发现 3 条
@@ -164,6 +169,47 @@ let same : Bool = back.round_trips()
 `moon run --target native cmd/coord` 跑协调器并把检查点写入
 `.openseek/coordinator-state.txt`（该目录已被 `.gitignore` 忽略）。
 
+#Examples
+
+四个可运行示例，**一例一包**，打印形式照 `riantr/moonbit_doubleML` 的例子
+（真值／估计／标准误／95% 置信区间）：
+
+| 示例 | 数据来源 | 估计器 | 命令 |
+|------|----------|--------|------|
+| `examples/plr` | 外部 `plr_CCDDHNR2018` | 外部 `DoubleMLPLR` | `moon run examples/plr` |
+| `examples/irm` | 外部 `make_irm_data` | 外部 `DoubleMLIRM`（倾向得分传 logistic） | `moon run examples/irm` |
+| `examples/cross_check` | 外部 `plr_CCDDHNR2018` | 外部 PLR **与** 自研 `ml.dml_plr` 同时跑 | `moon run examples/cross_check` |
+| `examples/consumer` | — | 只用本库公开 API | `moon run examples/consumer` |
+
+```console
+$ moon run examples/plr
+=== MoonBit DML PLR（数据取自 riantr/moonbit_doubleML 的 DGP）===
+true theta_0      = 1
+estimated theta   = 0.9821170792373195
+standard error    = 0.03755880410559667
+95% CI            = [0.90850182319035, 1.055732335284289]
+n_obs             = 500
+n_features        = 20
+
+$ moon run examples/irm
+=== MoonBit DML IRM（数据取自 riantr/moonbit_doubleML 的 DGP）===
+true theta_0      = 1
+estimated theta   = 0.9646539735147219
+standard error    = 0.10162091470514976
+95% CI            = [0.7654769806926284, 1.1638309663368154]
+
+$ moon run examples/cross_check
+=== 实现互校：外部 DGP（plr_CCDDHNR2018），n = 500，5 折 ===
+真值 θ            = 1
+参考实现 θ̂        = 0.9821170792373195（se 0.03755880410559667）
+自研实现 θ̂        = 1.0050224545430984（se 0.038635225992883944）
+两者之差 |Δθ̂|     = 0.022905375305778852｜标准误之差 = 0.0010764218872872724
+容差内一致        = true
+```
+
+`examples/irm` 的**倾向得分**必须传 logistic 学习器：处理变量是 0/1，用线性回归拟合
+倾向得分会让 m̂ 越出 [0,1]，权重随之爆炸——这正是第一次跑出 −1520 的原因。
+
 #Project layout
 
 ```
@@ -179,6 +225,11 @@ pyroduct/                  <- the module (riantr/pyroduct, 11 packages)
   cmd/main/                <- CLI（wasm）
   cmd/coord/               <- CLI（native，真实落盘）
   tools/pdfdump/           <- 对 truth.pdf 的零依赖只读勘察记录
+  examples/                <- 可运行示例（一例一包）
+    plr/                   <- 外部 DGP + 外部 DoubleMLPLR
+    irm/                   <- 外部 DGP + 外部 DoubleMLIRM
+    cross_check/           <- 外部 DGP 上两实现互校
+    consumer/              <- 库使用者的最小闭环
   moon.mod                 <- module manifest（riantr/pyroduct@0.1.0）
   README.mbt.md            <- this file
 ```
@@ -198,7 +249,7 @@ pyroduct/                  <- the module (riantr/pyroduct, 11 packages)
 - 不变量由测试锁定：`society::no_final_closure()`（无终态且缺口处处可达）、
   `State::residue > 0`（残余恒正）、`evolution::constitutional()`（三条宪法级条款）、
   `coordinator::decision_ok()`（可修订 + 重开条件非空 + 残余归属有效）。
-- 版本验证计数：`moon test` **75 / 75**（`wasm`）；`moon check` 与
+- 版本验证计数：`moon test` **77 / 77**（`wasm`）；`moon check` 与
   `moon fmt --check` 干净；`moon run --target native cmd/coord` 落盘往返一致。
 - 外部互校：同 nuisance 下 `dmlref` 比对自研与 `riantr/moonbit_doubleML` 的 PLR，
   θ̂ 相差 0.017（se 0.153／0.152）。

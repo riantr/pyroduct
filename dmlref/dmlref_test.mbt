@@ -43,3 +43,22 @@ test "报告覆盖对照结论" {
     assert_true(r.contains(k))
   }
 }
+
+///|
+test "外部 DGP 互校：参考实现的 plr_CCDDHNR2018 上两实现一致" {
+  let c = @dmlref.external_plr(500, 20, 1.0, 3141, 5, 0.05)
+  assert_true(c.agree)
+  assert_true(c.d_theta < 0.05)
+  assert_true(c.d_se < 0.01)
+  assert_true((c.theta_ref - c.truth).abs() < 0.1)
+  assert_true((c.theta_ours - c.truth).abs() < 0.1)
+}
+
+///|
+test "外部 DGP 互校：规模与折数随参数走" {
+  let c = @dmlref.external_plr(120, 4, 0.5, 7, 2, 1.0)
+  assert_eq(c.n, 120)
+  assert_eq(c.folds, 2)
+  assert_true(c.theta_ref > 0.0)
+  assert_true(c.theta_ours > 0.0)
+}

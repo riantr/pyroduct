@@ -1,0 +1,108 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonseek/lava_conduit/ml"
+
+import {
+  "moonseek/lava_conduit/src",
+}
+
+// Values
+pub fn csv_preview(Dataset, Int) -> String
+
+pub fn default_dml_config() -> DmlConfig
+
+pub fn default_ml_plan() -> MlPlan
+
+pub fn distance_to_rest(@src.SubjectState) -> Int
+
+pub fn dml_in_sample(Array[Double], Array[Double], Array[Array[Double]], DmlConfig) -> DmlResult
+
+pub fn dml_plr(Array[Double], Array[Double], Array[Array[Double]], DmlConfig) -> DmlResult
+
+pub fn export_csv(Dataset) -> String
+
+pub fn linear_adjust_ols(Array[Double], Array[Double], Array[Array[Double]]) -> (Double, Double)
+
+pub fn make_dataset(Int, Double, UInt64) -> Dataset
+
+pub fn naive_ols(Array[Double], Array[Double]) -> (Double, Double)
+
+pub fn one_sided_residual(Array[Double], Array[Double], Array[Array[Double]], DmlConfig) -> DmlResult
+
+pub fn practice_count(@src.SubjectState, Int, Rng) -> Int
+
+pub fn render_ml_design() -> String
+
+pub fn render_ml_report(MlPlan) -> String
+
+pub fn replicate(Int, Int, Double, DmlConfig) -> Array[RepSummary]
+
+pub fn single_run(Int, Double, DmlConfig) -> Array[EstimateRow]
+
+pub fn state_features() -> Array[(String, Array[Double])]
+
+// Errors
+
+// Types and methods
+pub struct Dataset {
+  y : Array[Double]
+  t : Array[Double]
+  x : Array[Array[Double]]
+  theta_true : Double
+}
+
+pub struct DmlConfig {
+  degree : Int
+  lambda : Double
+  folds : Int
+  seed : UInt64
+}
+
+pub struct DmlResult {
+  theta : Double
+  se : Double
+  ci_low : Double
+  ci_high : Double
+  z : Double
+  p_value : Double
+  n : Int
+  folds : Int
+  degree : Int
+}
+
+pub struct EstimateRow {
+  name : String
+  theta : Double
+  se : Double
+  ci_low : Double
+  ci_high : Double
+  bias : Double
+}
+
+pub struct MlPlan {
+  theta : Double
+  single_n : Int
+  single : DmlConfig
+  rep_n : Int
+  reps : Int
+  rep : DmlConfig
+}
+
+pub struct RepSummary {
+  name : String
+  mean_bias : Double
+  rmse : Double
+  coverage : Double
+}
+
+pub struct Rng {
+  mut state : UInt64
+}
+pub fn Rng::new(UInt64) -> Self
+pub fn Rng::next_u64(Self) -> UInt64
+pub fn Rng::normal(Self) -> Double
+pub fn Rng::shuffle(Self, Array[Int]) -> Unit
+pub fn Rng::uniform(Self) -> Double
+
+// Type aliases
+
+// Traits

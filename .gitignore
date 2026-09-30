@@ -1,0 +1,11 @@
+# MoonBit build output
+_build/
+target/
+
+# tool / session artifacts
+.openseek/
+.worktrees/
+
+# OS noise
+.DS_Store
+Thumbs.db

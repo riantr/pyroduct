@@ -1,0 +1,187 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonseek/lava_conduit/src"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn all_phases() -> Array[Phase]
+
+pub fn all_states() -> Array[SubjectState]
+
+pub fn course() -> Array[SubjectState]
+
+pub fn freedom_text(Int) -> String
+
+pub fn genesis_path() -> Array[SubjectState]
+
+pub fn initial() -> SubjectState
+
+pub fn predecessors(SubjectState) -> Array[(SubjectState, Trigger)]
+
+pub fn reachable(SubjectState, SubjectState) -> Bool
+
+pub fn render_course() -> String
+
+pub fn render_dot() -> String
+
+pub fn render_genesis() -> String
+
+pub fn render_mermaid() -> String
+
+pub fn render_naming_table() -> String
+
+pub fn render_report() -> String
+
+pub fn revision_principle() -> String
+
+pub fn successors(SubjectState) -> Array[(Trigger, SubjectState)]
+
+pub fn terminal() -> SubjectState
+
+pub fn transitions() -> Array[Transition]
+
+// Errors
+
+// Types and methods
+pub(all) enum Phase {
+  Natural
+  Release
+  Becoming
+  Otherness
+  Bondage
+  Anguish
+  Idolatry
+  Glory
+  Recollection
+  Upbringing
+  Serenity
+} derive(Eq, @debug.Debug)
+pub fn Phase::designation(Self) -> String
+pub fn Phase::equal(Self, Self) -> Bool
+pub fn Phase::label(Self) -> String
+pub fn Phase::not_equal(Self, Self) -> Bool
+pub fn Phase::qualified(Self) -> String
+pub fn Phase::to_repr(Self) -> @debug.Repr
+
+pub struct StateInfo {
+  state : SubjectState
+  label : String
+  phase : Phase
+  freedom : Int
+  gloss : String
+}
+
+pub(all) enum SubjectState {
+  NoPast
+  NoFuture
+  Standing
+  Freedom
+  Urgency
+  Alienation
+  Emptiness
+  Busyness
+  Selfhood
+  Weaving
+  Choosing
+  Encounter
+  Opening
+  Evil
+  Shame
+  Guilt
+  Binding
+  Secret
+  Suffering
+  Loss
+  Idol
+  Ordered
+  Sublime
+  Passion
+  Honor
+  Awe
+  Habit
+  Reflection
+  Dizziness
+  Harmony
+  Model
+  Marking
+  Discipline
+  Tranquility
+} derive(Eq, @debug.Debug)
+pub fn SubjectState::designation(Self) -> String
+pub fn SubjectState::equal(Self, Self) -> Bool
+pub fn SubjectState::freedom(Self) -> Int
+pub fn SubjectState::gloss(Self) -> String
+pub fn SubjectState::info(Self) -> StateInfo
+pub fn SubjectState::label(Self) -> String
+pub fn SubjectState::not_equal(Self, Self) -> Bool
+pub fn SubjectState::phase(Self) -> Phase
+pub fn SubjectState::qualified(Self) -> String
+pub fn SubjectState::to_repr(Self) -> @debug.Repr
+
+pub struct Transition {
+  from : SubjectState
+  trigger : Trigger
+  to : SubjectState
+}
+
+pub(all) enum Trigger {
+  TakeStand
+  ActInFreedom
+  FeelFinitude
+  FeelBoundlessness
+  FuseFeelings
+  MustBeBusy
+  KeepContinuity
+  Deposit
+  TurnToResidue
+  TouchFuture
+  Interweave
+  ChooseMoreLasting
+  MeetOther
+  Surprise
+  Doubt
+  Linger
+  GoodFaith
+  OpenArms
+  Complexify
+  ColdHard
+  AttributeSelf
+  FillEmptiness
+  BindSelf
+  Avoid
+  Sting
+  BlameSelf
+  CutPast
+  SummonIdol
+  EnactOrder
+  AbsorbGlory
+  SeekMoreJoy
+  Reward
+  Dread
+  Habituate
+  CoolDown
+  DoubtOneself
+  TryMethods
+  SeekBalance
+  SeekGoal
+  TakeModel
+  Approximate
+  MarkGoodBad
+  RedrawMap
+  WidenFrontier
+  Endure
+  RemoveReefs
+  Ascend
+  WaitNext
+  ReopenByHorizon
+} derive(Eq, @debug.Debug)
+pub fn Trigger::equal(Self, Self) -> Bool
+pub fn Trigger::label(Self) -> String
+pub fn Trigger::not_equal(Self, Self) -> Bool
+pub fn Trigger::to_repr(Self) -> @debug.Repr
+
+// Type aliases
+
+// Traits

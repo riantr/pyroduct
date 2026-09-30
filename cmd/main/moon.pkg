@@ -1,0 +1,7 @@
+import {
+  "moonseek/lava_conduit/src" @sm,
+  "moonseek/lava_conduit/ml",
+  "moonbitlang/core/env",
+}
+
+pkgtype(kind: "executable")

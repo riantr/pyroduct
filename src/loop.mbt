@@ -150,11 +150,19 @@ pub fn exitable(state : SubjectState, slot : Slot) -> Bool {
 }
 
 ///|
-/// 哪些位置有「由该槽驱动」的出边。
+/// 哪些位置有「由该槽驱动」的出边（顺序照 `all_states`；出边取自邻接索引，
+/// 见 `index.mbt`）。
 pub fn positions_reachable_by(slot : Slot) -> Array[SubjectState] {
+  let idx = MovesIndex::build()
   let out : Array[SubjectState] = []
   for s in all_states() {
-    if exitable(s, slot) {
+    let mut found = false
+    for entry in idx.edges_from(s) {
+      if entry.0.slot() == slot {
+        found = true
+      }
+    }
+    if found {
       out.push(s)
     }
   }
@@ -162,12 +170,21 @@ pub fn positions_reachable_by(slot : Slot) -> Array[SubjectState] {
 }
 
 ///|
-/// 全部缺口：位置 × 槽 中没有对应出边的组合。
+/// 全部缺口：位置 × 槽 中没有对应出边的组合（一次扫描建索引，272 次查询
+/// 不再逐条重扫全表；顺序照 `all_states` × `all_slots`）。
 pub fn gaps() -> Array[(SubjectState, Slot)] {
+  let idx = MovesIndex::build()
   let out : Array[(SubjectState, Slot)] = []
   for s in all_states() {
+    let outs = idx.edges_from(s)
     for k in all_slots() {
-      if !exitable(s, k) {
+      let mut found = false
+      for entry in outs {
+        if entry.0.slot() == k {
+          found = true
+        }
+      }
+      if !found {
         out.push((s, k))
       }
     }

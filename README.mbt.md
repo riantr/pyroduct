@@ -67,7 +67,7 @@ Add the module, then run the suite:
 
 ```
 moon add riantr/pyroduct
-moon test             # Total tests: 90, passed: 90, failed: 0.
+moon test             # Total tests: 93, passed: 93, failed: 0.
 ```
 
 From this repository, every layer prints a report:

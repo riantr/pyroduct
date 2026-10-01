@@ -62,6 +62,12 @@ pub fn render_report() -> String {
   lines.push(
     "执行契约：位置 × 槽共 \{combos} 个组合，其中 \{gaps().length()} 组无路可走——无路是合法回执，机器不编造下一步。逐条归位见 `slots`，缺口分布与示范见 `loop`。",
   )
+  lines.push("")
+  lines.push("## 派生表与持久度")
+  lines.push("")
+  for entry in durability_manifest() {
+    lines.push("- \{entry.0}　消费 \{entry.1}　〔\{entry.2}〕")
+  }
   lines.join("\n")
 }
 

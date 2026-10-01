@@ -16,6 +16,8 @@ pub fn all_triggers() -> Array[Trigger]
 
 pub fn course() -> Array[SubjectState]
 
+pub fn durability_manifest() -> Array[(String, String, String)]
+
 pub fn every_phase_has_non_act() -> Bool
 
 pub fn exitable(SubjectState, Slot) -> Bool

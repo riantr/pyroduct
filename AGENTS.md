@@ -10,7 +10,7 @@ Long-form context lives in `README.mbt.md`; read it before non-trivial changes.
 ## Commands
 
 ```console
-moon test                              # all tests (default target: wasm); currently 90/90
+moon test                              # all tests (default target: wasm); currently 93/93
 moon check                             # type/warn check
 moon info                              # regenerates every pkg.generated.mbti (tracked)
 moon fmt                               # format; `moon fmt --check` must stay clean
@@ -48,12 +48,12 @@ moon run --target native cmd/coord     # coordinator CLI with real disk I/O; wri
 
 | Package | Unit | Contents |
 |---------|------|----------|
-| `src` | one subject | Subject state machine (34 states · 53 transitions · 11 phases) + drive slots (8, `slot.mbt`) + step contract (`loop.mbt`: `step` → 迁/守/未定/无路) + rendering |
+| `src` | one subject | Subject state machine (34 states · 53 transitions · 11 phases) + drive slots (8, `slot.mbt`) + step contract (`loop.mbt`: `step` → 迁/守/未定/无路) + adjacency index (`index.mbt`) + durability manifest (`durability.mbt`) + rendering |
 | `multi` | two subjects | Normative rules R1–R14, `TruthRegime`, claim schemas, `encounter` verdicts |
 | `group` | one group | Emergence state machine (20 states), member config → group state, R7 write-back |
 | `society` | one society | Two-level social model from the thesis (13 states), lifeworld vs. system |
 | `ml` | — | From-scratch DoubleML (PLR, cross-fitting, orthogonal scores, inference), RNG, linear algebra |
-| `evolution` | one agent | `Genome`, mutations, `Objective`, update gates (weighted or DoubleML-based), append-only `Ledger`, heredity; subject cycle (`cycle.mbt`: `run_cycle` drives `@sm.step` by slot and judges 修习/开放 candidates through the gate) |
+| `evolution` | one agent | `Genome`, mutations, `Objective`, update gates (weighted or DoubleML-based), append-only `Ledger`, heredity; subject cycle (`cycle.mbt`: `run_cycle` drives `@sm.step` by slot and judges 修习/开放 candidates through the gate); decision memo (`replay.mbt`: one judgement per (parent, candidate) pair per cycle, repeats annotated 同判·不重裁); backdating (`gate.mbt`: zero-diff candidates → Tie without re-running the estimator) |
 | `coordinator` | research agents | Tasks/artifacts, planning, external evidence by confidence interval, content memory, credit, deliberation/decision split, replayable runtime |
 | `dmlref` | — | Cross-check of our DoubleML against `riantr/moonbit_doubleML@0.64.0` |
 | `cmd/main` | — | wasm CLI (17 subcommands above) |

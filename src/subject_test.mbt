@@ -187,3 +187,30 @@ test "通用定名一律两字" {
     assert_eq(p.designation().length(), 2)
   }
 }
+
+///|
+test "派生表持久度清单：消费层由出处自己长出，改动影响可查" {
+  let m = @src.durability_manifest()
+  assert_true(m.length() >= 4)
+  let mut graph_row = ""
+  let mut contract_row = ""
+  for row in m {
+    assert_true(row.0.length() > 0)
+    assert_true(row.1.length() > 0)
+    assert_true(row.2.length() > 0)
+    if row.0.contains("迁移图") {
+      graph_row = row.1
+    }
+    if row.0.contains("执行契约") {
+      contract_row = row.1
+    }
+  }
+  // 迁移图只消费原文直述层：改槽映射不触发重算。
+  assert_true(graph_row.contains("原文直述"))
+  assert_true(!graph_row.contains("模型整理"))
+  // 槽派生表必然消费模型整理层——揭蔽槽是模型整理，清单运行时算出。
+  assert_true(contract_row.contains("原文直述"))
+  assert_true(contract_row.contains("模型整理"))
+  // 报告对称：清单渲染进主体报告。
+  assert_true(@src.render_report().contains("派生表与持久度"))
+}

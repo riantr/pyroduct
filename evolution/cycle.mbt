@@ -146,6 +146,9 @@ fn resolve_open(
 ///|
 /// 跑 `rounds` 回合主体循环：真跑遭遇得回应 → 挑可走的驱动槽 → `@sm.step` 得回执
 /// → 修习与开放各过一个闸门 → 位置按回执、配置按裁决推进。
+///
+/// 裁决先问备忘录（`replay.mbt`）：被拒不推进配置，后续回合的输入与首裁逐字节
+/// 相同——同一份证据不重裁，判词以「[与回合 N 同判·不重裁]」标注入账。
 pub fn run_cycle(
   seed : CycleState,
   world : Array[Opponent],
@@ -157,13 +160,15 @@ pub fn run_cycle(
     Causal(p) => p.objective
   }
   let events : Array[CycleEvent] = []
+  let memo = DecisionMemo::new()
   let mut cur = seed
   for round = 0; round < rounds; round = round + 1 {
-    let response = evaluate(cur.genome, world)
+    let g = cur.genome
+    let response = memo.response(g, round, () => evaluate(g, world))
     let parent_score = score(response, objective)
     let slot = cycle_slot(response, cur.state)
     let raw = @sm.step(cur.state, slot)
-    let outcome = resolve_open(raw, cur.genome, cur.state)
+    let outcome = resolve_open(raw, g, cur.state)
     let moved_to = match outcome.landing() {
       Some(next) => next
       None => cur.state
@@ -171,15 +176,17 @@ pub fn run_cycle(
     // 修习：残余再降 4，降到 1 为止（R10 不许把不确定性进化掉）。
     let shed = if cur.genome.carry - 4 < 1 { 1 } else { cur.genome.carry - 4 }
     let practice = offer(
-      cur.genome,
+      g,
       Candidate::{
         locus: Memory,
-        what: "修习：残余 \{cur.genome.carry} → \{shed}",
-        genome: { ..cur.genome, carry: shed, },
+        what: "修习：残余 \{g.carry} → \{shed}",
+        genome: { ..g, carry: shed, },
       },
       world,
       parent_score,
       criterion,
+      memo,
+      round,
     )
     // 开放：己之诚降 25（遭遇要求自身不再抱得太紧），降到 1 为止。
     let loosen = if cur.genome.toward_self - 25 < 1 {
@@ -188,15 +195,17 @@ pub fn run_cycle(
       cur.genome.toward_self - 25
     }
     let opening = offer(
-      cur.genome,
+      g,
       Candidate::{
         locus: Strategy,
-        what: "开放：己之诚 \{cur.genome.toward_self} → \{loosen}",
-        genome: { ..cur.genome, toward_self: loosen, },
+        what: "开放：己之诚 \{g.toward_self} → \{loosen}",
+        genome: { ..g, toward_self: loosen, },
       },
       world,
       parent_score,
       criterion,
+      memo,
+      round,
     )
     let mut next_genome = cur.genome
     if practice.decision.verdict == Accepted {
@@ -229,15 +238,21 @@ pub fn run_cycle(
 }
 
 ///|
-/// 把候选送进闸门，成对返回（复用 `breed` 里的 `Offer`）。
+/// 把候选送进闸门，成对返回（复用 `breed` 里的 `Offer`）；裁决先问备忘录——
+/// 同一份证据不重裁（见 `replay.mbt`）。
 fn offer(
   parent : Genome,
   c : Candidate,
   world : Array[Opponent],
   parent_score : Int,
   criterion : Criterion,
+  memo : DecisionMemo,
+  round : Int,
 ) -> Offer {
-  { candidate: c, decision: judge(parent, parent_score, c, world, criterion), }
+  let d = memo.judgement(parent, c, round, () => {
+    judge(parent, parent_score, c, world, criterion)
+  })
+  { candidate: c, decision: d, }
 }
 
 ///|

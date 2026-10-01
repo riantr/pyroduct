@@ -126,6 +126,18 @@ pub fn judge(
       effect_lo: 0,
     }
   }
+  // 回溯（backdating）：候选零改动时，判词直接是「持平」，不再动估计器——
+  // 输入相同则输出相同，重跑 DoubleML 得不到任何新证据。
+  if c.genome == parent {
+    return {
+      verdict: Tie,
+      reason: "候选与父代相同，零效应——先比较输出，未重跑估计",
+      fitness,
+      score: s,
+      effect: 0,
+      effect_lo: 0,
+    }
+  }
   match causal {
     Some(plan) => {
       let v = causal_effect(parent, c.genome, world, plan.episodes, plan.config)

@@ -294,3 +294,49 @@ test "主体循环：反馈不由标签给出——报告同时打印四分量�
   assert_true(report.contains("未穷尽"))
   assert_true(report.contains("修习"))
 }
+
+///|
+test "同一份证据不重裁：被拒后的重复回合以首裁判词入账，标注首裁回合" {
+  let c = small_cycle(4)
+  // 首裁无标注。
+  assert_true(!c.events[0].practice.decision.reason.contains("同判"))
+  assert_true(!c.events[0].opening.decision.reason.contains("同判"))
+  // 上述参数下全部被拒：回合 1 起的输入与回合 0 逐字节相同，判词取自备忘录。
+  for i = 1; i < c.events.length(); i = i + 1 {
+    let p = c.events[i].practice.decision
+    let o = c.events[i].opening.decision
+    assert_true(p.reason.contains("[与回合 0 同判·不重裁]"))
+    assert_true(o.reason.contains("[与回合 0 同判·不重裁]"))
+    assert_true(p.verdict == c.events[0].practice.decision.verdict)
+    assert_true(o.verdict == c.events[0].opening.decision.verdict)
+    assert_true(p.fitness == c.events[0].practice.decision.fitness)
+  }
+  // 备忘录不改变结果：两次运行的账本逐字节相同。
+  let again = small_cycle(4)
+  assert_eq(again.ledger().serialize(), c.ledger().serialize())
+}
+
+///|
+test "回溯：候选与父代相同则持平，不重跑因果估计" {
+  // 残余已在 1：修习触底，候选就是父代本身。
+  let g = @evolution.genome(
+    @evolution.Suggestive,
+    @evolution.all_regimes()[3],
+    70,
+    70,
+    1,
+    70,
+  )
+  let c = @evolution.run_cycle(
+    @evolution.cycle_state(@evolution.default_cycle_seed().state, g),
+    @evolution.default_world(),
+    @evolution.causal_criterion(200),
+    1,
+  )
+  let d = c.events[0].practice.decision
+  assert_true(d.verdict == @evolution.Tie)
+  assert_true(d.reason.contains("先比较输出，未重跑估计"))
+  assert_eq(d.effect, 0)
+  // 开放候选（己之诚 70 → 45）是真实改动，仍走因果估计。
+  assert_true(c.events[0].opening.decision.reason.contains("因果 θ̂"))
+}

@@ -238,3 +238,59 @@ test "因果进化：被接收的改动效应皆为正，且账本可往返" {
   let text = ledger.serialize()
   assert_eq(@evolution.parse(text).serialize(), text)
 }
+
+///|
+/// 主体循环：从立位出发，在缺省世界里走 `rounds` 回合（因果判据）。
+fn small_cycle(rounds : Int) -> @evolution.SubjectCycle {
+  @evolution.run_cycle(
+    @evolution.default_cycle_seed(),
+    @evolution.default_world(),
+    @evolution.causal_criterion(200),
+    rounds,
+  )
+}
+
+///|
+test "主体循环：位置只按迁移表推进，每步都留下未穷尽者，配置皆合宪" {
+  let c = small_cycle(3)
+  assert_eq(c.events.length(), 3)
+  assert_true(c.legal())
+  assert_true(c.never_closed())
+  assert_true(c.finished().genome.carry >= 1)
+}
+
+///|
+test "主体循环：未定不掷骰子——由双诚之比裁决，绝无以未定推进位置" {
+  let c = small_cycle(3)
+  for e in c.events {
+    assert_true(e.outcome.label() != "未定")
+    assert_true(e.remainder.length() > 0)
+  }
+}
+
+///|
+test "主体循环：被接收的修习效应皆为正，账本只追加且可往返、可重放" {
+  let c = small_cycle(2)
+  let led = c.ledger()
+  assert_eq(led.trails.length(), 2)
+  for t in led.trails {
+    if t.verdict == @evolution.Accepted {
+      assert_true(t.effect > 0)
+      assert_true(t.effect_lo > 0)
+    }
+  }
+  let text = led.serialize()
+  assert_eq(@evolution.parse(text).serialize(), text)
+  assert_true(@evolution.parse(text).seed == @evolution.default_agent())
+  let again = small_cycle(2)
+  assert_eq(again.ledger().serialize(), text)
+}
+
+///|
+test "主体循环：反馈不由标签给出——报告同时打印四分量与判词" {
+  let report = @evolution.render_cycle_report(small_cycle(2))
+  assert_true(report.contains("主体循环"))
+  assert_true(report.contains("共识"))
+  assert_true(report.contains("未穷尽"))
+  assert_true(report.contains("修习"))
+}

@@ -7,6 +7,8 @@
 ///   moon run cmd/main -- genesis   主线（原文顺序）
 ///   moon run cmd/main -- course    历程（可重入的环节序列）
 ///   moon run cmd/main -- naming    定名对照表（通用定名 / 原文名）
+///   moon run cmd/main -- slots     驱动槽对照表（触发 → 八个槽）
+///   moon run cmd/main -- loop      执行契约（位置 × 槽：迁／守／未定／无路）
 ///   moon run cmd/main -- principle 修订所依据的主体通用性原则
 ///   moon run cmd/main -- ml       机器学习/DoubleML 与状态机的接口 + 因果实验
 ///   moon run cmd/main -- ml-export 导出状态机生成的数据集（CSV，前若干行）
@@ -15,6 +17,7 @@
 ///   moon run cmd/main -- society 双层次社会交往模型（论文自身的理论构造：生活世界／系统／交往）
 ///   moon run cmd/main -- society-mermaid 上者的 Mermaid 状态图
 ///   moon run cmd/main -- evolution 进化：变异空间／适应度目标／闸门／持久化／遗传
+///   moon run cmd/main -- cycle    主体循环：位置 × 驱动槽 × 因果反馈（修习与开放都过闸门）
 ///   moon run cmd/main -- coordinator 科研 Agent 协调器：制品／规划／证据／决策／记忆／署名／运行时
 ///   moon run cmd/main -- dmlref 与外部参考实现（riantr/moonbit_doubleML）对照
 ///   moon run cmd/main -- all       报告 + 历程 + Mermaid
@@ -27,6 +30,8 @@ fn main {
     "genesis" => println(@sm.render_genesis())
     "course" => println(@sm.render_course())
     "naming" => println(@sm.render_naming_table())
+    "slots" => println(@sm.render_slots())
+    "loop" => println(@sm.render_loop_report())
     "principle" => println(@sm.revision_principle())
     "ml" => println(@ml.render_ml_report(@ml.default_ml_plan()))
     "ml-export" => println(@ml.csv_preview(@ml.make_dataset(200, 1.5, 7), 12))
@@ -35,6 +40,7 @@ fn main {
     "society" => println(@society.render_report())
     "society-mermaid" => println(@society.render_mermaid())
     "evolution" => println(@evolution.render_report())
+    "cycle" => println(@evolution.render_cycle_report(@evolution.demo_cycle()))
     "coordinator" => println(@coordinator.render_report())
     "dmlref" => println(@dmlref.render_report())
     "all" => {

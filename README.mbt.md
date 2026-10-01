@@ -20,15 +20,15 @@ ledger, evidence binding, and a principled refusal to close.
 | Repository | `git@gitee.com:ren-yongxiang/pyroduct.git` |
 | Author | `riantr` |
 | License | MIT |
-| `moon.mod` version | **0.1.1** |
+| `moon.mod` version | **0.1.2** |
 | Module name | `riantr/pyroduct` |
 | Source layout | 15 packages in one module（11 个库／CLI + 4 个示例），一个关注点一个包 |
-| `.mbt` file count | **41 production files** (+ 8 test files) |
+| `.mbt` file count | **44 production files** (+ 10 test files) |
 | Packages | 库：`src` · `multi` · `group` · `society` · `ml` · `evolution` · `coordinator` · `dmlref`；CLI：`cmd/main` · `cmd/coord`；其他：`tools/pdfdump` · `examples/{plr,irm,cross_check,consumer}` |
 | Third-party deps | `moonbitlang/async@0.22.4` (only `cmd/coord`) · `riantr/moonbit_doubleML@0.64.0` (only `dmlref`) |
 | Backends | `wasm` (default `moon test`) · `native` (`cmd/coord`, real disk I/O) — `wasm-gc` / `js` 未实测 |
-| Tests | **77 / 77** (`moon test`) |
-| Keywords | state machine · hermeneutics · Gadamer · Habermas · multi-agent · DoubleML · causal inference · research coordinator · 语料建模 · 科研协调 |
+| Tests | **90 / 90** (`moon test`) |
+| Keywords | state machine · hermeneutics · Gadamer · Habermas · multi-agent · DoubleML · causal inference · research coordinator · 语料建模 · 科研协调 · 驱动槽 · 执行契约 |
 
 #Features
 
@@ -43,8 +43,24 @@ ledger, evidence binding, and a principled refusal to close.
 是论文自身的群体层面构造（13 状态 · 26 迁移 · 8 阶段）。命名纪律贯穿三者：状态名与
 阶段名**一律两字**，只指称结构关系。
 
-**规范先行：多主体行为规则 R1–R14** — `multi` 把论文里「如何对待主体性」的立场做成
-可计算的体制（`TruthRegime`：内在秩序／逻各斯／超主体性／主体间性／诚然），把四类
+**驱动槽与执行契约：把「什么在推动迁移」做成数据** — `Trigger` 原本把几种结构上不同
+的东西记成同一个名字（被动生出、主动行动、沉淀自环、解蔽）。`src::Slot` 按主体通用性
+原则把它们归回**八个槽**（处境／取向／先行／行动／反馈／持存／共在／揭蔽），归位是
+`Trigger::slot` 上的穷尽函数——状态、迁移、阶段与 34／53／11 的计数一概不动。两条纪律
+写进测试：**共在独立成槽**（`MeetOther`／`GoodFaith`／`OpenArms` 不并入处境或行动——
+「对方是否和自身一样」不是感知的结果），**先行不等于预测**（不给概率、不引数值）。
+`src::step(位置, 槽)` 给出四种合法回执：迁／守／未定（多条出路并存，机器不替主体决断）／
+无路（缺口，不编造下一步）。
+
+**主体循环：反馈不由标签给出** — `evolution::run_cycle` 把六段agent回路（S→O→G→P→A→F）
+逐项换成本仓库已有的机制：位置＝`src` 的发生论位置，世界回应＝真跑 `@multi.encounter`
+（不造「感知(环境, S)」函数），驱动槽只在该位置**可走**的槽里挑，行动＝`src::step`，
+因果反馈＝修习（残余 −4）与开放（己之诚 −25）两个候选各过**同一个闸门**——因果判据下由
+DoubleML 给 θ̂ 与 95% 置信下界，两者皆正才接收。缺省主体从立位走到「自身」后停在持存
+自环：θ̂=0.012、CI 跨零，朴素差 0.467 被识破为选择偏误——**没有证据就不前进**。全部裁决
+只追加进 `Ledger`，每步恒带未穷尽者。
+
+**规范先行：多主体行为规则 R1–R14** — `multi` 把论文里「如何对待主体性」的立场做成可计算的体制（`TruthRegime`：内在秩序／逻各斯／超主体性／主体间性／诚然），把四类
 有效性主张做成带**时间位置**的 schema（`ClaimKind` × `ClaimPhase`，事前／事中／事后），
 并给出一次遭遇的完整裁决（`encounter` → `Verdict`：相位越界／不寻求／体制冲突／
 独白化／暂时共识／相契）。每条规则都附原文出处。
@@ -80,13 +96,16 @@ ledger, evidence binding, and a principled refusal to close.
 
 ```console
 $ moon test
-Total tests: 75, passed: 75, failed: 0.
+Total tests: 90, passed: 90, failed: 0.
 
 $ moon run cmd/main -- report        # 主体状态机（默认）
+$ moon run cmd/main -- slots         # 驱动槽：49 个触发 → 8 个槽（处境／取向／先行／行动／反馈／持存／共在／揭蔽）
+$ moon run cmd/main -- loop          # 执行契约：位置 × 槽（迁／守／未定／无路）
 $ moon run cmd/main -- multi         # 多主体行为规则 R1–R14 + 场景
 $ moon run cmd/main -- group         # 群体状态机
 $ moon run cmd/main -- society       # 双层次社会交往模型
 $ moon run cmd/main -- evolution     # 变异／适应度／闸门／持久化／遗传
+$ moon run cmd/main -- cycle         # 主体循环：位置 × 驱动槽 × 因果反馈（修习与开放都过闸门）
 $ moon run cmd/main -- coordinator   # 科研 Agent 协调器（八节）
 $ moon run cmd/main -- dmlref        # 与外部参考实现对照
 
@@ -151,6 +170,11 @@ let same : Bool = back.round_trips()
 `multi` 的规则（R1–R14）是这套模型的**规范面**：体制优先、不独断、解蔽—遮蔽、
 有效性时序、两诚区分、弃符合论存方法、构成性、第三者、商谈类型、谬误残余、
 不可闭合、诚然相契、横检纵共、共识即建议。
+
+上表四套状态机之外，`src::Slot`／`src::step` 与 `evolution::run_cycle` 是**执行契约**而
+非第五套模型：位置与迁移仍只有上表那些，新增的只是「什么在推动这条边」的归位，以及
+「位置 × 驱动槽 → 回执」这一步。它不给 `src` 引入环境（`src/moon.pkg` 至今零 import），
+环境的提供者留在 `evolution`／`coordinator` 层。
 
 #CLI
 
@@ -231,7 +255,7 @@ pyroduct/                  <- the module (riantr/pyroduct, 11 packages)
     cross_check/           <- 外部 DGP 上两实现互校
     consumer/              <- 库使用者的最小闭环
   moon.pkg                 <- 根包（只承载本 README；mooncakes 的 docs 按包渲染文档）
-  moon.mod                 <- module manifest（riantr/pyroduct@0.1.1）
+  moon.mod                 <- module manifest（riantr/pyroduct@0.1.2）
   README.mbt.md            <- this file
 ```
 
@@ -268,7 +292,7 @@ pyroduct/                  <- the module (riantr/pyroduct, 11 packages)
 
 #Used By
 
-- `cmd/main` —— 十四个子命令的报告入口。
+- `cmd/main` —— 十七个子命令的报告入口。
 - `cmd/coord` —— 把协调器运行时检查点写进磁盘的 native 样例。
 
 #Caveats
@@ -276,5 +300,7 @@ pyroduct/                  <- the module (riantr/pyroduct, 11 packages)
 - `wasm-gc` 与 `js` 后端**未实测**；`cmd/coord` 只在 `native` 上构建。
 - `coordinator` 的「想」这一步是**确定性替身**，尚未接入 LLM；示例证据来自模拟回合，
   不是真实科研轨迹。
+- 驱动槽的八分、循环里「回应 → 驱动槽」的优先序、以及「未定按双诚之比裁决」都是
+  **模型整理**（各文件出处注释已标明），不是附录原文直述；位置、迁移与措辞才是原文层。
 - `cmd/coord` 依赖 `moonbitlang/async` 仅为落盘；若要去掉该依赖，落盘可退化为
   「检查点字符串 + 重定向」。

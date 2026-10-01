@@ -1,0 +1,116 @@
+# AGENTS.md
+
+Guidance for AI coding agents working in **riantr/pyroduct** — a pure-MoonBit module that
+turns two Chinese philosophy texts into runnable, tested state machines (subject / group /
+society / multi-agent), plus an evolution layer, a research-agent coordinator, a
+from-scratch DoubleML, and a cross-check against the published `riantr/moonbit_doubleML`.
+
+Long-form context lives in `README.mbt.md`; read it before non-trivial changes.
+
+## Commands
+
+```console
+moon test                              # all tests (default target: wasm); currently 90/90
+moon check                             # type/warn check
+moon info                              # regenerates every pkg.generated.mbti (tracked)
+moon fmt                               # format; `moon fmt --check` must stay clean
+moon run cmd/main -- report            # CLI: report (default) | multi | group | society |
+                                       # evolution | coordinator | dmlref | mermaid | dot |
+                                       # genesis | course | naming | slots | loop |
+                                       # principle | ml | ml-export | all
+                                       # (`slots` = 驱动槽归位表, `loop` = 位置 × 槽的执行契约)
+moon run examples/plr                  # also: examples/irm, examples/cross_check,
+                                       # examples/consumer
+moon run --target native cmd/coord     # coordinator CLI with real disk I/O; writes
+                                       # .openseek/coordinator-state.txt (gitignored)
+```
+
+- After changing dependencies in `moon.mod`, run `moon update` first.
+- CI-equivalent gate before you finish: `moon check`, `moon test`, `moon fmt --check` all
+  clean.
+- **`moon fmt` cannot rewrite files in this sandbox** (in-place writes to existing files
+  are denied; only the agent's file tools may modify them). To get canonical formatting,
+  run `moon fmt --check` — it writes formatted copies under
+  `_build/wasm-gc/release/format/<pkg>/<file>` — then diff each touched file against its
+  copy (`git diff --no-index <file> _build/wasm-gc/release/format/<pkg>/<file>`) and apply
+  the hunks with the file tools.
+- `_build/` is a build artifact directory (gitignored); `pkg.generated.mbti` files are
+  generated interfaces — never hand-edit them. `moon info`'s final copy step (overwriting
+  the tracked `.mbti` files) hits the same sandbox denial as `moon fmt`; the workaround is
+  the same: diff each regenerated package against its fresh copy under
+  `_build/wasm/debug/check/<pkg>/<name>.mbti` and apply the changes with the file tools.
+- Sandbox note: `moon update` and the first dependency download write to the MoonBit
+  registry cache under the user profile (`~/.moon/registry`), outside this workspace; they
+  may need elevated file access once. Everything else (build, test, run, format) works
+  inside the workspace.
+
+## Layout
+
+| Package | Unit | Contents |
+|---------|------|----------|
+| `src` | one subject | Subject state machine (34 states · 53 transitions · 11 phases) + drive slots (8, `slot.mbt`) + step contract (`loop.mbt`: `step` → 迁/守/未定/无路) + rendering |
+| `multi` | two subjects | Normative rules R1–R14, `TruthRegime`, claim schemas, `encounter` verdicts |
+| `group` | one group | Emergence state machine (20 states), member config → group state, R7 write-back |
+| `society` | one society | Two-level social model from the thesis (13 states), lifeworld vs. system |
+| `ml` | — | From-scratch DoubleML (PLR, cross-fitting, orthogonal scores, inference), RNG, linear algebra |
+| `evolution` | one agent | `Genome`, mutations, `Objective`, update gates (weighted or DoubleML-based), append-only `Ledger`, heredity; subject cycle (`cycle.mbt`: `run_cycle` drives `@sm.step` by slot and judges 修习/开放 candidates through the gate) |
+| `coordinator` | research agents | Tasks/artifacts, planning, external evidence by confidence interval, content memory, credit, deliberation/decision split, replayable runtime |
+| `dmlref` | — | Cross-check of our DoubleML against `riantr/moonbit_doubleML@0.64.0` |
+| `cmd/main` | — | wasm CLI (17 subcommands above) |
+| `cmd/coord` | — | native CLI with real disk I/O (`supported_targets = "+native"`) |
+| `tools/pdfdump` | — | read-only survey records of the source PDF |
+| `examples/*` | — | one runnable example per package: `plr`, `irm`, `cross_check`, `consumer` |
+
+Each package directory contains a `moon.pkg` whose first lines are a comment explaining the
+package's purpose — those comments are package-level docs, keep them accurate.
+
+## Dependency rule (enforced by convention; keep it)
+
+- Outside the two exceptions below, packages may only use official `moonbitlang/*` (mostly
+  `moonbitlang/core`); no third-party libraries.
+- `moonbitlang/async@0.22.4` — sole consumer `cmd/coord` (native disk I/O).
+- `riantr/moonbit_doubleML@0.64.0` — sole consumer `dmlref` (external cross-check only).
+- `ml`'s DoubleML is fully self-contained: never import a numerics library into `ml`.
+- First-party imports stay minimal and point downward only (`evolution` imports `src` as
+  `@sm` for the cycle). `src/moon.pkg` has **zero imports** — never add an environment,
+  RNG, or numerics dependency to `src`; producers of slot content live above it.
+
+## Code conventions
+
+- **Language**: code identifiers, type names and doc comments are Chinese + English mixed;
+  doc comments (`///`) explaining provenance are typically Chinese. Follow the surrounding
+  file.
+- **MoonBit style**: `///|` marker before each top-level definition; `pub`/`pub(all)` for
+  the exported surface; explicit `extend T with Eq::{equal, not_equal}` instead of relying
+  on implicit Eq promotion; `derive(Eq, Debug)` on data enums/structs.
+- **Data-as-code**: models are literal data tables (states, transitions, phases) with a
+  source citation attached to every construct (`gloss` text ending in `P.xx` page refs).
+  Distinguish 原文直述 (direct from the text) from 模型整理 (model reconstruction) when
+  adding constructs.
+- **Naming discipline**: state and phase names are exactly two characters (designations in
+  `general.mbt`); keep new names in that register and structural only. Drive slots
+  (`src::Slot`) follow the same rule.
+- **Drive-slot discipline**: new `Trigger`s must be placed by `Trigger::slot` (exhaustive
+  match — the compiler enforces it); 共在 (`CoBeing`) is never merged into 处境/行动
+  (the other is not part of the environment); 先行 (`Antecedent`) carries no numbers —
+  probabilities live in `ml`/`evolution`. `src::step` returns only 迁/守/未定/无路;
+  `未定` is resolved by the genome (双诚之比) in `evolution`, never inside `src`, and
+  `Block` outcomes must never be papered over into a fabricated move.
+- **Tests are black-box**: test files (e.g. `*_test.mbt`) exercise only the package's public
+  API via `@pkg.…` and lock invariants — e.g. `no_final_closure()` (no terminal state, gap
+  always reachable), residue always positive, constitutional clauses, `decision_ok()`.
+  When you change a model, extend the invariant tests, not just snapshots.
+- **Determinism**: all randomness goes through fixed seeds (`ml`'s splitmix64 `Rng`,
+  evolution round seeds, external `seed=3141`). Never introduce unseeded randomness.
+- **Report symmetry**: each layer has a `report`-style renderer (`render_report` /
+  `report.mbt`); new user-facing constructs should appear there and in the matching
+  `cmd/main` subcommand.
+
+## When you change a model
+
+1. Update the data tables and any rendered reports together.
+2. Keep counts consistent: state/transition/phase totals appear in tests, README tables,
+   and `moon.mod` description — update all of them.
+3. Run the full gate (`moon check` + `moon test` + `moon fmt --check`) and, for
+   coordinator/evolution changes, `moon run --target native cmd/coord` to confirm the
+   checkpoint round-trips (`往返一致 true`).

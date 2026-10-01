@@ -8,15 +8,29 @@ import {
 // Values
 pub fn all_phases() -> Array[Phase]
 
+pub fn all_slots() -> Array[Slot]
+
 pub fn all_states() -> Array[SubjectState]
+
+pub fn all_triggers() -> Array[Trigger]
 
 pub fn course() -> Array[SubjectState]
 
+pub fn every_phase_has_non_act() -> Bool
+
+pub fn exitable(SubjectState, Slot) -> Bool
+
 pub fn freedom_text(Int) -> String
+
+pub fn gaps() -> Array[(SubjectState, Slot)]
 
 pub fn genesis_path() -> Array[SubjectState]
 
 pub fn initial() -> SubjectState
+
+pub fn only_act_exits() -> Array[SubjectState]
+
+pub fn positions_reachable_by(Slot) -> Array[SubjectState]
 
 pub fn predecessors(SubjectState) -> Array[(SubjectState, Trigger)]
 
@@ -28,13 +42,23 @@ pub fn render_dot() -> String
 
 pub fn render_genesis() -> String
 
+pub fn render_loop_report() -> String
+
 pub fn render_mermaid() -> String
 
 pub fn render_naming_table() -> String
 
 pub fn render_report() -> String
 
+pub fn render_slot_tally() -> String
+
+pub fn render_slots() -> String
+
 pub fn revision_principle() -> String
+
+pub fn slot_tally() -> Array[(Slot, Int)]
+
+pub fn step(SubjectState, Slot) -> Outcome
 
 pub fn successors(SubjectState) -> Array[(Trigger, SubjectState)]
 
@@ -42,9 +66,23 @@ pub fn terminal() -> SubjectState
 
 pub fn transitions() -> Array[Transition]
 
+pub fn walk(SubjectState, Array[Slot]) -> Trace
+
 // Errors
 
 // Types and methods
+pub(all) enum Outcome {
+  Moved(Trigger, SubjectState)
+  Held(Trigger, SubjectState)
+  Open(Array[(Trigger, SubjectState)])
+  Block(String)
+} derive(Eq, @debug.Debug)
+pub fn Outcome::equal(Self, Self) -> Bool
+pub fn Outcome::label(Self) -> String
+pub fn Outcome::landing(Self) -> SubjectState?
+pub fn Outcome::not_equal(Self, Self) -> Bool
+pub fn Outcome::to_repr(Self) -> @debug.Repr
+
 pub(all) enum Phase {
   Natural
   Release
@@ -64,6 +102,25 @@ pub fn Phase::label(Self) -> String
 pub fn Phase::not_equal(Self, Self) -> Bool
 pub fn Phase::qualified(Self) -> String
 pub fn Phase::to_repr(Self) -> @debug.Repr
+
+pub(all) enum Slot {
+  Occasion
+  Orientation
+  Antecedent
+  Act
+  Feedback
+  Hold
+  CoBeing
+  Unveil
+} derive(Eq, @debug.Debug)
+pub fn Slot::designation(Self) -> String
+pub fn Slot::equal(Self, Self) -> Bool
+pub fn Slot::gloss(Self) -> String
+pub fn Slot::not_equal(Self, Self) -> Bool
+pub fn Slot::provenance(Self) -> String
+pub fn Slot::qualified(Self) -> String
+pub fn Slot::source(Self) -> String
+pub fn Slot::to_repr(Self) -> @debug.Repr
 
 pub struct StateInfo {
   state : SubjectState
@@ -119,6 +176,16 @@ pub fn SubjectState::not_equal(Self, Self) -> Bool
 pub fn SubjectState::phase(Self) -> Phase
 pub fn SubjectState::qualified(Self) -> String
 pub fn SubjectState::to_repr(Self) -> @debug.Repr
+
+pub struct Trace {
+  start : SubjectState
+  steps : Array[(Slot, Outcome)]
+} derive(Eq, @debug.Debug)
+pub fn Trace::at(Self) -> SubjectState
+pub fn Trace::equal(Self, Self) -> Bool
+pub fn Trace::not_equal(Self, Self) -> Bool
+pub fn Trace::outcome_labels(Self) -> Array[String]
+pub fn Trace::to_repr(Self) -> @debug.Repr
 
 pub struct Transition {
   from : SubjectState
@@ -180,6 +247,7 @@ pub(all) enum Trigger {
 pub fn Trigger::equal(Self, Self) -> Bool
 pub fn Trigger::label(Self) -> String
 pub fn Trigger::not_equal(Self, Self) -> Bool
+pub fn Trigger::slot(Self) -> Slot
 pub fn Trigger::to_repr(Self) -> @debug.Repr
 
 // Type aliases

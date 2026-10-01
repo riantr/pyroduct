@@ -4,6 +4,7 @@ package "riantr/pyroduct/evolution"
 import {
   "riantr/pyroduct/ml",
   "riantr/pyroduct/multi",
+  "riantr/pyroduct/src",
 }
 
 // Values
@@ -23,9 +24,15 @@ pub fn constitution_violations(Genome) -> Array[String]
 
 pub fn constitutional(Genome) -> Bool
 
+pub fn cycle_state(@src.SubjectState, Genome) -> CycleState
+
 pub fn default_agent() -> Genome
 
+pub fn default_cycle_seed() -> CycleState
+
 pub fn default_world() -> Array[Opponent]
+
+pub fn demo_cycle() -> SubjectCycle
 
 pub fn descend(Genome, Candidate) -> Genome
 
@@ -53,6 +60,8 @@ pub fn quality(Genome, Array[Opponent]) -> Double
 
 pub fn render_causal() -> String
 
+pub fn render_cycle_report(SubjectCycle) -> String
+
 pub fn render_ledger(Ledger) -> String
 
 pub fn render_objectives() -> String
@@ -60,6 +69,8 @@ pub fn render_objectives() -> String
 pub fn render_report() -> String
 
 pub fn render_variation() -> String
+
+pub fn run_cycle(CycleState, Array[Opponent], Criterion, Int) -> SubjectCycle
 
 pub fn score(Fitness, Objective) -> Int
 
@@ -98,6 +109,26 @@ pub(all) enum Criterion {
   Weighted(Objective)
   Causal(CausalPlan)
 }
+
+pub struct CycleEvent {
+  round : Int
+  state_before : @src.SubjectState
+  slot : @src.Slot
+  outcome : @src.Outcome
+  state_after : @src.SubjectState
+  genome_after : Genome
+  response : Fitness
+  practice : Offer
+  opening : Offer
+  remainder : String
+}
+
+pub struct CycleState {
+  state : @src.SubjectState
+  genome : Genome
+} derive(Eq)
+pub fn CycleState::equal(Self, Self) -> Bool
+pub fn CycleState::not_equal(Self, Self) -> Bool
 
 pub struct Decision {
   verdict : Judgement
@@ -190,6 +221,16 @@ pub struct Opponent {
   reason : Int
   residue : Int
 }
+
+pub struct SubjectCycle {
+  seed : CycleState
+  objective : String
+  events : Array[CycleEvent]
+}
+pub fn SubjectCycle::finished(Self) -> CycleState
+pub fn SubjectCycle::ledger(Self) -> Ledger
+pub fn SubjectCycle::legal(Self) -> Bool
+pub fn SubjectCycle::never_closed(Self) -> Bool
 
 pub struct Trail {
   generation : Int

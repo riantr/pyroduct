@@ -51,6 +51,17 @@ pub fn render_report() -> String {
   lines.push("## 主线（原文顺序）")
   lines.push("")
   lines.push(render_genesis())
+  lines.push("")
+  lines.push(
+    "## 驱动槽（\{all_triggers().length()} 个触发 · \{all_slots().length()} 个槽）",
+  )
+  lines.push("")
+  lines.push(render_slot_tally())
+  lines.push("")
+  let combos = all_states().length() * all_slots().length()
+  lines.push(
+    "执行契约：位置 × 槽共 \{combos} 个组合，其中 \{gaps().length()} 组无路可走——无路是合法回执，机器不编造下一步。逐条归位见 `slots`，缺口分布与示范见 `loop`。",
+  )
   lines.join("\n")
 }
 

@@ -1,6 +1,7 @@
 // 进化层：变异空间 / 适应度目标 / 更新闸门 / 持久化 / 遗传。依赖 multi（行为规则）
-// 与 core/string（持久化的解析）。
+// 与 core/string（持久化的解析）；`cycle.mbt` 另依赖 src（位置 × 驱动槽的执行契约）。
 import {
+  "riantr/pyroduct/src" @sm,
   "riantr/pyroduct/multi",
   "riantr/pyroduct/ml",
   "moonbitlang/core/string",

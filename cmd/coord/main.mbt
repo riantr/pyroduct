@@ -3,7 +3,8 @@
 ///
 ///   moon run --target native cmd/coord
 ///
-/// 写出的文件放在 `.openseek/`（已被 `.gitignore` 忽略），不污染工作树。
+/// 写出的文件放在 `.openseek/`（已被 `.gitignore` 忽略），不污染工作树；目录不存在
+/// 时先建（新克隆里它并不在）。
 async fn main {
   let rt = @coordinator.new_runtime()
   let ts = @coordinator.demo_tasks()
@@ -20,6 +21,7 @@ async fn main {
     }
   }
   let path = ".openseek/coordinator-state.txt"
+  @fs.mkdir(".openseek", recursive=true, allow_exist=true)
   @fs.write_file(path, rt.checkpoint())
   let back = @coordinator.restore(@fs.read_file(path).text())
   println(

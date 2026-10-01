@@ -1,6 +1,6 @@
 name = "riantr/pyroduct"
 
-version = "0.1.1"
+version = "0.1.2"
 
 readme = "README.mbt.md"
 
@@ -17,12 +17,16 @@ keywords = [
   "research-coordinator",
   "语料建模",
   "科研协调",
+  "驱动槽",
+  "执行契约",
 ]
 
 description = "把《伽达默尔与哈贝马斯真理观比较》与《通往宁静之路》建模为可运行、可测试的 MoonBit 状态机族（主体／多主体／群体／双层次社会交往），外加进化层与科研 Agent 协调器，并附自研 DoubleML 与 riantr/moonbit_doubleML 的互校。"
 
-// 《通往宁静之路》主体状态机 → 多主体行为规则 → 群体状态机／双层次社会交往模型
-// → 进化层（变异／适应度／更新闸门／持久化／遗传，闸门可用 DoubleML 判因果效应）
+// 《通往宁静之路》主体状态机（含驱动槽八分与「位置 × 槽」执行契约）→ 多主体行为规则
+// → 群体状态机／双层次社会交往模型
+// → 进化层（变异／适应度／更新闸门／持久化／遗传，闸门可用 DoubleML 判因果效应；
+// 主体循环把驱动槽接到真迁移表上，修习与开放两个候选都过同一个闸门）
 // → 科研 Agent 协调器（制品／规划／外部证据／决策分段／内容记忆／署名／运行时）。
 // 依赖：moonbitlang/async 仅供 cmd/coord（native）真实落盘；riantr/moonbit_doubleML
 // 仅供 dmlref（与外部参考实现互校自研 DoubleML）。其余包仍不依赖第三方库。

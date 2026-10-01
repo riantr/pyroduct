@@ -110,7 +110,10 @@ package's purpose — those comments are package-level docs, keep them accurate.
 
 1. Update the data tables and any rendered reports together.
 2. Keep counts consistent: state/transition/phase totals appear in tests, README tables,
-   and `moon.mod` description — update all of them.
+   and `moon.mod` description — update all of them. `README.mbt.md` follows the
+   `moonbit-community/rabbita` README style and deliberately presents only the
+   state-machine family (`src`/`multi`/`group`/`society`), the agent layer (`evolution`)
+   and the coordinator — `ml`, `dmlref` and `examples` are not presented there.
 3. Run the full gate (`moon check` + `moon test` + `moon fmt --check`) and, for
    coordinator/evolution changes, `moon run --target native cmd/coord` to confirm the
    checkpoint round-trips (`往返一致 true`).

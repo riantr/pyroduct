@@ -1,6 +1,6 @@
 name = "riantr/pyroduct"
 
-version = "0.1.2"
+version = "0.1.3"
 
 readme = "README.mbt.md"
 
@@ -12,7 +12,6 @@ keywords = [
   "state-machine",
   "hermeneutics",
   "multi-agent",
-  "doubleml",
   "causal-inference",
   "research-coordinator",
   "语料建模",
@@ -21,7 +20,7 @@ keywords = [
   "执行契约",
 ]
 
-description = "把《伽达默尔与哈贝马斯真理观比较》与《通往宁静之路》建模为可运行、可测试的 MoonBit 状态机族（主体／多主体／群体／双层次社会交往），外加进化层与科研 Agent 协调器，并附自研 DoubleML 与 riantr/moonbit_doubleML 的互校。"
+description = "把《伽达默尔与哈贝马斯真理观比较》与《通往宁静之路》建模为可运行、可测试的 MoonBit 状态机族（主体／多主体／群体／双层次社会交往），外加 Agent 状态机（进化层：变异／闸门／只追加账本）与科研 Agent 协调器。"
 
 // 《通往宁静之路》主体状态机（含驱动槽八分与「位置 × 槽」执行契约）→ 多主体行为规则
 // → 群体状态机／双层次社会交往模型

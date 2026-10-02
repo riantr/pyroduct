@@ -10,6 +10,7 @@
 ///   moon run cmd/main -- slots     驱动槽对照表（触发 → 八个槽）
 ///   moon run cmd/main -- loop      执行契约（位置 × 槽：迁／守／未定／无路）
 ///   moon run cmd/main -- principle 修订所依据的主体通用性原则
+///   moon run cmd/main -- intuition 直觉读法：把裁决备忘录读成背景直觉的仓库（模型整理）
 ///   moon run cmd/main -- ml       机器学习/DoubleML 与状态机的接口 + 因果实验
 ///   moon run cmd/main -- ml-export 导出状态机生成的数据集（CSV，前若干行）
 ///   moon run cmd/main -- multi    多主体行为规则（R1–R12）+ 场景演示
@@ -33,6 +34,7 @@ fn main {
     "slots" => println(@sm.render_slots())
     "loop" => println(@sm.render_loop_report())
     "principle" => println(@sm.revision_principle())
+    "intuition" => println(@evolution.intuition_principle())
     "ml" => println(@ml.render_ml_report(@ml.default_ml_plan()))
     "ml-export" => println(@ml.csv_preview(@ml.make_dataset(200, 1.5, 7), 12))
     "multi" => println(@multi.render_multi_report())

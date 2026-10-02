@@ -44,6 +44,10 @@ pub fn evolve(Genome, Array[Opponent], Criterion, Int) -> Ledger
 
 pub fn genome(Voice, @multi.TruthRegime, Int, Int, Int, Int) -> Genome
 
+pub fn intuition_disciplines() -> Array[(String, String)]
+
+pub fn intuition_principle() -> String
+
 pub fn judge(Genome, Int, Candidate, Array[Opponent], Criterion) -> Decision
 
 pub fn make_episodes(Genome, Genome, Array[Opponent], Int, UInt64) -> Episodes

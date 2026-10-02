@@ -340,3 +340,37 @@ test "回溯：候选与父代相同则持平，不重跑因果估计" {
   // 开放候选（己之诚 70 → 45）是真实改动，仍走因果估计。
   assert_true(c.events[0].opening.decision.reason.contains("因果 θ̂"))
 }
+
+///|
+test "直觉读法：四条纪律齐备，读法全文覆盖纪律与两极" {
+  let ds = @evolution.intuition_disciplines()
+  assert_eq(ds.length(), 4)
+  let seen : Array[String] = []
+  for row in ds {
+    assert_true(row.0.length() > 0)
+    assert_true(row.1.length() > 0)
+    assert_true(!seen.contains(row.0))
+    seen.push(row.0)
+  }
+  let t = @evolution.intuition_principle()
+  assert_true(t.contains("模型整理"))
+  assert_true(t.contains("背景直觉"))
+  assert_true(t.contains("P.43-44"))
+  assert_true(t.contains("不是第九个槽"))
+  for row in ds {
+    assert_true(t.contains(row.0))
+  }
+  assert_true(t.contains("伽达默尔"))
+  assert_true(t.contains("哈贝马斯"))
+  assert_true(t.contains("不封闭"))
+}
+
+///|
+test "报告对称：循环报告指向直觉读法，直觉读法标注出处层" {
+  let report = @evolution.render_cycle_report(small_cycle(2))
+  assert_true(report.contains("直觉读法（模型整理）"))
+  assert_true(report.contains("intuition"))
+  let t = @evolution.intuition_principle()
+  assert_true(t.contains("持存"))
+  assert_true(t.contains("揭蔽"))
+}

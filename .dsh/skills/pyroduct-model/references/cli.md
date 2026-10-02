@@ -21,6 +21,7 @@
 | `mermaid` / `dot` | 状态图源码（可直接粘进渲染器） |
 | `genesis` / `course` | 原文顺序主线 / 可重入环节序列 |
 | `naming` / `principle` | 定名对照表 / 主体通用性原则（R1–R3） |
+| `intuition` | 直觉读法：裁决备忘录读成背景直觉的仓库（模型整理；四条纪律：出处可查、在接触中存活或破碎、出处层即稳固度、不编造命中） |
 | `ml` / `ml-export` | DoubleML 接口与因果实验说明 / 数据集 CSV |
 | `all` | 报告 + 历程 + Mermaid |
 

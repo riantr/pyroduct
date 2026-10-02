@@ -351,6 +351,10 @@ pub fn render_cycle_report(c : SubjectCycle) -> String {
   lines.push(
     "位置推进只由「位置 × 驱动槽」的迁移表给；「未定」由双诚之比裁决；一切配置改动都过闸门——反馈不由标签给出。",
   )
+  lines.push("")
+  lines.push(
+    "直觉读法（模型整理）：同判不重裁是「持存」的取回，回溯持平是「揭蔽」的通过；出处见账本的首裁回合。全文见 `intuition`。",
+  )
   lines.join("\n")
 }
 

@@ -32,6 +32,9 @@ pub fn render_report() -> String {
   lines.push(
     "状态 \{all_states().length()} 个 · 迁移 \{transitions().length()} 条 · 阶段 \{all_phases().length()} 个",
   )
+  lines.push(
+    "退化起点：无忆（失忆）、无筹（浑噩）——只出不进：各有一条出边汇入立位，从立位不可达。这是设计：起点是抛入的境况，不是历程的一站；机器不编造进入它们的边。",
+  )
   lines.push("")
   for p in all_phases() {
     lines.push("## \{p.qualified()}")

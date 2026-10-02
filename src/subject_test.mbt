@@ -88,11 +88,26 @@ test "可达性与方向性" {
 }
 
 ///|
-test "失忆与浑噩是汇入站立的退化起点" {
+test "失忆与浑噩是汇入站立的退化起点：只出不进，不被立位到达，不在历程上" {
+  // 只出不进：各恰一条出边（TakeStand）汇入立位；全表无任何入边。
   assert_eq(@src.successors(@src.NoPast).length(), 1)
   assert_eq(@src.successors(@src.NoFuture).length(), 1)
+  assert_eq(@src.successors(@src.NoPast)[0].1, @src.Standing)
+  assert_eq(@src.successors(@src.NoFuture)[0].1, @src.Standing)
+  assert_eq(@src.predecessors(@src.NoPast).length(), 0)
+  assert_eq(@src.predecessors(@src.NoFuture).length(), 0)
+  // 汇入可达，反向不可达：它们是额外的起点，不是走到的位置。
+  assert_true(@src.reachable(@src.NoPast, @src.Standing))
+  assert_true(@src.reachable(@src.NoFuture, @src.Standing))
   assert_true(!@src.reachable(@src.Standing, @src.NoPast))
   assert_true(!@src.reachable(@src.Standing, @src.NoFuture))
+  // 不在可重入环节与主线上——被抛境况不是历程的一站。
+  for s in [@src.NoPast, @src.NoFuture] {
+    assert_true(!has_state(@src.course(), s))
+    assert_true(!has_state(@src.genesis_path(), s))
+  }
+  // 报告对称：设计显式出现在报告里。
+  assert_true(@src.render_report().contains("退化起点"))
 }
 
 ///|

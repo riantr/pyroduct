@@ -5,7 +5,8 @@ turns two Chinese philosophy texts into runnable, tested state machines (subject
 society / multi-agent), plus an evolution layer, a research-agent coordinator, a
 from-scratch DoubleML, and a cross-check against the published `riantr/moonbit_doubleML`.
 
-Long-form context lives in `README.mbt.md`; read it before non-trivial changes.
+Long-form context lives in `README.mbt.md` (English) and `README.zh.mbt.md`
+(Chinese); read it before non-trivial changes.
 
 ## Commands
 
@@ -130,8 +131,9 @@ package's purpose — those comments are package-level docs, keep them accurate.
 
 1. Update the data tables and any rendered reports together.
 2. Keep counts consistent: state/transition/phase totals appear in tests, README tables,
-   and `moon.mod` description — update all of them. `README.mbt.md` follows the
-   `moonbit-community/rabbita` README style and deliberately presents only the
+   and `moon.mod` description — update all of them. `README.mbt.md` (English) and
+   `README.zh.mbt.md` (Chinese) follow the `moonbit-community/rabbita` README style
+   and deliberately present only the
    state-machine family (`src`/`multi`/`group`/`society`), the agent layer (`evolution`)
    and the coordinator — `ml`, `dmlref` and `examples` are not presented there.
 3. Run the full gate (`moon check` + `moon test` + `moon fmt --check`) and, for

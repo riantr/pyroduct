@@ -11,16 +11,18 @@ Long-form context lives in `README.mbt.md`; read it before non-trivial changes.
 
 ```console
 moon test                              # all tests (default target: wasm); currently
-                                       # 95/95 on wasm + 2 snnref tests on native
+                                       # 100/100 on wasm + 2 snnref tests on native
 moon test --target native snnref       # spike-sediment experiment (native only)
 moon check                             # type/warn check
 moon info                              # regenerates every pkg.generated.mbti (tracked)
 moon fmt                               # format; `moon fmt --check` must stay clean
 moon run cmd/main -- report            # CLI: report (default) | multi | group | society |
-                                       # evolution | coordinator | dmlref | mermaid | dot |
-                                       # genesis | course | naming | slots | loop |
-                                       # principle | intuition | ml | ml-export | all
+                                       # evolution | coordinator | dmlref | causal |
+                                       # mermaid | dot | genesis | course | naming |
+                                       # slots | loop | principle | intuition | ml |
+                                       # ml-export | all
                                        # (`intuition` = 直觉读法：备忘录读成背景直觉的仓库）
+                                       # (`causal` = 0.75.0 深用：敏感性／多重检验／异质性）
                                        # (`slots` = 驱动槽归位表, `loop` = 位置 × 槽的执行契约)
 moon run examples/plr                  # also: examples/irm, examples/cross_check,
                                        # examples/consumer,
@@ -60,8 +62,9 @@ moon run --target native cmd/coord     # coordinator CLI with real disk I/O; wri
 | `evolution` | one agent | `Genome`, mutations, `Objective`, update gates (weighted or DoubleML-based), append-only `Ledger`, heredity; subject cycle (`cycle.mbt`: `run_cycle` drives `@sm.step` by slot and judges 修习/开放 candidates through the gate); decision memo (`replay.mbt`: one judgement per (parent, candidate) pair per cycle, repeats annotated 同判·不重裁); backdating (`gate.mbt`: zero-diff candidates → Tie without re-running the estimator); intuition reading (`intuition.mbt`: memo read as background-intuition repository, marked 模型整理) |
 | `coordinator` | research agents | Tasks/artifacts, planning, external evidence by confidence interval, content memory, credit, deliberation/decision split, replayable runtime |
 | `dmlref` | — | Cross-check of our DoubleML against `riantr/moonbit_doubleML@0.75.0` |
+| `causal` | one dataset | 0.75.0-deep diagnostics (read-only, data from the state machine): sensitivity (Cinelli–Hazlett `rv = \|θ̂\|/max_bias`), multiple-testing correction (BH/Bonferroni — naive OLS also passes, significance ≠ evidence), BLP heterogeneity (residualized treatment × centered covariates, HC0 se; d̃ recovers θ̂); marked 模型整理 |
 | `snnref` | one experiment | Spike-sediment experiment (native only): 49 triggers → Poisson spike trains with slot-correlated rates → Gerstner STDP (CSR, library defaults) → does the sedimented weight structure recover the 8-slot partition? Means, hit rate vs. chance baseline, per-slot table; marked 模型整理 |
-| `cmd/main` | — | wasm CLI (18 subcommands above) |
+| `cmd/main` | — | wasm CLI (19 subcommands above) |
 | `cmd/coord` | — | native CLI with real disk I/O (`supported_targets = "+native"`) |
 | `tools/pdfdump` | — | read-only survey records of the source PDF |
 | `examples/*` | — | one runnable example per package: `plr`, `irm`, `cross_check`, `consumer`, `sediment` (native) |
@@ -74,7 +77,9 @@ package's purpose — those comments are package-level docs, keep them accurate.
 - Outside the three exceptions below, packages may only use official `moonbitlang/*`
   (mostly `moonbitlang/core`); no third-party libraries.
 - `moonbitlang/async@0.22.4` — sole consumer `cmd/coord` (native disk I/O).
-- `riantr/moonbit_doubleML@0.75.0` — sole consumer `dmlref` (external cross-check only).
+- `riantr/moonbit_doubleML@0.75.0` — consumers `dmlref` (cross-check of our
+  from-scratch estimator) and `causal` (0.75.0-deep diagnostics: sensitivity,
+  multiple-testing correction, BLP heterogeneity — read-only, no gate).
 - `riantr/snn_mbt@0.84.0` (pulls `riantr/moonbit_image@0.3.4`) — sole consumer `snnref`
   (spike-sediment experiment, cross-check only). `snn_mbt` declares native as its only
   target, so `snnref` and `examples/sediment` are `+native`: the wasm gate skips them,

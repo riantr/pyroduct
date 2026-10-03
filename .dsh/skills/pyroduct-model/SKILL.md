@@ -22,6 +22,7 @@ description: '读取本仓库（riantr/pyroduct）的可运行哲学状态机：
 | `evolution` | Agent 配置的变异／适应度／宪法／闸门／账本 |
 | `cycle` | 主体循环：位置 × 驱动槽 × 因果反馈（修习与开放过同一个闸门） |
 | `coordinator` | 科研 Agent 协调器：制品／规划／证据（按置信区间）／决策分段 |
+| `dmlref` / `causal` | 外部 DoubleML 互校（θ̂ 差、se 差）／0.75.0 深用诊断：敏感性 rv、BH 校正（天真 OLS 也「显著」）、BLP 异质性（模型整理） |
 | `mermaid` / `dot` | 状态图源码 |
 | `genesis` / `course` / `naming` / `principle` / `intuition` | 主线／环节序列／定名对照表／主体通用性原则／直觉读法（备忘录读成背景直觉的仓库，模型整理） |
 | `all` | 报告 + 历程 + Mermaid |

@@ -1,0 +1,31 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "riantr/pyroduct/causal"
+
+// Values
+pub fn phi_tail(Double) -> Double
+
+pub fn render_report() -> String raise
+
+pub fn run_diagnostics() -> Diagnostics raise
+
+// Errors
+
+// Types and methods
+pub(all) struct Diagnostics {
+  theta_ref : Double
+  se_ref : Double
+  rv : Double
+  max_bias : Double
+  p_theta : Double
+  p_neg : Double
+  p_naive : Double
+  bh_theta : Double
+  bh_naive : Double
+  bonf_naive : Double
+  het_coefs : Array[Double]
+  het_ses : Array[Double]
+}
+
+// Type aliases
+
+// Traits

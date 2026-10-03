@@ -1,0 +1,11 @@
+// 因果诊断层（0.75.0 深用）：引入 riantr/moonbit_doubleML 做三类只读分析——
+// 敏感性（隐藏混杂多强才推翻结论）、多重检验校正（批量闸门的假发现率）、
+// BLP 异质性（效应落在哪个维度）。数据一律来自状态机（ml.make_dataset）。
+// 只读诊断，不设闸门：更新闸门仍在 evolution，不因 0.75.0 扩展而改判据。
+import {
+  "riantr/pyroduct/ml",
+  "riantr/moonbit_doubleML" @dml,
+  "moonbitlang/core/math",
+}
+
+supported_targets = "native+wasm+wasm-gc+js"

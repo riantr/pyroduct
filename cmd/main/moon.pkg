@@ -7,6 +7,7 @@ import {
   "riantr/pyroduct/evolution",
   "riantr/pyroduct/coordinator",
   "riantr/pyroduct/dmlref",
+  "riantr/pyroduct/causal",
   "moonbitlang/core/env",
 }
 

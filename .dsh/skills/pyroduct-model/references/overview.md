@@ -14,17 +14,20 @@
 | `ml` | — | 自研 DoubleML（PLR、交叉拟合、正交分数、推断）、RNG、线性代数 |
 | `evolution` | 一个 agent | `Genome`、变异、`Objective`、更新闸门（加权或 DoubleML 因果）、只追加 `Ledger`、遗传；主体循环（`cycle.mbt`） |
 | `coordinator` | 科研 agent | 任务/制品、规划、按置信区间的外部证据、内容记忆、署名、商谈/决策分段、可重放运行时 |
-| `dmlref` | — | 自研 DoubleML 与 `riantr/moonbit_doubleML@0.64.0` 的互校 |
+| `dmlref` | — | 自研 DoubleML 与 `riantr/moonbit_doubleML@0.75.0` 的互校 |
+| `snnref` | 一个实验 | 脉冲沉淀实验（native 专属）：49 触发 → Poisson spike trains（槽内共现高率）→ Gerstner STDP → 权重结构能否恢复驱动槽八分（比值、命中率对基线、分槽表）；标模型整理 |
 | `cmd/main` | — | wasm CLI（十七个子命令） |
 | `cmd/coord` | — | native CLI，真实落盘（`supported_targets = "+native"`） |
 | `tools/pdfdump` | — | 源 PDF 的只读勘察记录 |
-| `examples/*` | — | 每包一个可运行示例 |
+| `examples/*` | — | 每包一个可运行示例（`sediment` 为 native 专属） |
 
 ## 依赖规则（按约定执行）
 
 - 官方 `moonbitlang/*` 之外只允许 `riantr/*`。
-- `moonbitlang/async@0.22.4` 唯一消费者 `cmd/coord`；`riantr/moonbit_doubleML@0.64.0`
-  唯一消费者 `dmlref`。
+- `moonbitlang/async@0.22.4` 唯一消费者 `cmd/coord`；`riantr/moonbit_doubleML@0.75.0`
+  唯一消费者 `dmlref`；`riantr/snn_mbt@0.84.0`（连带 `riantr/moonbit_image@0.3.4`）
+  唯一消费者 `snnref`——`snn_mbt` 只声明 native 目标，`snnref` 与 `examples/sediment`
+  随之 `+native`，wasm 门禁自动跳过，须单独 `moon test --target native snnref`。
 - `src/moon.pkg` **零 import**——永不给 `src` 加环境、RNG 或数值依赖；槽内容的
   生产者在其上的层。
 - 一方依赖只向下指（`evolution` 以 `@sm` 引 `src`）。
@@ -33,9 +36,11 @@
 
 ```console
 moon check                              # 类型/告警检查
-moon test                               # 全部测试（wasm），当前 95/95
+moon test                               # 全部测试（wasm），当前 95/95 + snnref 2（native）
+moon test --target native snnref        # 脉冲沉淀实验（native 专属）
 moon fmt --check                        # 格式必须干净
 moon run --target native cmd/coord      # 检查点落盘往返（往返一致 true）
+moon run --target native examples/sediment  # 脉冲沉淀实验报告
 ```
 
 ## 确定性

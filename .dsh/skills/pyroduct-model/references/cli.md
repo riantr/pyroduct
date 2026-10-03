@@ -18,6 +18,7 @@
 | `cycle` | 主体循环逐回合：回应 → 驱动槽 → 迁移 → 修习/开放判词（θ̂、95% CI、真值、朴素差）→ 足迹 |
 | `coordinator` | 协调器八节：任务/问题/工人/数据集/世界/父任务/候选 → 规划与决策 |
 | `dmlref` | 自研与外部 DoubleML 同 nuisance 对照（θ̂ 差、se 差） |
+| —（native 示例） | `moon run --target native examples/sediment`：脉冲沉淀实验——49 触发 → spike trains → Gerstner STDP → 能否恢复驱动槽八分（模型整理；`snn_mbt` 只支持 native） |
 | `mermaid` / `dot` | 状态图源码（可直接粘进渲染器） |
 | `genesis` / `course` | 原文顺序主线 / 可重入环节序列 |
 | `naming` / `principle` | 定名对照表 / 主体通用性原则（R1–R3） |

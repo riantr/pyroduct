@@ -1,0 +1,8 @@
+// 示例 4：脉冲沉淀实验（native 专属，snn_mbt 只支持 native 目标）。
+import {
+  "riantr/pyroduct/snnref",
+}
+
+supported_targets = "+native"
+
+pkgtype(kind: "executable")

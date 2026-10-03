@@ -1,4 +1,4 @@
-// 与外部参考实现对照：引入 riantr/moonbit_doubleML@0.64.0 复核自研的 ml.dml_plr。
+// 与外部参考实现对照：引入 riantr/moonbit_doubleML@0.75.0 复核自研的 ml.dml_plr。
 import {
   "riantr/pyroduct/ml",
   "riantr/moonbit_doubleML" @dml,

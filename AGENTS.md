@@ -10,7 +10,9 @@ Long-form context lives in `README.mbt.md`; read it before non-trivial changes.
 ## Commands
 
 ```console
-moon test                              # all tests (default target: wasm); currently 95/95
+moon test                              # all tests (default target: wasm); currently
+                                       # 95/95 on wasm + 2 snnref tests on native
+moon test --target native snnref       # spike-sediment experiment (native only)
 moon check                             # type/warn check
 moon info                              # regenerates every pkg.generated.mbti (tracked)
 moon fmt                               # format; `moon fmt --check` must stay clean
@@ -21,7 +23,8 @@ moon run cmd/main -- report            # CLI: report (default) | multi | group |
                                        # (`intuition` = 直觉读法：备忘录读成背景直觉的仓库）
                                        # (`slots` = 驱动槽归位表, `loop` = 位置 × 槽的执行契约)
 moon run examples/plr                  # also: examples/irm, examples/cross_check,
-                                       # examples/consumer
+                                       # examples/consumer,
+                                       # moon run --target native examples/sediment
 moon run --target native cmd/coord     # coordinator CLI with real disk I/O; writes
                                        # .openseek/coordinator-state.txt (gitignored)
 ```
@@ -56,21 +59,26 @@ moon run --target native cmd/coord     # coordinator CLI with real disk I/O; wri
 | `ml` | — | From-scratch DoubleML (PLR, cross-fitting, orthogonal scores, inference), RNG, linear algebra |
 | `evolution` | one agent | `Genome`, mutations, `Objective`, update gates (weighted or DoubleML-based), append-only `Ledger`, heredity; subject cycle (`cycle.mbt`: `run_cycle` drives `@sm.step` by slot and judges 修习/开放 candidates through the gate); decision memo (`replay.mbt`: one judgement per (parent, candidate) pair per cycle, repeats annotated 同判·不重裁); backdating (`gate.mbt`: zero-diff candidates → Tie without re-running the estimator); intuition reading (`intuition.mbt`: memo read as background-intuition repository, marked 模型整理) |
 | `coordinator` | research agents | Tasks/artifacts, planning, external evidence by confidence interval, content memory, credit, deliberation/decision split, replayable runtime |
-| `dmlref` | — | Cross-check of our DoubleML against `riantr/moonbit_doubleML@0.64.0` |
+| `dmlref` | — | Cross-check of our DoubleML against `riantr/moonbit_doubleML@0.75.0` |
+| `snnref` | one experiment | Spike-sediment experiment (native only): 49 triggers → Poisson spike trains with slot-correlated rates → Gerstner STDP (CSR, library defaults) → does the sedimented weight structure recover the 8-slot partition? Means, hit rate vs. chance baseline, per-slot table; marked 模型整理 |
 | `cmd/main` | — | wasm CLI (18 subcommands above) |
 | `cmd/coord` | — | native CLI with real disk I/O (`supported_targets = "+native"`) |
 | `tools/pdfdump` | — | read-only survey records of the source PDF |
-| `examples/*` | — | one runnable example per package: `plr`, `irm`, `cross_check`, `consumer` |
+| `examples/*` | — | one runnable example per package: `plr`, `irm`, `cross_check`, `consumer`, `sediment` (native) |
 
 Each package directory contains a `moon.pkg` whose first lines are a comment explaining the
 package's purpose — those comments are package-level docs, keep them accurate.
 
 ## Dependency rule (enforced by convention; keep it)
 
-- Outside the two exceptions below, packages may only use official `moonbitlang/*` (mostly
-  `moonbitlang/core`); no third-party libraries.
+- Outside the three exceptions below, packages may only use official `moonbitlang/*`
+  (mostly `moonbitlang/core`); no third-party libraries.
 - `moonbitlang/async@0.22.4` — sole consumer `cmd/coord` (native disk I/O).
-- `riantr/moonbit_doubleML@0.64.0` — sole consumer `dmlref` (external cross-check only).
+- `riantr/moonbit_doubleML@0.75.0` — sole consumer `dmlref` (external cross-check only).
+- `riantr/snn_mbt@0.84.0` (pulls `riantr/moonbit_image@0.3.4`) — sole consumer `snnref`
+  (spike-sediment experiment, cross-check only). `snn_mbt` declares native as its only
+  target, so `snnref` and `examples/sediment` are `+native`: the wasm gate skips them,
+  run `moon test --target native snnref` separately.
 - `ml`'s DoubleML is fully self-contained: never import a numerics library into `ml`.
 - First-party imports stay minimal and point downward only (`evolution` imports `src` as
   `@sm` for the cycle). `src/moon.pkg` has **zero imports** — never add an environment,

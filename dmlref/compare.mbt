@@ -1,8 +1,8 @@
 ///|
 /// 与外部参考实现的对照层。
 ///
-/// 引入 `riantr/moonbit_doubleML@0.64.0`（`doubleml-for-py` 的纯 MoonBit 移植，
-/// 22 个估计器、491 个测试）。这里只做一件事：**用它的 `DoubleMLPLR` 复核我们自研的
+/// 引入 `riantr/moonbit_doubleML@0.75.0`（`doubleml-for-py` 的纯 MoonBit 移植，
+/// 22 个估计器、554+ 测试、23 项 Python 交叉验证）。这里只做一件事：**用它的 `DoubleMLPLR` 复核我们自研的
 /// `ml.dml_plr`**——同一份数据、同一种 nuisance（最小二乘），两个独立实现应当给出同一个
 /// θ̂。容差内一致，就说明我们的交叉拟合、正交分数与方差公式没有写错。
 ///
@@ -168,7 +168,7 @@ pub fn render_report() -> String {
   let lines : Array[String] = [
     "# 与外部参考实现对照",
     "",
-    "依赖：`riantr/moonbit_doubleML@0.64.0`（doubleml-for-py 的纯 MoonBit 移植）。",
+    "依赖：`riantr/moonbit_doubleML@0.75.0`（doubleml-for-py 的纯 MoonBit 移植）。",
     "数据：状态机生成，n = 400，真值 θ = \{fmt3(data.theta_true)}，4 个协变量。",
     "",
     "对照 | 参考 θ̂ | 自研 θ̂ | 两者之差 | 参考距真值 | 自研距真值 | se(参考／自研)",
@@ -186,8 +186,9 @@ pub fn render_report() -> String {
     "  线性学习器吃掉的偏差拿回来。",
     "",
     "参考实现本身的规模：22 个估计器（PLR／IRM／PLIV／IIVM／DID 家族／SSM／APO(S)／",
-    "PQ／QTE／LPQ／CVAR／RDD／BLP／PolicyTree 等），491 个测试，纯 MoonBit，",
-    "支持 native／wasm／wasm-gc／js 四个后端。",
+    "PQ／QTE／LPQ／CVAR／RDD／BLP／PolicyTree 等），554+ 测试、23 项 Python 交叉验证，",
+    "纯 MoonBit，支持 native／wasm／wasm-gc／js 四个后端。0.75.0 还带敏感性分析、",
+    "多重检验校正与调参——「结论要多强的隐藏混杂才被推翻」有了现成工具（R10 的统计学形态）。",
   ]
   lines.join("\n")
 }

@@ -1,0 +1,12 @@
+// 脉冲沉淀实验层：引入 riantr/snn_mbt@0.84.0（SpikingNeuralNetworks.jl 的
+// bit-exact 移植，+连带的 riantr/moonbit_image@0.3.4），把 49 个驱动槽触发编成
+// spike trains，用 Gerstner STDP 让共现沉淀为权重结构，与驱动槽八分对照。
+// 只做实验对照，不进模型本体（src 零依赖、闸门可解释的纪律不破）。
+// 注意：snn_mbt 只声明了 native 目标——本包随之限 native（同 cmd/coord），
+// wasm 门禁自动跳过；专属入口是 examples/sediment（native）。
+import {
+  "riantr/pyroduct/src",
+  "riantr/snn_mbt" @snn,
+}
+
+supported_targets = "+native"

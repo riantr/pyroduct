@@ -59,7 +59,7 @@
 ## 术语表
 
 每个构造都带一个两字中文定名、一个英文枚举标识符，以及它所命名的原文。下表
-是全部词汇的英文转译。
+是全部词汇的英文转译，覆盖三个尺度（主体／群体／社会）与规范层。
 
 ### 阶段——主体（11）
 
@@ -132,6 +132,85 @@
 ### 执行契约（四种结果）
 
 迁 Moved · 守 Held · 未定 Undecided · 无路 No-way
+
+### 群体——阶段（9）
+
+| 定名 | English | 读法 |
+|---|---|---|
+| 聚散 | Gathering | 众人只是一群，彼此尚无关联；群体还不是主体 |
+| 成体 | Bodied | 共同的语言与商谈给群体一个身体 |
+| 立序 | Ordering | 由理由或传统立起共同规矩 |
+| 分歧 | Diverging | 差异被承认、体制相左、界域关闭 |
+| 失度 | Excess | 第三者交给绝对者——投射、独白 |
+| 自缚 | SelfBound | 群体把自己与成员一起束缚；隐成了不许问 |
+| 受损 | Impaired | 集体的创伤与离散 |
+| 修习 | Cultivating | 复归、忍受、扩界 |
+| 宁定 | Resting | 每一对成员都双诚俱足；不再绝对化任何结论 |
+
+### 群体——状态（20）
+
+| 定名 | English | 阶段 |
+|---|---|---|
+| 散在 | Scattered | 聚散 |
+| 趋同 | Converging | 聚散 |
+| 共语 | CommonTongue | 成体 |
+| 商谈 | Discourse | 成体 |
+| 规范 | Normed | 立序 |
+| 共识 | Consensus | 立序 |
+| 歧见 | Dissensus | 分歧 |
+| 对峙 | Confronting | 分歧 |
+| 割据 | Partitioned | 分歧 |
+| 投射 | Projected | 失度 |
+| 独白 | Monologic | 失度 |
+| 规训 | Disciplined | 自缚 |
+| 遮蔽 | Concealed | 自缚 |
+| 创伤 | Wounded | 受损 |
+| 离散 | Dispersed | 受损 |
+| 复归 | Returning | 修习 |
+| 修习 | Practicing | 修习 |
+| 扩界 | Widening | 修习 |
+| 相契 | Attuned | 宁定 |
+| 宁定 | Settled | 宁定 |
+
+群体触发（22）：Appear, Attention, SharedMedium, RaiseClaims, NormFromTradition,
+NormFromReason, Agree, Differ, Clash, CloseHorizon, Absolutize, OneVoice, Bind,
+Suppress, Reopen, BreakUp, TurnBack, RemoveReefs, Widen, MutualCheng, Settle,
+Reenter。
+
+### 社会——阶段（8）
+
+| 定名 | English | 读法 |
+|---|---|---|
+| 生活 | Life | 以语言组织的生活世界 |
+| 语言 | Language | 超主体性（伽达默尔）对 主体间性（哈贝马斯） |
+| 商谈 | Speech | 主张被提出、过滤、辩护、转为共识 |
+| 规范 | Rule | 实践商谈立起的规范贴着「过去时」标签 |
+| 缺口 | Aporia | 第三者在现实中不可能——乌托邦的命运 |
+| 系统 | Instrument | 以金钱与权力为中介的系统 |
+| 殖民 | Domination | 对生活世界的内在殖民化；被扭曲的交往 |
+| 复建 | Rebuild | 重建被扭曲的交往领域 |
+
+### 社会——状态（13）
+
+| 定名 | English | 阶段 |
+|---|---|---|
+| 世界 | World | 生活 |
+| 超体 | Suprasubjective | 语言 |
+| 间性 | Intersubjective | 语言 |
+| 主张 | Claim | 商谈 |
+| 商谈 | Discourse | 商谈 |
+| 辩护 | Justification | 商谈 |
+| 共识 | Consensus | 商谈 |
+| 规范 | Norm | 规范 |
+| 缺口 | Gap | 缺口 |
+| 系统 | System | 系统 |
+| 殖民 | Colony | 殖民 |
+| 扭曲 | Distortion | 殖民 |
+| 重建 | Reconstruction | 复建 |
+
+社会触发（18）：SpeakLanguage, BuildIntersubjective, RaiseClaims, EnterDiscourse,
+Filter, Justify, Subsume, Store, EnactNorm, LabelPast, DemandThird, Serve,
+Expand, Colonize, Distort, Hinder, Reconstruct, Circulate。
 
 ### 真理体制（5）· 商谈类型（4）· 有效性主张（4）
 

@@ -75,11 +75,12 @@ One society: 13 · 26 · 8. Two subjects: 14 normative rules.
 
 Every construct carries a two-character Chinese designation, an English enum
 identifier, and the original wording (原文) it designates. The tables below are
-the complete English rendering of the vocabulary.
+the complete English rendering of the vocabulary across the three scales
+(subject / group / society) and the normative layer.
 
 ### Phases — subject (11)
 
-| 定名 | English | 原文 |
+| Designation | English | Original |
 |---|---|---|
 | 立位 | Natural | 本然 |
 | 自决 | Release | 自由的发生 |
@@ -95,7 +96,7 @@ the complete English rendering of the vocabulary.
 
 ### Positions — subject (34)
 
-| 定名 | English | 原文 |
+| Designation | English | Original |
 |---|---|---|
 | 无忆 | NoPast | 失忆 |
 | 无筹 | NoFuture | 浑噩 |
@@ -134,7 +135,7 @@ the complete English rendering of the vocabulary.
 
 ### Drive slots (8) and the 49 triggers
 
-| English | 定名 | Count | Triggers |
+| English | Designation | Count | Triggers |
 |---|---|---|---|
 | Occasion | 处境 | 6 | TakeStand, FeelFinitude, FeelBoundlessness, FuseFeelings, MustBeBusy, ColdHard |
 | Orientation | 取向 | 6 | ChooseMoreLasting, Complexify, SeekMoreJoy, SeekBalance, SeekGoal, TakeModel |
@@ -149,9 +150,88 @@ the complete English rendering of the vocabulary.
 
 迁 Moved · 守 Held · 未定 Undecided · 无路 No-way
 
+### Group — phases (9)
+
+| Designation | English | Gloss |
+|---|---|---|
+| 聚散 | Gathering | a crowd with no bonds yet — the group is not yet a subject |
+| 成体 | Bodied | common tongue and discourse give the group a body |
+| 立序 | Ordering | norms raised from reason or tradition |
+| 分歧 | Diverging | difference acknowledged, regimes clash, horizons close |
+| 失度 | Excess | the third party handed to the absolute — projection, one voice |
+| 自缚 | SelfBound | the group binds itself and its members; the hidden becomes forbidden |
+| 受损 | Impaired | collective wounds, dispersal |
+| 修习 | Cultivating | return, endure, widen |
+| 宁定 | Resting | every pair complete in the two sincerities; nothing absolutized |
+
+### Group — states (20)
+
+| Designation | English | Phase |
+|---|---|---|
+| 散在 | Scattered | Gathering |
+| 趋同 | Converging | Gathering |
+| 共语 | CommonTongue | Bodied |
+| 商谈 | Discourse | Bodied |
+| 规范 | Normed | Ordering |
+| 共识 | Consensus | Ordering |
+| 歧见 | Dissensus | Diverging |
+| 对峙 | Confronting | Diverging |
+| 割据 | Partitioned | Diverging |
+| 投射 | Projected | Excess |
+| 独白 | Monologic | Excess |
+| 规训 | Disciplined | SelfBound |
+| 遮蔽 | Concealed | SelfBound |
+| 创伤 | Wounded | Impaired |
+| 离散 | Dispersed | Impaired |
+| 复归 | Returning | Cultivating |
+| 修习 | Practicing | Cultivating |
+| 扩界 | Widening | Cultivating |
+| 相契 | Attuned | Resting |
+| 宁定 | Settled | Resting |
+
+Group triggers (22): Appear, Attention, SharedMedium, RaiseClaims,
+NormFromTradition, NormFromReason, Agree, Differ, Clash, CloseHorizon,
+Absolutize, OneVoice, Bind, Suppress, Reopen, BreakUp, TurnBack, RemoveReefs,
+Widen, MutualCheng, Settle, Reenter.
+
+### Society — phases (8)
+
+| Designation | English | Gloss |
+|---|---|---|
+| 生活 | Life | the lifeworld, organized by language |
+| 语言 | Language | supra-subjective (Gadamer) vs. intersubjective (Habermas) |
+| 商谈 | Speech | claims raised, filtered, justified, turned into consensus |
+| 规范 | Rule | norms set by practical discourse carry a "past tense" label |
+| 缺口 | Aporia | the third party is impossible in reality — the utopian fate |
+| 系统 | Instrument | the system, mediated by money and power |
+| 殖民 | Domination | inner colonization of the lifeworld; distorted communication |
+| 复建 | Rebuild | rebuild the distorted communicative realm |
+
+### Society — states (13)
+
+| Designation | English | Phase |
+|---|---|---|
+| 世界 | World | Life |
+| 超体 | Suprasubjective | Language |
+| 间性 | Intersubjective | Language |
+| 主张 | Claim | Speech |
+| 商谈 | Discourse | Speech |
+| 辩护 | Justification | Speech |
+| 共识 | Consensus | Speech |
+| 规范 | Norm | Rule |
+| 缺口 | Gap | Aporia |
+| 系统 | System | Instrument |
+| 殖民 | Colony | Domination |
+| 扭曲 | Distortion | Domination |
+| 重建 | Reconstruction | Rebuild |
+
+Society triggers (18): SpeakLanguage, BuildIntersubjective, RaiseClaims,
+EnterDiscourse, Filter, Justify, Subsume, Store, EnactNorm, LabelPast,
+DemandThird, Serve, Expand, Colonize, Distort, Hinder, Reconstruct, Circulate.
+
 ### Truth regimes (5) · discourse types (4) · validity claims (4)
 
-| 定名 | English | Gloss |
+| Designation | English | Gloss |
 |---|---|---|
 | 内在秩序 | Immanent | truth as an eternal order already in the world (ancient Egypt) |
 | 逻各斯 | Logos | truth as eternal speech, guaranteed by the rational soul (ancient Greece) |
@@ -159,14 +239,14 @@ the complete English rendering of the vocabulary.
 | 主体间性 | InterSubjective | Habermas: truth is intersubjective validity claims, woven into a net |
 | 诚然 | ChengRan | the author's own scheme: a hermeneutics of sincerity, unified in self-illumination |
 
-| 定名 | English |
+| Designation | English |
 |---|---|
 | 理论商谈 | Theoretical |
 | 实践商谈 | Practical |
 | 表达性商谈 | Aesthetic |
 | 信仰商谈 | Faith |
 
-| 定名 | English | Claim |
+| Designation | English | Claim |
 |---|---|---|
 | 真实性 | Truthfulness | propositional truth — objective world |
 | 正当性 | Legitimacy | normative rightness — social world |
@@ -177,7 +257,7 @@ Claim phases: 事前 Before · 事中 During · 事后 After.
 
 ### Normative rules R1–R14
 
-| Code | 定名 | English |
+| Code | Designation | English |
 |---|---|---|
 | R1 | 体制优先 | Regime precedence |
 | R2 | 不独断 | No dogmatism |

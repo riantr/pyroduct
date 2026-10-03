@@ -23,7 +23,7 @@ moon run cmd/main -- report            # CLI: report (default) | multi | group |
                                        # ml | ml-export | all
                                        # (`intuition` = 直觉读法：备忘录读成背景直觉的仓库）
                                        # (`causal` = 0.75.0 深用：敏感性／多重检验／异质性）
-                                       # (`audit` = 三棱镜自审计：主体机当程序读）
+                                       # (`audit` = 三鉴自审计（结构鉴／类型鉴／行为鉴）：主体机当程序读）
                                        # (`slots` = 驱动槽归位表, `loop` = 位置 × 槽的执行契约)
 moon run examples/plr                  # also: examples/irm, examples/cross_check,
                                        # examples/consumer,

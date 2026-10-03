@@ -12,7 +12,7 @@ test "规格转写：真实主体机的表原样进入 MachineSpec" {
 }
 
 ///|
-test "三棱镜在真实表上：4 条已知设计（无忆／无筹），未预期必须为零" {
+test "三鉴在真实表上：4 条已知设计（无忆／无筹），未预期必须为零" {
   let (known, fresh) = @audit.run_audit(@audit.build_spec())
   // 回归绊线：结构／类型／行为任一层新增报警即测试失败，强制复审。
   assert_eq(fresh.length(), 0)
@@ -43,9 +43,9 @@ test "绊线是活的：给历程人为接一步无路，行为层立刻报警" 
 }
 
 ///|
-test "报告对称：三棱镜小节、出处层标注、判读齐全" {
+test "报告对称：三鉴小节、出处层标注、判读齐全" {
   let report = @audit.render_report()
-  assert_true(report.contains("三棱镜"))
+  assert_true(report.contains("三鉴"))
   assert_true(report.contains("已知设计"))
   assert_true(report.contains("未预期"))
   assert_true(report.contains("设计使然"))

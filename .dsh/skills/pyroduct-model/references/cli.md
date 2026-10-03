@@ -19,7 +19,7 @@
 | `coordinator` | 协调器八节：任务/问题/工人/数据集/世界/父任务/候选 → 规划与决策 |
 | `dmlref` | 自研与外部 DoubleML 同 nuisance 对照（θ̂ 差、se 差） |
 | `causal` | 0.75.0 深用诊断（模型整理）：敏感性 rv＝|θ̂|/max_bias；BH/Bonferroni 校正——天真 OLS 同样「显著」，显著性≠证据；BLP 异质性（d̃ 回收 θ̂，交互维不显著＝均匀效应发现） |
-| `audit` | 三棱镜自审计（模型整理）：34 状态·53 迁移·49 触发→8 槽·228 无路·31 站历程进 MachineSpec；结构／类型／行为三棱镜；4 条已知设计（无忆／无筹只出不进）+ 0 条未预期（活的绊线：篡改历程一步立刻报警） |
+| `audit` | 三鉴自审计（模型整理）：34 状态·53 迁移·49 触发→8 槽·228 无路·31 站历程进 MachineSpec；结构鉴／类型鉴／行为鉴三鉴；4 条已知设计（无忆／无筹只出不进）+ 0 条未预期（活的绊线：篡改历程一步立刻报警） |
 | —（native 示例） | `moon run --target native examples/sediment`：脉冲沉淀实验——49 触发 → spike trains → Gerstner STDP → 能否恢复驱动槽八分（模型整理；`snn_mbt` 只支持 native） |
 | `mermaid` / `dot` | 状态图源码（可直接粘进渲染器） |
 | `genesis` / `course` | 原文顺序主线 / 可重入环节序列 |

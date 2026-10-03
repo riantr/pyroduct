@@ -1,6 +1,6 @@
 name = "riantr/pyroduct"
 
-version = "0.1.8"
+version = "0.1.9"
 
 readme = "README.mbt.md"
 
@@ -30,11 +30,14 @@ description = "把《伽达默尔与哈贝马斯真理观比较》与《通往�
 // 依赖：moonbitlang/async 仅供 cmd/coord（native）真实落盘；riantr/moonbit_doubleML
 // 仅供 dmlref（与外部参考实现互校自研 DoubleML）与 causal（0.75.0 深用诊断层：
 // 敏感性／多重检验／异质性，只读）；riantr/snn_mbt（连带 riantr/moonbit_image）
-// 仅供 snnref（native 专属的脉冲沉淀实验层）。其余包仍不依赖第三方库。
+// 仅供 snnref（native 专属的脉冲沉淀实验层）；riantr/moonbit_static_analysis
+// 仅供 audit（三棱镜自审计：它的 moon.mod 把本仓库点名为参考消费者）。
+// 其余包仍不依赖第三方库。
 // 见 https://moonbitlang.com 了解 moon.mod。
 
 import {
   "moonbitlang/async@0.22.4",
   "riantr/moonbit_doubleML@0.75.0",
   "riantr/snn_mbt@0.84.0",
+  "riantr/moonbit_static_analysis@0.1.0",
 }

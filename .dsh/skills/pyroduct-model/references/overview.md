@@ -1,6 +1,6 @@
 # Pyroduct 仓库总览（skill 参考）
 
-模块 `riantr/pyroduct`，15 个包一个模块。完整文档在仓库根 `README.mbt.md` 与
+模块 `riantr/pyroduct`，16 个包一个模块。完整文档在仓库根 `README.mbt.md` 与
 `AGENTS.md`（后者面向维护者，含门禁与纪律）。
 
 ## 包布局
@@ -16,8 +16,9 @@
 | `coordinator` | 科研 agent | 任务/制品、规划、按置信区间的外部证据、内容记忆、署名、商谈/决策分段、可重放运行时 |
 | `dmlref` | — | 自研 DoubleML 与 `riantr/moonbit_doubleML@0.75.0` 的互校 |
 | `causal` | 一份数据 | 0.75.0 深用诊断（只读，数据来自状态机）：敏感性（Cinelli–Hazlett rv）、多重检验校正（BH/Bonferroni——天真 OLS 也过线，显著性≠证据）、BLP 异质性（d̃ 回收 θ̂）；标模型整理 |
+| `audit` | 一台机器 | 三棱镜自审计：真实主体机的表 → 纯数据 MachineSpec → 结构／类型／行为三棱镜（库的 moon.mod 点名 pyroduct 为参考消费者）；发现分已知设计（无忆／无筹只出不进，0.1.2 已验证）与未预期（必须为零——活的绊线）；标模型整理 |
 | `snnref` | 一个实验 | 脉冲沉淀实验（native 专属）：49 触发 → Poisson spike trains（槽内共现高率）→ Gerstner STDP → 权重结构能否恢复驱动槽八分（比值、命中率对基线、分槽表）；标模型整理 |
-| `cmd/main` | — | wasm CLI（十七个子命令） |
+| `cmd/main` | — | wasm CLI（二十个子命令） |
 | `cmd/coord` | — | native CLI，真实落盘（`supported_targets = "+native"`） |
 | `tools/pdfdump` | — | 源 PDF 的只读勘察记录 |
 | `examples/*` | — | 每包一个可运行示例（`sediment` 为 native 专属） |
@@ -29,7 +30,10 @@
   消费者 `dmlref`（互校）与 `causal`（0.75.0 深用诊断，只读）；
   `riantr/snn_mbt@0.84.0`（连带 `riantr/moonbit_image@0.3.4`）
   唯一消费者 `snnref`——`snn_mbt` 只声明 native 目标，`snnref` 与 `examples/sediment`
-  随之 `+native`，wasm 门禁自动跳过，须单独 `moon test --target native snnref`。
+  随之 `+native`，wasm 门禁自动跳过，须单独 `moon test --target native snnref`；
+  `riantr/moonbit_static_analysis@0.1.0` 唯一消费者 `audit`（三棱镜自审计——库的
+  moon.mod 点名 pyroduct 为参考消费者，`src` 保持零 import，表在 `audit` 层转
+  纯数据）。
 - `src/moon.pkg` **零 import**——永不给 `src` 加环境、RNG 或数值依赖；槽内容的
   生产者在其上的层。
 - 一方依赖只向下指（`evolution` 以 `@sm` 引 `src`）。
@@ -38,7 +42,7 @@
 
 ```console
 moon check                              # 类型/告警检查
-moon test                               # 全部测试（wasm），当前 100/100 + snnref 2（native）
+moon test                               # 全部测试（wasm），当前 105/105 + snnref 2（native）
 moon test --target native snnref        # 脉冲沉淀实验（native 专属）
 moon fmt --check                        # 格式必须干净
 moon run --target native cmd/coord      # 检查点落盘往返（往返一致 true）

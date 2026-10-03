@@ -1,0 +1,22 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "riantr/pyroduct/audit"
+
+import {
+  "riantr/moonbit_static_analysis/src/report",
+  "riantr/moonbit_static_analysis/src/statecheck",
+}
+
+// Values
+pub fn build_spec() -> @statecheck.MachineSpec
+
+pub fn render_report() -> String
+
+pub fn run_audit(@statecheck.MachineSpec) -> (Array[@report.Report], Array[@report.Report])
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

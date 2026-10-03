@@ -1,0 +1,14 @@
+// 自审计层（三棱镜的「参考消费者」）：把真实主体机的表转成纯数据
+// MachineSpec（34 状态 · 53 迁移 · 49 触发 → 8 槽 · 228 无路组合 · 修习历程），
+// 交给 riantr/moonbit_static_analysis/src/statecheck 审计——结构（状态即绑定：
+// 绑定／进入／可达）、类型（注解即契约：无路必须说出口）、行为（历程抽象
+// 执行）。已知设计使然的发现（失忆／无明只出不进）在报告里注明出处层，
+// 未预期发现必须为零（回归绊线）。本层只读：不改判据、不修表。
+import {
+  "riantr/pyroduct/src" @sm,
+  "riantr/moonbit_static_analysis/src/statecheck" @sa,
+  "riantr/moonbit_static_analysis/src/report" @sareport,
+  "riantr/moonbit_static_analysis/src/core" @sacore,
+}
+
+supported_targets = "native+wasm+wasm-gc+js"

@@ -1,7 +1,8 @@
 # Pyroduct 仓库总览（skill 参考）
 
-模块 `riantr/pyroduct`，16 个包一个模块。完整文档在仓库根 `README.mbt.md`（英）、
-`README.zh.mbt.md`（中）与 `AGENTS.md`（后者面向维护者，含门禁与纪律）。
+模块 `riantr/pyroduct`，20 个包一个模块（含模块根与 5 个示例）。完整文档在仓库根
+`README.mbt.md`（英）、`README.zh.mbt.md`（中）——两份都带三尺度中英术语表——
+与 `AGENTS.md`（后者面向维护者，含门禁与纪律）。
 
 ## 包布局
 

@@ -39,7 +39,7 @@
 
 ```moonbit nocheck
 let ok   = @src.reachable(@src.initial(), @src.terminal())
-let slot = @src.Trigger::FeelFinitude.slot()          // 处境
+let slot = @src.FeelFinitude.slot()                   // 处境
 let back = @src.step(@src.Standing, @src.Occasion)    // 迁（落到 自由）
 let gaps = @src.gaps()                                // 无路组合
 let led  = @evolution.evolve(@evolution.default_agent(), @evolution.default_world(),

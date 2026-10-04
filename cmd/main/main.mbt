@@ -29,6 +29,7 @@
 ///   moon run cmd/main -- audit    自审计（三鉴）：主体机当程序读，已知设计 vs 未预期
 ///   moon run cmd/main -- spec     规格导出：主体机即 JSON 数据（词汇表防漂移，模型整理）
 ///   moon run cmd/main -- association 未定的软关联（JPDA 面镜像）：β 权重 + 歧义度 + 一致性核对（模型整理）
+///   moon run cmd/main -- pathsum   泛半环路径和：最短路（tropical）+ 机器性质谓词（模型整理）
 ///   moon run cmd/main -- all       报告 + 历程 + Mermaid
 fn main raise {
   let args = @env.args()
@@ -61,6 +62,7 @@ fn main raise {
     "audit" => println(@audit.render_report())
     "spec" => println(@sm.spec_json())
     "association" => println(@evolution.render_association_report())
+    "pathsum" => println(@sm.render_pathsum_report())
     "all" => {
       println(@sm.render_report())
       println("")

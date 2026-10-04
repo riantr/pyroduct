@@ -16,6 +16,8 @@ pub fn all_triggers() -> Array[Trigger]
 
 pub fn course() -> Array[SubjectState]
 
+pub fn distance_to(SubjectState) -> Array[(SubjectState, Int?)]
+
 pub fn durability_manifest() -> Array[(String, String, String)]
 
 pub fn every_phase_has_non_act() -> Bool
@@ -29,6 +31,12 @@ pub fn gaps() -> Array[(SubjectState, Slot)]
 pub fn genesis_path() -> Array[SubjectState]
 
 pub fn initial() -> SubjectState
+
+pub fn is_acyclic() -> Bool
+
+pub fn is_deterministic() -> Bool
+
+pub fn min_steps(SubjectState, SubjectState) -> Int?
 
 pub fn only_act_exits() -> Array[SubjectState]
 
@@ -53,6 +61,8 @@ pub fn render_mermaid_journey(Trace) -> String
 pub fn render_mermaid_nested() -> String
 
 pub fn render_naming_table() -> String
+
+pub fn render_pathsum_report() -> String
 
 pub fn render_report() -> String
 

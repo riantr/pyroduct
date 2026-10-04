@@ -128,6 +128,37 @@ pub fn Trace::at(self : Trace) -> SubjectState {
 }
 
 ///|
+/// 一步的明细：从哪个位置出发、经哪个驱动槽、得到什么回执。
+/// `Trace.steps` 只记「槽 + 回执」，位置要靠重放才知道；`detailed` 把重放
+/// 一次做完，供行程视图与上层逐条引用（模型整理：出处仍全在迁移表）。
+pub(all) struct Step {
+  from : SubjectState
+  slot : Slot
+  outcome : Outcome
+} derive(Eq, Debug)
+
+///|
+pub extend Step with Eq::{not_equal, equal}
+
+///|
+pub extend Step with Debug::{to_repr}
+
+///|
+/// 逐步明细（含每步的出发位置），顺序与 `steps` 一致。
+pub fn Trace::detailed(self : Trace) -> Array[Step] {
+  let out : Array[Step] = []
+  let mut at = self.start
+  for entry in self.steps {
+    out.push({ from: at, slot: entry.0, outcome: entry.1, })
+    match entry.1.landing() {
+      Some(next) => at = next
+      None => ()
+    }
+  }
+  out
+}
+
+///|
 /// 回执的名。
 pub fn Trace::outcome_labels(self : Trace) -> Array[String] {
   let out : Array[String] = []

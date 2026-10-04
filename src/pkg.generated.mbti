@@ -48,6 +48,10 @@ pub fn render_loop_report() -> String
 
 pub fn render_mermaid() -> String
 
+pub fn render_mermaid_journey(Trace) -> String
+
+pub fn render_mermaid_nested() -> String
+
 pub fn render_naming_table() -> String
 
 pub fn render_report() -> String
@@ -132,6 +136,15 @@ pub struct StateInfo {
   gloss : String
 }
 
+pub(all) struct Step {
+  from : SubjectState
+  slot : Slot
+  outcome : Outcome
+} derive(Eq, @debug.Debug)
+pub fn Step::equal(Self, Self) -> Bool
+pub fn Step::not_equal(Self, Self) -> Bool
+pub fn Step::to_repr(Self) -> @debug.Repr
+
 pub(all) enum SubjectState {
   NoPast
   NoFuture
@@ -184,6 +197,7 @@ pub struct Trace {
   steps : Array[(Slot, Outcome)]
 } derive(Eq, @debug.Debug)
 pub fn Trace::at(Self) -> SubjectState
+pub fn Trace::detailed(Self) -> Array[Step]
 pub fn Trace::equal(Self, Self) -> Bool
 pub fn Trace::not_equal(Self, Self) -> Bool
 pub fn Trace::outcome_labels(Self) -> Array[String]

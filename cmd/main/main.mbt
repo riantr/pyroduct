@@ -18,6 +18,8 @@
 ///   moon run cmd/main -- society 双层次社会交往模型（论文自身的理论构造：生活世界／系统／交往）
 ///   moon run cmd/main -- society-mermaid 上者的 Mermaid 状态图
 ///   moon run cmd/main -- group-mermaid  群体机的 Mermaid 状态图
+///   moon run cmd/main -- nested-mermaid 嵌套视图：11 阶段为复合状态（容器）
+///   moon run cmd/main -- journey    行程视图：一次示范行走真正走过的边（局部 + 样式）
 ///   moon run cmd/main -- viz       三台机汇成一页自包含 HTML（浏览器直开）
 ///   moon run cmd/main -- evolution 进化：变异空间／适应度目标／闸门／持久化／遗传
 ///   moon run cmd/main -- cycle    主体循环：位置 × 驱动槽 × 因果反馈（修习与开放都过闸门）
@@ -46,6 +48,8 @@ fn main raise {
     "society" => println(@society.render_report())
     "society-mermaid" => println(@society.render_mermaid())
     "group-mermaid" => println(@group.render_mermaid())
+    "nested-mermaid" => println(@sm.render_mermaid_nested())
+    "journey" => println(@viz.journey())
     "viz" => println(@viz.page())
     "evolution" => println(@evolution.render_report())
     "cycle" => println(@evolution.render_cycle_report(@evolution.demo_cycle()))

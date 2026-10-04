@@ -21,7 +21,11 @@
 | `causal` | 0.75.0 深用诊断（模型整理）：敏感性 rv＝|θ̂|/max_bias；BH/Bonferroni 校正——天真 OLS 同样「显著」，显著性≠证据；BLP 异质性（d̃ 回收 θ̂，交互维不显著＝均匀效应发现） |
 | `audit` | 三鉴自审计（模型整理）：34 状态·53 迁移·49 触发→8 槽·228 无路·31 站历程进 MachineSpec；结构鉴／类型鉴／行为鉴三鉴；4 条已知设计（无忆／无筹只出不进）+ 0 条未预期（活的绊线：篡改历程一步立刻报警） |
 | —（native 示例） | `moon run --target native examples/sediment`：脉冲沉淀实验——49 触发 → spike trains → Gerstner STDP → 能否恢复驱动槽八分（模型整理；`snn_mbt` 只支持 native） |
-| `mermaid` / `dot` | 状态图源码（可直接粘进渲染器） |
+| `mermaid` / `dot` | 状态图源码（可直接粘进渲染器；声明式 ASCII 节点 id + 中文定名） |
+| `society-mermaid` / `group-mermaid` | 上者／群体机的 Mermaid 源码 |
+| `nested-mermaid` | 嵌套视图：11 阶段为复合状态（容器），迁移照旧跨容器连边（模型整理） |
+| `journey` | 行程视图：一次示范行走（从立位按八槽巡回三轮）真正走过的边；未定/无路只以注释说明，当下/缺口/未定位置样式标注（模型整理） |
+| `viz` | 三台机 + 嵌套视图 + 行程视图汇成一页自包含 HTML（`moon run cmd/main -- viz > viz.html`，浏览器直开；mermaid.js 仅视时 CDN，构建零网络） |
 | `genesis` / `course` | 原文顺序主线 / 可重入环节序列 |
 | `naming` / `principle` | 定名对照表 / 主体通用性原则（R1–R3） |
 | `intuition` | 直觉读法：裁决备忘录读成背景直觉的仓库（模型整理；四条纪律：出处可查、在接触中存活或破碎、出处层即稳固度、不编造命中） |
@@ -42,6 +46,10 @@ let ok   = @src.reachable(@src.initial(), @src.terminal())
 let slot = @src.FeelFinitude.slot()                   // 处境
 let back = @src.step(@src.Standing, @src.Occasion)    // 迁（落到 自由）
 let gaps = @src.gaps()                                // 无路组合
+let trace = @src.walk(@src.initial(), [@src.Act, @src.Occasion])
+let det  = trace.detailed()                           // Step{from, slot, outcome}
+let nest = @src.render_mermaid_nested()               // 嵌套视图（阶段为容器）
+let jrn  = @src.render_mermaid_journey(trace)         // 行程视图（局部 + 样式）
 let led  = @evolution.evolve(@evolution.default_agent(), @evolution.default_world(),
                              @evolution.Weighted(@evolution.truth_objective()), 3)
 ```

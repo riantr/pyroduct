@@ -148,6 +148,38 @@ test "三种渲染都覆盖全部状态的通用定名" {
 }
 
 ///|
+test "嵌套视图：11 个阶段都是复合状态，全部位置都在各自容器里" {
+  let nested = @src.render_mermaid_nested()
+  assert_true(nested.has_prefix("stateDiagram-v2"))
+  for p in @src.all_phases() {
+    assert_true(nested.contains("state \"\{p.qualified()}\" as \{Repr(p)} {"))
+  }
+  for s in @src.all_states() {
+    assert_true(nested.contains("state \"\{s.qualified()}\" as "))
+  }
+  // 迁移边与平铺视图同表：起始与静定极两处锚点在
+  assert_true(nested.contains("[*] --> Standing"))
+  assert_true(nested.contains("Tranquility"))
+}
+
+///|
+test "行程视图：只画走过的边；当下、缺口、未定各有样式" {
+  let trace = @src.walk(@src.Standing, [@src.Act, @src.Occasion, @src.CoBeing])
+  let j = @src.render_mermaid_journey(trace)
+  assert_true(j.has_prefix("stateDiagram-v2"))
+  // 走过的边：立位 × 行动 → 自由
+  assert_true(j.contains("Standing --> Freedom : 行动·迁"))
+  // 未定不画边，只以注释说明
+  assert_true(j.contains("%% 未定：自由 × 处境"))
+  assert_true(!j.contains("Freedom --> Freedom : 处境"))
+  // 缺口注释或样式存在（行程里 Step3 自由 × 共在为无路/未定，皆以注释记录）
+  assert_true(j.contains("%% 无路") || j.contains("%% 未定"))
+  // 样式：当下位置高亮；未定位置标蓝
+  assert_true(j.contains("classDef now"))
+  assert_true(j.contains("class Freedom now"))
+}
+
+///|
 test "通用定名已按主体通用性原则修订，原文名可回溯" {
   let standing : @src.SubjectState = @src.Standing
   let guilt : @src.SubjectState = @src.Guilt

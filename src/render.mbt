@@ -94,6 +94,144 @@ pub fn render_mermaid() -> String {
 }
 
 ///|
+/// 嵌套视图：以 11 个阶段为复合状态（容器）的 Mermaid 源文本。每个位置只在
+/// 所属阶段的容器里声明一次，迁移照旧跨容器连边——「阶段」从报告里的分组
+/// 变成图里看得见的边界（模型整理；嵌套本身是对原文分段的形式化）。
+pub fn render_mermaid_nested() -> String {
+  let lines : Array[String] = ["stateDiagram-v2"]
+  for p in all_phases() {
+    lines.push("    state \"\{p.qualified()}\" as \{Repr(p)} {")
+    for s in all_states() {
+      if s.phase() == p {
+        lines.push("        state \"\{s.qualified()}\" as \{Repr(s)}")
+      }
+    }
+    lines.push("    }")
+  }
+  lines.push("    [*] --> \{Repr(initial())}")
+  lines.push("    [*] --> \{Repr(NoPast)}")
+  lines.push("    [*] --> \{Repr(NoFuture)}")
+  for t in transitions() {
+    lines.push("    \{Repr(t.from)} --> \{Repr(t.to)} : \{t.trigger.label()}")
+  }
+  lines.push(
+    "    %% \{terminal().qualified()} 是静定极；界域重开时经 ReopenByHorizon 重入反顾",
+  )
+  lines.join("\n")
+}
+
+///|
+/// 行程视图：只画一次行走真正走过的位置与边（局部视图）。走到的边标
+/// 「槽·回执」；未定与无路不画边——它们没有改变位置——而以注释与样式
+/// 标出：当下位置 `now`，缺口位置 `gap`，未定位置 `undecided`（模型整理；
+/// 「不画没走的路」与缺口表同一条纪律：机器不编造下一步）。
+pub fn render_mermaid_journey(trace : Trace) -> String {
+  let lines : Array[String] = ["stateDiagram-v2"]
+  // 节点：起点 + 每步出发位置 + 每步落点，去重保序。
+  let visited : Array[SubjectState] = [trace.start]
+  fn visit(s : SubjectState) {
+    let mut seen = false
+    for v in visited {
+      if v == s {
+        seen = true
+      }
+    }
+    if !seen {
+      visited.push(s)
+    }
+  }
+
+  let detail = trace.detailed()
+  for st in detail {
+    visit(st.from)
+    match st.outcome.landing() {
+      Some(to) => visit(to)
+      None => ()
+    }
+  }
+  for s in visited {
+    lines.push("    state \"\{s.qualified()}\" as \{Repr(s)}")
+  }
+  // 样式：当下 / 缺口 / 未定（一个位置至多一类：当下 > 缺口 > 未定）。
+  lines.push("    classDef now fill:#ffe9a8,stroke:#b8860b;")
+  lines.push("    classDef gap fill:#f4cccc;")
+  lines.push("    classDef undecided fill:#dbe9ff;")
+  lines.push("    [*] --> \{Repr(trace.start)}")
+  // 边：只有迁／守真正画边；未定／无路以注释与样式说明。
+  let undecided : Array[String] = []
+  let gap : Array[String] = []
+  let drawn : Array[String] = []
+  for st in detail {
+    let from_id = "\{Repr(st.from)}"
+    match st.outcome {
+      Moved(tr, to) => {
+        let key = "\{from_id}-->\{Repr(to)}:\{tr.label()}"
+        if !contains_str(drawn, key) {
+          lines.push(
+            "    \{from_id} --> \{Repr(to)} : \{st.slot.designation()}·\{st.outcome.label()}",
+          )
+          drawn.push(key)
+        }
+      }
+      Held(_, _) => {
+        let key = "\{from_id}-->self:\{st.slot.designation()}"
+        if !contains_str(drawn, key) {
+          lines.push(
+            "    \{from_id} --> \{from_id} : \{st.slot.designation()}·守",
+          )
+          drawn.push(key)
+        }
+      }
+      Open(cands) => {
+        if !contains_str(undecided, from_id) {
+          undecided.push(from_id)
+        }
+        lines.push(
+          "    %% 未定：\{st.from.designation()} × \{st.slot.designation()}（\{cands.length()} 条出路并存，位置不变）",
+        )
+      }
+      Block(reason) => {
+        if !contains_str(gap, from_id) {
+          gap.push(from_id)
+        }
+        lines.push(
+          "    %% 无路：\{st.from.designation()} × \{st.slot.designation()}（\{reason}）",
+        )
+      }
+    }
+  }
+  let now_id = "\{Repr(trace.at())}"
+  for s in visited {
+    let id = "\{Repr(s)}"
+    let style = if id == now_id {
+      Some("now")
+    } else if contains_str(gap, id) {
+      Some("gap")
+    } else if contains_str(undecided, id) {
+      Some("undecided")
+    } else {
+      None
+    }
+    match style {
+      Some(cls) => lines.push("    class \{id} \{cls}")
+      None => ()
+    }
+  }
+  lines.join("\n")
+}
+
+///|
+/// 字符串数组包含判断（渲染层小工具）。
+fn contains_str(arr : Array[String], s : String) -> Bool {
+  for x in arr {
+    if x == s {
+      return true
+    }
+  }
+  false
+}
+
+///|
 /// Graphviz DOT 源文本；节点用中文状态名，边标注触发。
 pub fn render_dot() -> String {
   let lines : Array[String] = [

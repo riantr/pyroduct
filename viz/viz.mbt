@@ -21,6 +21,25 @@ pub fn society() -> String {
 }
 
 ///|
+/// 主体机的嵌套视图：11 个阶段作为复合状态（容器），迁移照旧跨容器连边。
+pub fn subject_nested() -> String {
+  @sm.render_mermaid_nested()
+}
+
+///|
+/// 行程视图（示范）：从立位起按八槽巡回走三轮——执行契约报告的同一走法，
+/// 只画真正走过的边；未定与缺口以注释与样式标出。
+pub fn journey() -> String {
+  let plan : Array[@sm.Slot] = []
+  for round = 0; round < 3; round = round + 1 {
+    for k in @sm.all_slots() {
+      plan.push(k)
+    }
+  }
+  @sm.render_mermaid_journey(@sm.walk(@sm.initial(), plan))
+}
+
+///|
 /// 自包含 HTML 页：三张 Mermaid 图嵌在同一页，浏览器打开即渲染。
 /// 引 mermaid.js CDN——构建与运行零网络，联网只发生在视时。
 /// 落盘：`moon run cmd/main -- viz > viz.html`。
@@ -46,6 +65,16 @@ pub fn page() -> String {
   lines.push("<h2>社会（13 状态 · 26 迁移 · 8 阶段）</h2>")
   lines.push("<pre class=\"mermaid\">")
   lines.push(society())
+  lines.push("</pre>")
+  lines.push("<h2>主体 · 嵌套视图（11 阶段为复合状态）</h2>")
+  lines.push("<pre class=\"mermaid\">")
+  lines.push(subject_nested())
+  lines.push("</pre>")
+  lines.push(
+    "<h2>主体 · 行程视图（从立位起按八槽巡回走三轮）</h2>",
+  )
+  lines.push("<pre class=\"mermaid\">")
+  lines.push(journey())
   lines.push("</pre>")
   lines.push("</body>")
   lines.push("</html>")

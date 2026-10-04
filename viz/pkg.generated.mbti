@@ -4,11 +4,15 @@ package "riantr/pyroduct/viz"
 // Values
 pub fn group() -> String
 
+pub fn journey() -> String
+
 pub fn page() -> String
 
 pub fn society() -> String
 
 pub fn subject() -> String
+
+pub fn subject_nested() -> String
 
 // Errors
 

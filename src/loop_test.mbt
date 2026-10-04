@@ -24,6 +24,32 @@ test "step 给四种合法回执：迁、守、未定、无路" {
 }
 
 ///|
+test "detailed：每步带上出发位置，与重放一致" {
+  let trace = @src.walk(@src.Standing, [
+    @src.Act,
+    @src.Occasion,
+    @src.Occasion,
+    @src.CoBeing,
+  ])
+  let d = trace.detailed()
+  assert_eq(d.length(), 4)
+  // 第一步：立位 × 行动 → 迁到自由
+  assert_true(d[0].from == @src.Standing)
+  assert_true(d[0].slot == @src.Act)
+  match d[0].outcome.landing() {
+    Some(to) => assert_true(to == @src.Freedom)
+    None => assert_true(false)
+  }
+  // 第二步出发位置是自由（上一步落点）
+  assert_true(d[1].from == @src.Freedom)
+  // 未定之后位置不变：第三、四步出发位置仍是自由
+  assert_true(d[2].from == @src.Freedom)
+  assert_true(d[3].from == @src.Freedom)
+  // 明细与重放互证：at() 等于最后落点（或最后出发位）
+  assert_true(trace.at() == @src.Freedom)
+}
+
+///|
 test "缺口只在槽的组合层面，不在位置层面：每个位置都有出边，宁静之后仍可重入反顾" {
   for s in @src.all_states() {
     assert_true(@src.successors(s).length() > 0)

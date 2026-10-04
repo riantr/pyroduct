@@ -36,7 +36,11 @@ pub fn is_acyclic() -> Bool
 
 pub fn is_deterministic() -> Bool
 
+pub fn is_minimal() -> Bool
+
 pub fn min_steps(SubjectState, SubjectState) -> Int?
+
+pub fn minimal_quotient() -> (Int, Array[String])
 
 pub fn only_act_exits() -> Array[SubjectState]
 
@@ -45,6 +49,8 @@ pub fn positions_reachable_by(Slot) -> Array[SubjectState]
 pub fn predecessors(SubjectState) -> Array[(SubjectState, Trigger)]
 
 pub fn reachable(SubjectState, SubjectState) -> Bool
+
+pub fn render_algebra_report() -> String
 
 pub fn render_course() -> String
 

@@ -30,6 +30,7 @@
 ///   moon run cmd/main -- spec     规格导出：主体机即 JSON 数据（词汇表防漂移，模型整理）
 ///   moon run cmd/main -- association 未定的软关联（JPDA 面镜像）：β 权重 + 歧义度 + 一致性核对（模型整理）
 ///   moon run cmd/main -- pathsum   泛半环路径和：最短路（tropical）+ 机器性质谓词（模型整理）
+///   moon run cmd/main -- algebra   机器代数（Ragel 面）：算子映射 + 主线分解 + 最小化（模型整理）
 ///   moon run cmd/main -- all       报告 + 历程 + Mermaid
 fn main raise {
   let args = @env.args()
@@ -63,6 +64,7 @@ fn main raise {
     "spec" => println(@sm.spec_json())
     "association" => println(@evolution.render_association_report())
     "pathsum" => println(@sm.render_pathsum_report())
+    "algebra" => println(@sm.render_algebra_report())
     "all" => {
       println(@sm.render_report())
       println("")

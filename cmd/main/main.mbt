@@ -32,6 +32,7 @@
 ///   moon run cmd/main -- pathsum   泛半环路径和：最短路（tropical）+ 机器性质谓词（模型整理）
 ///   moon run cmd/main -- algebra   机器代数（Ragel 面）：算子映射 + 主线分解 + 最小化（模型整理）
 ///   moon run cmd/main -- petri     Petri 网面（CarlAdam 镜像）：库所/变迁/标识/发火/守恒（模型整理）
+///   moon run cmd/main -- aho       回忆结构（Aho-Corasick 面）：触发句前缀树 + 失败链（模型整理）
 ///   moon run cmd/main -- all       报告 + 历程 + Mermaid
 fn main raise {
   let args = @env.args()
@@ -67,6 +68,7 @@ fn main raise {
     "pathsum" => println(@sm.render_pathsum_report())
     "algebra" => println(@sm.render_algebra_report())
     "petri" => println(@sm.render_petri_report())
+    "aho" => println(@sm.render_aho_report())
     "all" => {
       println(@sm.render_report())
       println("")

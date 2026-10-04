@@ -6,6 +6,8 @@ import {
 }
 
 // Values
+pub fn aho_build(Array[String]) -> AhoAutomaton
+
 pub fn all_phases() -> Array[Phase]
 
 pub fn all_slots() -> Array[Slot]
@@ -53,6 +55,8 @@ pub fn positions_reachable_by(Slot) -> Array[SubjectState]
 pub fn predecessors(SubjectState) -> Array[(SubjectState, Trigger)]
 
 pub fn reachable(SubjectState, SubjectState) -> Bool
+
+pub fn render_aho_report() -> String
 
 pub fn render_algebra_report() -> String
 
@@ -103,6 +107,29 @@ pub fn walk(SubjectState, Array[Slot]) -> Trace
 // Errors
 
 // Types and methods
+pub(all) struct AhoAutomaton {
+  children : Array[Map[Char, Int]]
+  fail : Array[Int]
+  output : Array[Array[Int]]
+  depth : Array[Int]
+  path : Array[String]
+  words : Array[String]
+}
+pub fn AhoAutomaton::scan(Self, String) -> Array[(Int, Int)]
+pub fn AhoAutomaton::stats(Self) -> AhoStats
+
+pub(all) struct AhoStats {
+  nodes : Int
+  links : Int
+  longest_word : Int
+  fail_links : Int
+  deepest_fail : Int
+  deepest_fail_path : String
+  deepest_fail_target : String
+  deepest_branch : Int
+  deepest_branch_path : String
+}
+
 pub(all) enum Outcome {
   Moved(Trigger, SubjectState)
   Held(Trigger, SubjectState)

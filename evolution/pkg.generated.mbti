@@ -10,6 +10,12 @@ import {
 // Values
 pub fn all_regimes() -> Array[@multi.TruthRegime]
 
+pub fn association_consistent(Int, Int, @src.Outcome) -> Bool?
+
+pub fn association_entropy(Array[Double]) -> Double
+
+pub fn association_probs(Int, Int, @src.Outcome) -> Array[Double]
+
 pub fn breed(Genome, Int, Array[Opponent], Criterion) -> Array[Offer]
 
 pub fn causal_criterion(Int) -> Criterion
@@ -61,6 +67,8 @@ pub fn parse(String) -> Ledger
 pub fn permille(Double) -> Int
 
 pub fn quality(Genome, Array[Opponent]) -> Double
+
+pub fn render_association_report() -> String
 
 pub fn render_causal() -> String
 

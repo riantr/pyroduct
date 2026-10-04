@@ -12,7 +12,7 @@ Long-form context lives in `README.mbt.md` (English) and `README.zh.mbt.md`
 
 ```console
 moon test                              # all tests (default target: wasm); currently
-                                       # 113/113 on wasm + 2 snnref tests on native
+                                       # 115/115 on wasm + 2 snnref tests on native
 moon test --target native snnref       # spike-sediment experiment (native only)
 moon check                             # type/warn check
 moon info                              # regenerates every pkg.generated.mbti (tracked)
@@ -23,7 +23,7 @@ moon run cmd/main -- report            # CLI: report (default) | multi | group |
                                        # naming | slots | loop | principle | intuition |
                                        # ml | ml-export | all | society-mermaid |
                                        # group-mermaid | nested-mermaid | journey |
-                                       # viz | spec
+                                       # viz | spec | association
                                        # (`intuition` = 直觉读法：备忘录读成背景直觉的仓库）
                                        # (`causal` = 0.75.0 深用：敏感性／多重检验／异质性）
                                        # (`audit` = 三鉴自审计（结构鉴／类型鉴／行为鉴）：主体机当程序读）
@@ -31,6 +31,7 @@ moon run cmd/main -- report            # CLI: report (default) | multi | group |
                                        # (`nested-mermaid` = 嵌套视图：11 阶段为复合状态容器)
                                        # (`journey` = 行程视图：一次行走的局部图 + 样式标注)
                                        # (`spec` = 规格导出：主体机即 JSON 数据，词汇表防漂移)
+                                       # (`association` = 未定的软关联（JPDA 面镜像）：β 权重/熵/argmax 一致性)
 moon run examples/plr                  # also: examples/irm, examples/cross_check,
                                        # examples/consumer,
                                        # moon run --target native examples/sediment
@@ -66,14 +67,14 @@ moon run --target native cmd/coord     # coordinator CLI with real disk I/O; wri
 | `group` | one group | Emergence state machine (20 states), member config → group state, R7 write-back |
 | `society` | one society | Two-level social model from the thesis (13 states), lifeworld vs. system |
 | `ml` | — | From-scratch DoubleML (PLR, cross-fitting, orthogonal scores, inference), RNG, linear algebra |
-| `evolution` | one agent | `Genome`, mutations, `Objective`, update gates (weighted or DoubleML-based), append-only `Ledger`, heredity; subject cycle (`cycle.mbt`: `run_cycle` drives `@sm.step` by slot and judges 修习/开放 candidates through the gate); decision memo (`replay.mbt`: one judgement per (parent, candidate) pair per cycle, repeats annotated 同判·不重裁); backdating (`gate.mbt`: zero-diff candidates → Tie without re-running the estimator); intuition reading (`intuition.mbt`: memo read as background-intuition repository, marked 模型整理) |
+| `evolution` | one agent | `Genome`, mutations, `Objective`, update gates (weighted or DoubleML-based), append-only `Ledger`, heredity; subject cycle (`cycle.mbt`: `run_cycle` drives `@sm.step` by slot and judges 修习/开放 candidates through the gate); decision memo (`replay.mbt`: one judgement per (parent, candidate) pair per cycle, repeats annotated 同判·不重裁); backdating (`gate.mbt`: zero-diff candidates → Tie without re-running the estimator); intuition reading (`intuition.mbt`: memo read as background-intuition repository, marked 模型整理); soft association for 未定 (`association.mbt`: JPDA-flavoured β weights + entropy over co-existing candidates — argmax-consistent with the 两诚 hard rule, diagnostic only, no sampling; port of PDA-JPDA, marked 模型整理) |
 | `coordinator` | research agents | Tasks/artifacts, planning, external evidence by confidence interval, content memory, credit, deliberation/decision split, replayable runtime |
 | `dmlref` | — | Cross-check of our DoubleML against `riantr/moonbit_doubleML@0.75.0` |
 | `causal` | one dataset | 0.75.0-deep diagnostics (read-only, data from the state machine): sensitivity (Cinelli–Hazlett `rv = \|θ̂\|/max_bias`), multiple-testing correction (BH/Bonferroni — naive OLS also passes, significance ≠ evidence), BLP heterogeneity (residualized treatment × centered covariates, HC0 se; d̃ recovers θ̂); marked 模型整理 |
 | `audit` | one machine | Three-lens static audit of the real subject machine (`riantr/moonbit_static_analysis/src/statecheck`; the library's moon.mod names pyroduct its reference consumer): real tables → plain-data `MachineSpec` → structural (states are bindings) / type (slots placed, no silent Block) / behavior (course abstractly executed) lenses; findings split 已知设计（无忆／无筹 only-exit, verified 0.1.2）vs 未预期（must stay 0 — live tripwire）; marked 模型整理 |
 | `snnref` | one experiment | Spike-sediment experiment (native only): 49 triggers → Poisson spike trains with slot-correlated rates → Gerstner STDP (CSR, library defaults) → does the sedimented weight structure recover the 8-slot partition? Means, hit rate vs. chance baseline, per-slot table; marked 模型整理 |
 | `viz` | — | Presentation-only: all three state machines as Mermaid `stateDiagram-v2` source plus one self-contained HTML page (`page()` embeds all three plus the subject machine's nested view — 11 phases as composite states — and the demo journey view with styling for now/gap/undecided; mermaid.js CDN loaded at view time — build/run stay offline). Delegates to the per-machine renderers; declares ASCII node ids with Chinese labels everywhere |
-| `cmd/main` | — | wasm CLI (27 named subcommands, incl. `all`, + the default report) |
+| `cmd/main` | — | wasm CLI (28 named subcommands, incl. `all`, + the default report) |
 | `cmd/coord` | — | native CLI with real disk I/O (`supported_targets = "+native"`) |
 | `tools/pdfdump` | — | read-only survey records of the source PDF |
 | `examples/*` | — | one runnable example per package: `plr`, `irm`, `cross_check`, `consumer`, `sediment` (native) |

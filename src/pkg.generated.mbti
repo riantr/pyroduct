@@ -44,6 +44,10 @@ pub fn minimal_quotient() -> (Int, Array[String])
 
 pub fn only_act_exits() -> Array[SubjectState]
 
+pub fn petri_marking_of(Array[SubjectState]) -> PetriMarking
+
+pub fn petri_transitions() -> Array[PetriTransition]
+
 pub fn positions_reachable_by(Slot) -> Array[SubjectState]
 
 pub fn predecessors(SubjectState) -> Array[(SubjectState, Trigger)]
@@ -69,6 +73,8 @@ pub fn render_mermaid_nested() -> String
 pub fn render_naming_table() -> String
 
 pub fn render_pathsum_report() -> String
+
+pub fn render_petri_report() -> String
 
 pub fn render_report() -> String
 
@@ -108,6 +114,32 @@ pub fn Outcome::label(Self) -> String
 pub fn Outcome::landing(Self) -> SubjectState?
 pub fn Outcome::not_equal(Self, Self) -> Bool
 pub fn Outcome::to_repr(Self) -> @debug.Repr
+
+pub(all) enum PetriEffect {
+  Consume(SubjectState)
+  Produce(SubjectState)
+} derive(Eq)
+pub fn PetriEffect::equal(Self, Self) -> Bool
+pub fn PetriEffect::not_equal(Self, Self) -> Bool
+
+pub(all) struct PetriMarking {
+  counts : Map[String, Int]
+} derive(Eq)
+pub fn PetriMarking::at(Self, SubjectState) -> Int
+pub fn PetriMarking::enabled(Self) -> Array[PetriTransition]
+pub fn PetriMarking::equal(Self, Self) -> Bool
+pub fn PetriMarking::fire(Self, PetriTransition) -> (Array[PetriEffect], Self)?
+pub fn PetriMarking::fire_by(Self, SubjectState, Trigger) -> (Array[PetriEffect], Self)?
+pub fn PetriMarking::not_equal(Self, Self) -> Bool
+pub fn PetriMarking::total(Self) -> Int
+
+pub(all) struct PetriTransition {
+  from : SubjectState
+  trigger : Trigger
+  to : SubjectState
+} derive(Eq)
+pub fn PetriTransition::equal(Self, Self) -> Bool
+pub fn PetriTransition::not_equal(Self, Self) -> Bool
 
 pub(all) enum Phase {
   Natural

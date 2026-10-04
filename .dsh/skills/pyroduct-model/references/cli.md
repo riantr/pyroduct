@@ -30,6 +30,7 @@
 | `association` | 未定的软关联（JPDA 面镜像，模型整理）：机器全部 5 个并存组合逐条给 β 权重（Σ=1）与香农熵（bit）；权重＝双诚分量的归一化（首条=己之诚/时间侧、末条=他之诚/空间侧）；活绊线＝硬裁决（双诚之比挑首/末）与软分布 argmax 逐个一致；诊断面，不采样、不推进位置——「未定不掷骰子」照旧 |
 | `pathsum` | 泛半环路径和（参照 FiniteStateTransducers.jl，OpenFST 谱系；模型整理）：机器三性质（`is_deterministic` 触发粒度确定=true、`is_acyclic`=false 有意成环、无 ε 弧＝acceptor）+ 每位置到宁静的最短路阶梯（tropical `min_steps`/`distance_to`，reversed BFS 一次得全表；无忆 30 步 → 修习 1 步 → 宁静 0 步，0 处不可达；`min_steps(宁静, 反顾)=1` 重入边）；半环词汇＝本仓库已横跨 Boolean（reachable/gaps）/ Tropical（本文件）/ Probability（evolution β） |
 | `algebra` | 机器代数（Ragel 面；模型整理）：算子映射（相接↔主线 30 站 + 重入反顾、并↔5 处槽粒度并存、星↔17 条自环、环↔宁静→反顾、确定化不需要、err↔Block 缺口诚实版、动作嵌入↔gloss 出处不适用）+ 主线分解（全状态 − 主线 = 无忆/无筹/畏怖/疏离四处）+ 最小商（`minimal_quotient`：31 块恰 = course 长度——主线就是最小商；三对孪生是设计：受赏≡畏怖、无忆≡无筹、紧迫≡疏离，原文以不同触发区分来处、机器以相同行为识别去处） |
+| `petri` | Petri 网面（CarlAdam 镜像；模型整理）：库所↔34 位置、变迁↔迁移表 53 行（一对一，托肯守恒）、不可变 `PetriMarking`（`enabled`/`fire` 返回一收一发的 Consume/Produce 效果与新标识）、双托肯并发演示（multi 的结构对准：立位与宁静两个托肯各自走一步）、判读（228 缺口=没有变迁即结构、未定=结构冲突仲裁不在 src、着色=基因组记档不落码） |
 | `genesis` / `course` | 原文顺序主线 / 可重入环节序列 |
 | `naming` / `principle` | 定名对照表 / 主体通用性原则（R1–R3） |
 | `intuition` | 直觉读法：裁决备忘录读成背景直觉的仓库（模型整理；四条纪律：出处可查、在接触中存活或破碎、出处层即稳固度、不编造命中） |

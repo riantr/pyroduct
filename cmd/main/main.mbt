@@ -17,6 +17,8 @@
 ///   moon run cmd/main -- group    群体状态机（模型延伸：成员 → 群体的涌现）
 ///   moon run cmd/main -- society 双层次社会交往模型（论文自身的理论构造：生活世界／系统／交往）
 ///   moon run cmd/main -- society-mermaid 上者的 Mermaid 状态图
+///   moon run cmd/main -- group-mermaid  群体机的 Mermaid 状态图
+///   moon run cmd/main -- viz       三台机汇成一页自包含 HTML（浏览器直开）
 ///   moon run cmd/main -- evolution 进化：变异空间／适应度目标／闸门／持久化／遗传
 ///   moon run cmd/main -- cycle    主体循环：位置 × 驱动槽 × 因果反馈（修习与开放都过闸门）
 ///   moon run cmd/main -- coordinator 科研 Agent 协调器：制品／规划／证据／决策／记忆／署名／运行时
@@ -43,6 +45,8 @@ fn main raise {
     "group" => println(@group.render_group_report())
     "society" => println(@society.render_report())
     "society-mermaid" => println(@society.render_mermaid())
+    "group-mermaid" => println(@group.render_mermaid())
+    "viz" => println(@viz.page())
     "evolution" => println(@evolution.render_report())
     "cycle" => println(@evolution.render_cycle_report(@evolution.demo_cycle()))
     "coordinator" => println(@coordinator.render_report())

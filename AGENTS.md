@@ -67,7 +67,8 @@ moon run --target native cmd/coord     # coordinator CLI with real disk I/O; wri
 | `causal` | one dataset | 0.75.0-deep diagnostics (read-only, data from the state machine): sensitivity (Cinelli–Hazlett `rv = \|θ̂\|/max_bias`), multiple-testing correction (BH/Bonferroni — naive OLS also passes, significance ≠ evidence), BLP heterogeneity (residualized treatment × centered covariates, HC0 se; d̃ recovers θ̂); marked 模型整理 |
 | `audit` | one machine | Three-lens static audit of the real subject machine (`riantr/moonbit_static_analysis/src/statecheck`; the library's moon.mod names pyroduct its reference consumer): real tables → plain-data `MachineSpec` → structural (states are bindings) / type (slots placed, no silent Block) / behavior (course abstractly executed) lenses; findings split 已知设计（无忆／无筹 only-exit, verified 0.1.2）vs 未预期（must stay 0 — live tripwire）; marked 模型整理 |
 | `snnref` | one experiment | Spike-sediment experiment (native only): 49 triggers → Poisson spike trains with slot-correlated rates → Gerstner STDP (CSR, library defaults) → does the sedimented weight structure recover the 8-slot partition? Means, hit rate vs. chance baseline, per-slot table; marked 模型整理 |
-| `cmd/main` | — | wasm CLI (20 subcommands above) |
+| `viz` | — | Presentation-only: all three state machines as Mermaid `stateDiagram-v2` source plus one self-contained HTML page (`page()` embeds all three; mermaid.js CDN loaded at view time — build/run stay offline). Delegates to the per-machine renderers; declares ASCII node ids with Chinese labels everywhere |
+| `cmd/main` | — | wasm CLI (22 subcommands below + the default report) |
 | `cmd/coord` | — | native CLI with real disk I/O (`supported_targets = "+native"`) |
 | `tools/pdfdump` | — | read-only survey records of the source PDF |
 | `examples/*` | — | one runnable example per package: `plr`, `irm`, `cross_check`, `consumer`, `sediment` (native) |

@@ -63,13 +63,40 @@ pub fn render_report() -> String {
 }
 
 ///|
-/// Mermaid 状态图。
-pub fn render_mermaid() -> String {
-  let lines = ["stateDiagram-v2"]
-  for t in transitions() {
-    lines.push(
-      "  \{t.from.designation()} --> \{t.to.designation()}: \{t.trigger.label()}",
-    )
+/// 社会状态的英文标识（图节点 id；中文定名做标签）。mermaid 对非 ASCII 的
+/// 节点 id 支持不稳，故一律先声明 `state "定名" as 英文标识` 再连边。
+fn repr(s : State) -> String {
+  match s {
+    World => "World"
+    Suprasubjective => "Suprasubjective"
+    Intersubjective => "Intersubjective"
+    Claim => "Claim"
+    Discourse => "Discourse"
+    Justification => "Justification"
+    Consensus => "Consensus"
+    Norm => "Norm"
+    Gap => "Gap"
+    System => "System"
+    Colony => "Colony"
+    Distortion => "Distortion"
+    Reconstruction => "Reconstruction"
   }
+}
+
+///|
+/// Mermaid `stateDiagram-v2` 源文本：声明式节点（中文定名做标签、英文标识做
+/// id），初始态 `[*] --> 世界`，迁移以触发词做边标。
+pub fn render_mermaid() -> String {
+  let lines : Array[String] = ["stateDiagram-v2"]
+  for s in all_states() {
+    lines.push("    state \"\{s.designation()}\" as \{repr(s)}")
+  }
+  lines.push("    [*] --> \{repr(initial())}")
+  for t in transitions() {
+    lines.push("    \{repr(t.from)} --> \{repr(t.to)} : \{t.trigger.label()}")
+  }
+  lines.push(
+    "    %% 缺口自任一状态皆可达（no_final_closure）；模型无一终态",
+  )
   lines.join("\n")
 }

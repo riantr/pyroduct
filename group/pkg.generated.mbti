@@ -34,6 +34,8 @@ pub fn render_emergence() -> String
 
 pub fn render_group_report() -> String
 
+pub fn render_mermaid() -> String
+
 pub fn resting() -> GroupState
 
 pub fn successors(GroupState) -> Array[(GroupTrigger, GroupState)]

@@ -1,0 +1,8 @@
+// 可视化层：把三台状态机（主体／群体／社会）汇成 Mermaid 源文本与自包含 HTML 页。
+// 只做呈现：数据全部来自下层包的渲染器，不新增模型事实；HTML 视时引 mermaid.js
+// CDN（构建与运行零网络，联网只发生在浏览器打开页面时）。
+import {
+  "riantr/pyroduct/src" @sm,
+  "riantr/pyroduct/group",
+  "riantr/pyroduct/society",
+}

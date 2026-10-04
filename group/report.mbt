@@ -153,3 +153,49 @@ pub fn render_group_report() -> String {
   )
   lines.join("\n")
 }
+
+///|
+/// 群体状态的英文标识（图节点 id；中文定名做标签）。mermaid 对非 ASCII 的
+/// 节点 id 支持不稳，故先声明 `state "定名" as 英文标识` 再连边。
+fn repr(s : GroupState) -> String {
+  match s {
+    Scattered => "Scattered"
+    Converging => "Converging"
+    CommonTongue => "CommonTongue"
+    Discourse => "Discourse"
+    Normed => "Normed"
+    Consensus => "Consensus"
+    Dissensus => "Dissensus"
+    Confronting => "Confronting"
+    Partitioned => "Partitioned"
+    Projected => "Projected"
+    Monologic => "Monologic"
+    Disciplined => "Disciplined"
+    Concealed => "Concealed"
+    Wounded => "Wounded"
+    Dispersed => "Dispersed"
+    Returning => "Returning"
+    Practicing => "Practicing"
+    Widening => "Widening"
+    Attuned => "Attuned"
+    Settled => "Settled"
+  }
+}
+
+///|
+/// Mermaid `stateDiagram-v2` 源文本：群体机（20 状态 · 42 迁移 · 9 阶段）。
+/// 初始态 `[*] --> 散在`；宁定是静定极而非终点（R11 不可闭合）。
+pub fn render_mermaid() -> String {
+  let lines : Array[String] = ["stateDiagram-v2"]
+  for s in all_states() {
+    lines.push("    state \"\{s.designation()}\" as \{repr(s)}")
+  }
+  lines.push("    [*] --> \{repr(initial())}")
+  for t in transitions() {
+    lines.push("    \{repr(t.from)} --> \{repr(t.to)} : \{t.trigger.label()}")
+  }
+  lines.push(
+    "    %% 宁定 是静定极而非终点：宁定 --Reenter--> 复归 恒在（R11 不可闭合）",
+  )
+  lines.join("\n")
+}

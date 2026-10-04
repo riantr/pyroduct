@@ -26,6 +26,7 @@
 | `nested-mermaid` | 嵌套视图：11 阶段为复合状态（容器），迁移照旧跨容器连边（模型整理） |
 | `journey` | 行程视图：一次示范行走（从立位按八槽巡回三轮）真正走过的边；未定/无路只以注释说明，当下/缺口/未定位置样式标注（模型整理） |
 | `viz` | 三台机 + 嵌套视图 + 行程视图汇成一页自包含 HTML（`moon run cmd/main -- viz > viz.html`，浏览器直开；mermaid.js 仅视时 CDN，构建零网络） |
+| `spec` | 规格导出：主体机即 JSON 数据（`$schema` 版本标记；states 按定名键控带原文名与阶段；phases 嵌套；slots；transitions 带 event=原文触发句 + slot=槽归位；`spec_vocabulary` 词汇表防漂移；参照 python-statemachine 的 io/中立 IR，方向反转为机器→规格；模型整理） |
 | `genesis` / `course` | 原文顺序主线 / 可重入环节序列 |
 | `naming` / `principle` | 定名对照表 / 主体通用性原则（R1–R3） |
 | `intuition` | 直觉读法：裁决备忘录读成背景直觉的仓库（模型整理；四条纪律：出处可查、在接触中存活或破碎、出处层即稳固度、不编造命中） |

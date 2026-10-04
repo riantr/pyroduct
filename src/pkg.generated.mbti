@@ -64,6 +64,10 @@ pub fn revision_principle() -> String
 
 pub fn slot_tally() -> Array[(Slot, Int)]
 
+pub fn spec_json() -> String
+
+pub fn spec_vocabulary() -> Array[String]
+
 pub fn step(SubjectState, Slot) -> Outcome
 
 pub fn successors(SubjectState) -> Array[(Trigger, SubjectState)]

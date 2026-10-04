@@ -27,6 +27,7 @@
 ///   moon run cmd/main -- dmlref 与外部参考实现（riantr/moonbit_doubleML）对照
 ///   moon run cmd/main -- causal   因果诊断（0.75.0 深用）：敏感性／多重检验／异质性
 ///   moon run cmd/main -- audit    自审计（三鉴）：主体机当程序读，已知设计 vs 未预期
+///   moon run cmd/main -- spec     规格导出：主体机即 JSON 数据（词汇表防漂移，模型整理）
 ///   moon run cmd/main -- all       报告 + 历程 + Mermaid
 fn main raise {
   let args = @env.args()
@@ -57,6 +58,7 @@ fn main raise {
     "dmlref" => println(@dmlref.render_report())
     "causal" => println(@causal.render_report())
     "audit" => println(@audit.render_report())
+    "spec" => println(@sm.spec_json())
     "all" => {
       println(@sm.render_report())
       println("")

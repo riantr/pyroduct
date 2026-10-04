@@ -16,6 +16,14 @@ pub fn all_states() -> Array[SubjectState]
 
 pub fn all_triggers() -> Array[Trigger]
 
+pub fn buchi_accepting() -> Array[SubjectState]
+
+pub fn buchi_live_potential() -> Bool
+
+pub fn buchi_nonempty() -> Bool
+
+pub fn buchi_stalls() -> Array[SubjectState]
+
 pub fn course() -> Array[SubjectState]
 
 pub fn distance_to(SubjectState) -> Array[(SubjectState, Int?)]
@@ -59,6 +67,8 @@ pub fn reachable(SubjectState, SubjectState) -> Bool
 pub fn render_aho_report() -> String
 
 pub fn render_algebra_report() -> String
+
+pub fn render_buchi_report() -> String
 
 pub fn render_course() -> String
 

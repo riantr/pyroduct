@@ -33,6 +33,7 @@
 ///   moon run cmd/main -- algebra   机器代数（Ragel 面）：算子映射 + 主线分解 + 最小化（模型整理）
 ///   moon run cmd/main -- petri     Petri 网面（CarlAdam 镜像）：库所/变迁/标识/发火/守恒（模型整理）
 ///   moon run cmd/main -- aho       回忆结构（Aho-Corasick 面）：触发句前缀树 + 失败链（模型整理）
+///   moon run cmd/main -- buchi     ω-视角（Büchi 面）：非空性/活性潜势/停滞词（模型整理）
 ///   moon run cmd/main -- all       报告 + 历程 + Mermaid
 fn main raise {
   let args = @env.args()
@@ -69,6 +70,7 @@ fn main raise {
     "algebra" => println(@sm.render_algebra_report())
     "petri" => println(@sm.render_petri_report())
     "aho" => println(@sm.render_aho_report())
+    "buchi" => println(@sm.render_buchi_report())
     "all" => {
       println(@sm.render_report())
       println("")

@@ -12,7 +12,7 @@ Long-form context lives in `README.mbt.md` (English) and `README.zh.mbt.md`
 
 ```console
 moon test                              # all tests (default target: wasm); currently
-                                       # 125/125 on wasm + 2 snnref tests on native
+                                       # 128/128 on wasm + 2 snnref tests on native
 moon test --target native snnref       # spike-sediment experiment (native only)
 moon check                             # type/warn check
 moon info                              # regenerates every pkg.generated.mbti (tracked)
@@ -24,7 +24,7 @@ moon run cmd/main -- report            # CLI: report (default) | multi | group |
                                        # ml | ml-export | all | society-mermaid |
                                        # group-mermaid | nested-mermaid | journey |
                                        # viz | spec | association | pathsum |
-                                       # algebra | petri | aho
+                                       # algebra | petri | aho | buchi
                                        # (`intuition` = 直觉读法：备忘录读成背景直觉的仓库）
                                        # (`causal` = 0.75.0 深用：敏感性／多重检验／异质性）
                                        # (`audit` = 三鉴自审计（结构鉴／类型鉴／行为鉴）：主体机当程序读）
@@ -37,6 +37,7 @@ moon run cmd/main -- report            # CLI: report (default) | multi | group |
                                        # (`algebra` = 机器代数（Ragel 面）：算子映射/主线分解/最小商——三对孪生)
                                        # (`petri` = Petri 网面（CarlAdam 镜像）：库所/变迁/标识/发火/守恒，多托肯并发)
                                        # (`aho` = 回忆结构（Aho-Corasick 面）：触发句前缀树/失败链/输出合并)
+                                       # (`buchi` = ω-视角（Büchi 面）：非空性/活性潜势/停滞词——结构不强迫活性)
 moon run examples/plr                  # also: examples/irm, examples/cross_check,
                                        # examples/consumer,
                                        # moon run --target native examples/sediment
@@ -67,7 +68,7 @@ moon run --target native cmd/coord     # coordinator CLI with real disk I/O; wri
 
 | Package | Unit | Contents |
 |---------|------|----------|
-| `src` | one subject | Subject state machine (34 states · 53 transitions · 11 phases) + drive slots (8, `slot.mbt`) + step contract (`loop.mbt`: `step` → 迁/守/未定/无路, `Trace::detailed` per-step provenance) + adjacency index (`index.mbt`) + durability manifest (`durability.mbt`) + rendering (`render.mbt`: report/dot/mermaid/nested/journey) + spec export (`spec.mbt`: machine as JSON data, `spec_vocabulary` anti-drift; port of python-statemachine's io/neutral-IR, direction inverted for data-as-code) + pathsum & properties (`paths.mbt`: tropical `min_steps`/`distance_to` — the road-to-tranquility ladder; `is_deterministic` per-trigger, `is_acyclic` = false by design; port of FiniteStateTransducers.jl's shortest_distance/properties, marked 模型整理) + machine algebra (`algebra.mbt`: operator mapping, main-line decomposition via `course()`, partition-refinement `minimal_quotient` — 31 blocks = course length with three designed twin pairs 无忆≡无筹/紧迫≡疏离/受赏≡畏怖; port of Ragel's minimization, marked 模型整理) + Petri net face (`petri.mbt`: places=34 states, transitions=53 table rows (one-to-one, token-conserving), immutable `PetriMarking` with `enabled`/`fire` returning Consume/Produce effects, multi-token concurrency demo, 未定 = structural conflict, coloring = genome noted not implemented; port of CarlAdam's marking/occurrence semantics, marked 模型整理) + Aho-Corasick face (`aho.mbt`: the 49 trigger sentences as a keyword trie with failure links and output merging — 失败链 = the algorithmic form of remembering (fall back to the longest shared past), textbook-example tests; port of pyahocorasick, marked 模型整理) |
+| `src` | one subject | Subject state machine (34 states · 53 transitions · 11 phases) + drive slots (8, `slot.mbt`) + step contract (`loop.mbt`: `step` → 迁/守/未定/无路, `Trace::detailed` per-step provenance) + adjacency index (`index.mbt`) + durability manifest (`durability.mbt`) + rendering (`render.mbt`: report/dot/mermaid/nested/journey) + spec export (`spec.mbt`: machine as JSON data, `spec_vocabulary` anti-drift; port of python-statemachine's io/neutral-IR, direction inverted for data-as-code) + pathsum & properties (`paths.mbt`: tropical `min_steps`/`distance_to` — the road-to-tranquility ladder; `is_deterministic` per-trigger, `is_acyclic` = false by design; port of FiniteStateTransducers.jl's shortest_distance/properties, marked 模型整理) + machine algebra (`algebra.mbt`: operator mapping, main-line decomposition via `course()`, partition-refinement `minimal_quotient` — 31 blocks = course length with three designed twin pairs 无忆≡无筹/紧迫≡疏离/受赏≡畏怖; port of Ragel's minimization, marked 模型整理) + Petri net face (`petri.mbt`: places=34 states, transitions=53 table rows (one-to-one, token-conserving), immutable `PetriMarking` with `enabled`/`fire` returning Consume/Produce effects, multi-token concurrency demo, 未定 = structural conflict, coloring = genome noted not implemented; port of CarlAdam's marking/occurrence semantics, marked 模型整理) + Aho-Corasick face (`aho.mbt`: the 49 trigger sentences as a keyword trie with failure links and output merging — 失败链 = the algorithmic form of remembering (fall back to the longest shared past), textbook-example tests; port of pyahocorasick, marked 模型整理) + Büchi face (`buchi.mbt`: the machine read as an ω-automaton — no finals + the R11 re-entry loop make the natural acceptance condition Büchi's (recurrence of 宁静); nonemptiness via lasso, liveness potential via distance_to, 11 stall self-loops: 10 rejecting (structure does not enforce liveness — fairness lives in the genome) + 宁静's own 静待下一刻 loop as the one accepted stall; marked 模型整理) |
 | `multi` | two subjects | Normative rules R1–R14, `TruthRegime`, claim schemas, `encounter` verdicts |
 | `group` | one group | Emergence state machine (20 states), member config → group state, R7 write-back |
 | `society` | one society | Two-level social model from the thesis (13 states), lifeworld vs. system |
@@ -79,7 +80,7 @@ moon run --target native cmd/coord     # coordinator CLI with real disk I/O; wri
 | `audit` | one machine | Three-lens static audit of the real subject machine (`riantr/moonbit_static_analysis/src/statecheck`; the library's moon.mod names pyroduct its reference consumer): real tables → plain-data `MachineSpec` → structural (states are bindings) / type (slots placed, no silent Block) / behavior (course abstractly executed) lenses; findings split 已知设计（无忆／无筹 only-exit, verified 0.1.2）vs 未预期（must stay 0 — live tripwire）; marked 模型整理 |
 | `snnref` | one experiment | Spike-sediment experiment (native only): 49 triggers → Poisson spike trains with slot-correlated rates → Gerstner STDP (CSR, library defaults) → does the sedimented weight structure recover the 8-slot partition? Means, hit rate vs. chance baseline, per-slot table; marked 模型整理 |
 | `viz` | — | Presentation-only: all three state machines as Mermaid `stateDiagram-v2` source plus one self-contained HTML page (`page()` embeds all three plus the subject machine's nested view — 11 phases as composite states — and the demo journey view with styling for now/gap/undecided; mermaid.js CDN loaded at view time — build/run stay offline). Delegates to the per-machine renderers; declares ASCII node ids with Chinese labels everywhere |
-| `cmd/main` | — | wasm CLI (32 named subcommands, incl. `all`, + the default report) |
+| `cmd/main` | — | wasm CLI (33 named subcommands, incl. `all`, + the default report) |
 | `cmd/coord` | — | native CLI with real disk I/O (`supported_targets = "+native"`) |
 | `tools/pdfdump` | — | read-only survey records of the source PDF |
 | `examples/*` | — | one runnable example per package: `plr`, `irm`, `cross_check`, `consumer`, `sediment` (native) |

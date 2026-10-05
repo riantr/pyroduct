@@ -6,8 +6,8 @@
   "buildCommand": "moon build --target js",
   "sourcePath": "_build/js/debug/build/cmd/jsoncli/jsoncli.js",
   "target": "js",
-  "bytes": 1251046,
-  "bundleSha256": "c422dbf81565643682b149a8b54fa60e5af42606f5f699bc23ae885b729e99e0",
+  "bytes": 1260290,
+  "bundleSha256": "d50b51cd84de837556535ebd457a7f867c078c24655f61bb77d20741ce9224e3",
   "note": "jsoncli is a pure spawner bridge: one JSON request argument {kind} in, one JSON reply line {ok,kind,rendered,faces} out. All model semantics stay in MoonBit and are gated with the module itself.",
   "pinRule": "bundleSha256 and bytes are asserted by tools/validate-plugin.mjs: the model semantics live inside this bundle, so an edited or stale copy must fail loudly rather than be discovered at the next release. tools/update-bundle.mjs rewrites all three fields together."
 }

@@ -68,21 +68,75 @@ pub fn Outcome::landing(self : Outcome) -> SubjectState? {
 }
 
 ///|
-/// 走一步：取 `state` 出发、由 `slot` 驱动的全部边，据其数目给回执。
+/// 位置 × 槽上的全部候选边：迁移表里从 `state` 出发、由 `slot` 推动的边，
+/// 按表的书写顺序收集（故结果可重放）。
 ///
-/// 候选按迁移表的顺序收集，故结果与表的书写顺序一致、可重放。
+/// 这是「此处此槽可能发生什么」的**唯一**取料处：`step` 的候选、`expand` 的
+/// 分叉、`after_open` 的起点都走它。分开各写一份等于给同一件事留几个说法，
+/// 迟早对不上。
+pub fn candidates(
+  state : SubjectState,
+  slot : Slot,
+) -> Array[(Trigger, SubjectState)] {
+  let out : Array[(Trigger, SubjectState)] = []
+  for t in transitions() {
+    if t.from == state && t.trigger.slot() == slot {
+      out.push((t.trigger, t.to))
+    }
+  }
+  out
+}
+
+///|
+/// 把回执拆成它**允许的每一条**确定走法。`at` 是该回执的出发位置（用来分
+/// 「迁」与「守」：候选若是自环，那一步仍是守）。
+///
+/// 拆开**不引入任何新事实**：`Open` 的每个候选、`Same` 的每条触发句都是迁移
+/// 表里真实存在的那条边，拆开后逐条点名不算编造——它说的是「**若是**这一句，
+/// 则到这儿」，条件与结论都摆在明面上。这与 `step` 拒绝点名同归触发不矛盾：
+/// 那里是**无条件**点名（把表里排第一的那条当成了发生过的话），这里是**条件**
+/// 点名。调用方拿到这份清单即可自己定策——这就是「未定可编程」的落点：
+/// 决断权在主体（`evolution` 的双诚之比）与上层，不在 `src`。
+///
+/// `Block`（缺口）不给任何走法：此处无路，展开不能凭空造一条——缺口一旦能被
+/// 展开，缺口就名存实亡。
+pub fn Outcome::forks_from(self : Outcome, at : SubjectState) -> Array[Outcome] {
+  let out : Array[Outcome] = []
+  match self {
+    Moved(tr, to) => out.push(Moved(tr, to))
+    Held(tr, s) => out.push(Held(tr, s))
+    Open(cands) =>
+      for c in cands {
+        out.push(resolved(c.0, c.1, at))
+      }
+    Same(_, named, to) =>
+      for tr in named {
+        out.push(resolved(tr, to, at))
+      }
+    Block(_) => ()
+  }
+  out
+}
+
+///|
+/// 边落回自身则记「守」，否则记「迁」——与 `step` 同一判据，不另立一套。
+fn resolved(tr : Trigger, to : SubjectState, at : SubjectState) -> Outcome {
+  if to == at {
+    Held(tr, to)
+  } else {
+    Moved(tr, to)
+  }
+}
+
+///|
+/// 走一步：取 `state` 出发、由 `slot` 驱动的全部边，据其数目给回执。
 ///
 /// 槽粒度**认不出是哪一句**——同一槽在这个位置可能挂着多条触发句。所以只有
 /// 候选恰好一条时它才点名（`Moved`／`Held`）；多条归到同一目标时给 `Same`
 /// （去处确定、来处不名），多条归到不同目标时给 `Open`。要知道是哪一句，
 /// 调 `step_by_trigger`。
 pub fn step(state : SubjectState, slot : Slot) -> Outcome {
-  let cands : Array[(Trigger, SubjectState)] = []
-  for t in transitions() {
-    if t.from == state && t.trigger.slot() == slot {
-      cands.push((t.trigger, t.to))
-    }
-  }
+  let cands = candidates(state, slot)
   if cands.length() == 0 {
     return Block(
       "\{state.designation()} 处没有「\{slot.designation()}」的出边",
@@ -202,6 +256,25 @@ pub fn same_target_pairs() -> Array[
 }
 
 ///|
+/// 全部未定点：位置 × 槽中**去处**不止一个的组合，即 `step` 给 `Open` 的那些
+/// （带候选边条数）。
+///
+/// 与 `same_target_pairs` 是一对：那一个列「来处多而去处一」，这一个列「去处
+/// 多」，两者互斥且并集恰是全部多候选组合。报告与测试都从这里取料。
+pub fn open_points() -> Array[(SubjectState, Slot, Int)] {
+  let out : Array[(SubjectState, Slot, Int)] = []
+  for s in all_states() {
+    for k in all_slots() {
+      match step(s, k) {
+        Open(cands) => out.push((s, k, cands.length()))
+        _ => ()
+      }
+    }
+  }
+  out
+}
+
+///|
 /// 一段行走的记录。`steps` 只追加；`Open`／`Block` 之后位置不变——
 /// 未定与缺口都不许被写成「已经过去了」。
 pub struct Trace {
@@ -281,6 +354,182 @@ pub fn Trace::outcome_labels(self : Trace) -> Array[String] {
   let out : Array[String] = []
   for entry in self.steps {
     out.push(entry.1.label())
+  }
+  out
+}
+
+///|
+/// 一批走法的展开结果。
+///
+/// `truncated` 为真表示撞上了 `limit` 上界，故 `leaves` **不是全部**。这
+/// 件事写在结果里而不是只写在文档里：静默截断的结果会被读成「所有可能的后续」，
+/// 而它其实不是——这正是本层一路在防的那类误读（不编造下一步、不编造上一步、
+/// 不把「停住」说成「走完了」）。
+pub(all) struct Expansion {
+  leaves : Array[Trace]
+  truncated : Bool
+} derive(Eq, Debug)
+
+///|
+pub extend Expansion with Eq::{not_equal, equal}
+
+///|
+pub extend Expansion with Debug::{to_repr}
+
+///|
+/// 展开：自 `start` 起按给定的槽序列走一段，遇到**未定**就按表里的候选分叉。
+///
+/// `walk` 收一条固定槽序列，走过未定点就停在原处（`Open` 无落点，位置不变）。
+/// 本函数回答的是那句没答上的话——未定之后**所有**可能的后续是什么：同一个
+/// 槽序列，路径按 `Open` 的候选数扇出，每个叶子是一条把每个未定点都选定好的
+/// 完整行程。
+///
+/// 三条纪律：
+///
+/// - **只在 `Open` 处分叉。** `Same` 的去处已定，分叉只会造出 N 条位置完全相同、
+///   只差一句「没说是哪句」的走法，等于在树上把「来处不名」又点名了一次；来处
+///   要逐条看，`Outcome::forks_from` 单给。
+/// - **缺口不终止行程。** `Block` 之后位置不动、接着走下一个槽，与 `walk` 同一
+///   读法；若在缺口处截断分支，`expand` 与 `walk` 就会对同一段脚本给出不同长度
+///   的行程，缺的那些后续才是被藏起来的。
+/// - **分叉不增事实。** 每个叶子都由表里的真实边组成，故叶子数必等于沿途
+///   `Open` 候选数之积——这条是判据，不是设计愿望。
+/// - **上界要说出来。** 机器有意成环（`is_acyclic` 恒 `false`），故展开必然要
+///   有界；`limit` 是走法条数上限，撞上了就置 `truncated`。
+pub fn expand(
+  start : SubjectState,
+  slots : Array[Slot],
+  limit : Int,
+) -> Expansion {
+  let (leaves, truncated) = expand_from(start, start, [], slots, 0, limit)
+  { leaves, truncated, }
+}
+
+///|
+/// 展开的递归内芯。返回（叶子，是否撞上界）。`budget` 是还能产出的走法条数。
+fn expand_from(
+  origin : SubjectState,
+  at : SubjectState,
+  steps : Array[(Slot, Outcome)],
+  slots : Array[Slot],
+  i : Int,
+  budget : Int,
+) -> (Array[Trace], Bool) {
+  if budget <= 0 {
+    return ([], true)
+  }
+  if i >= slots.length() {
+    return ([{ start: origin, steps, }], false)
+  }
+  let slot = slots[i]
+  let out = step(at, slot)
+  match out {
+    // 未定：按候选扇出。`forks_from` 给的每一条都是表里的真实边。
+    Open(_) => {
+      let leaves : Array[Trace] = []
+      let mut left = budget
+      let mut truncated = false
+      for one in out.forks_from(at) {
+        let next = match one.landing() {
+          Some(s) => s
+          None => at
+        }
+        let (sub, cut) = expand_from(
+          origin,
+          next,
+          push_step(steps, slot, one),
+          slots,
+          i + 1,
+          left,
+        )
+        for t in sub {
+          leaves.push(t)
+        }
+        left -= sub.length()
+        if cut {
+          truncated = true
+          break
+        }
+      }
+      (leaves, truncated)
+    }
+    // 同归／迁／守：去处确定，单线继续（`forks_from` 于此处恰给一条）。
+    _ => {
+      let advanced = push_step(steps, slot, out)
+      let next = match out.landing() {
+        Some(s) => s
+        // 无路：位置不动，接着走下一个槽——与 `walk` 同一读法。缺口不是终点，
+        // 只是这一步走不出去；在这里终止分支会让 `expand` 与 `walk` 对同一段
+        // 脚本给出不同长度的行程，那才是真正的「不编造后续」。
+        None => at
+      }
+      expand_from(origin, next, advanced, slots, i + 1, budget)
+    }
+  }
+}
+
+///|
+/// 追加一步并另存一份：展开里每条分支各持一份行程，不得互相看见。
+fn push_step(
+  steps : Array[(Slot, Outcome)],
+  slot : Slot,
+  outcome : Outcome,
+) -> Array[(Slot, Outcome)] {
+  let out : Array[(Slot, Outcome)] = []
+  for entry in steps {
+    out.push(entry)
+  }
+  out.push((slot, outcome))
+  out
+}
+
+///|
+/// `after_open` 的取料：`state` 处 `slot` 的未定点逐条候选边。
+///
+/// 「未定之后所有可能的后续」的字面回答：逐条候选边出发，**不预设后续的槽**
+/// （未定之后推不推、推哪一槽，本来就还没定，故对全部八槽都算），至多 `depth`
+/// 步内够得着的位置与各自的最少步数。
+///
+/// 与近邻三者的分工：`expand` 守着给定的槽序列往下走；`min_steps` 问「到某一个
+/// 指定位置要几步」；本函数问「未定之后够得着的地方有哪些」。未定点本身不算
+/// 后续——除非某条候选边绕回了它，那时它以自己的身份出现在清单里。
+pub fn after_open(
+  state : SubjectState,
+  slot : Slot,
+  depth : Int,
+) -> Array[(SubjectState, Int)] {
+  let dist : Map[String, Int] = Map([])
+  let queue : Array[SubjectState] = []
+  for c in candidates(state, slot) {
+    if !dist.contains(c.1.designation()) {
+      dist[c.1.designation()] = 1
+      queue.push(c.1)
+    }
+  }
+  let mut head = 0
+  while head < queue.length() {
+    let cur = queue[head]
+    head += 1
+    let d = match dist.get(cur.designation()) {
+      Some(d) => d
+      None => 1
+    }
+    if d >= depth {
+      continue
+    }
+    for t in successors(cur) {
+      if !dist.contains(t.1.designation()) {
+        dist[t.1.designation()] = d + 1
+        queue.push(t.1)
+      }
+    }
+  }
+  let out : Array[(SubjectState, Int)] = []
+  for s in all_states() {
+    match dist.get(s.designation()) {
+      Some(d) => out.push((s, d))
+      None => ()
+    }
   }
   out
 }
@@ -419,13 +668,52 @@ pub fn render_loop_report() -> String {
     }
   }
   lines.push("")
-  lines.push("## 示范：从立位起，按八槽巡回走三轮")
+  lines.push("## 未定的展开：去处未定时的所有可能后续")
+  lines.push(
+    "`walk` 只走一条给定的槽序列，撞上未定就停在原处。「所有可能的后续」是另一句问，",
+  )
+  lines.push(
+    "由 `expand`（守着给定槽序列分叉）与 `after_open`（不预设后续的槽）两个函数回答；",
+  )
+  lines.push(
+    "两者都不引入新事实——每个分支都是迁移表里真实存在的边。",
+  )
+  lines.push("")
+  for op in open_points() {
+    let (s, k, n) = op
+    let reach = after_open(s, k, 3)
+    lines.push(
+      "- \{s.designation()} × \{k.designation()}　\{n} 条候选边；不预设后续的槽时，三步内够得着 \{reach.length()} 处",
+    )
+  }
+  lines.push("")
+  lines.push("### 示范：把下面那次八槽巡回展开成所有走法")
   let plan : Array[Slot] = []
   for round = 0; round < 3; round = round + 1 {
     for k in all_slots() {
       plan.push(k)
     }
   }
+  let fan = expand(initial(), plan, 64)
+  for leaf in fan.leaves {
+    let marks : Array[String] = []
+    for d in leaf.detailed() {
+      if candidates(d.from, d.slot).length() > 1 {
+        marks.push("\{d.from.designation()}〔\{d.slot.designation()}〕→")
+      } else {
+        marks.push("\{d.from.designation()}-\{d.slot.designation()}→")
+      }
+    }
+    lines.push(
+      "- \{marks.join(" ")} \{leaf.at().designation()}（\{leaf.steps.length()} 步）",
+    )
+  }
+  lines.push("")
+  lines.push(
+    "\{fan.leaves.length()} 条走法，撞界 \{fan.truncated}。每条走法里都不再有「未定」——分叉时机器没有替主体择一，是把表里那几条并排摆出来，让人去选。",
+  )
+  lines.push("")
+  lines.push("## 示范：从立位起，按八槽巡回走三轮")
   let trace = walk(initial(), plan)
   let mut moved = 0
   let mut held = 0

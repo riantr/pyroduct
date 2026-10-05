@@ -87,3 +87,41 @@ test "CSV 导出可直接交给 Python 的 DoubleML" {
   let preview = @ml.csv_preview(data, 3).split("\n").collect()
   assert_eq(preview.length(), 4)
 }
+
+///|
+/// 设计图九条接口的实现状态是**数据表**不是散文：`design_status_table` 九条、
+/// 三条已实现六条设计点，且报告里那九行「状态：」由表生成。
+/// 这一条把 0.1.28 之前「第 1 条写『本包未实现』、其余只写『设计点』」的
+/// 不一致钉死——同一件事两种说法，读者无从判断哪个是特例。
+test "设计图：九条接口的实现状态由表生成，3 实现 6 设计点" {
+  let table = @ml.design_status_table()
+  assert_eq(table.length(), 9)
+  let mut done = 0
+  let mut todo = 0
+  for entry in table {
+    if entry.1 == "已实现" {
+      done += 1
+    } else if entry.1 == "设计点" {
+      todo += 1
+    } else {
+      assert_true(false)
+    }
+  }
+  assert_eq(done, 3)
+  assert_eq(todo, 6)
+  // 报告里九行状态逐条对上表，且没有一行是散文另写的
+  let report = @ml.render_ml_design()
+  let mut seen = 0
+  for entry in table {
+    assert_true(report.contains("### " + entry.0))
+    seen += 1
+  }
+  assert_eq(seen, 9)
+  assert_eq(count_occurrences(report, "- 状态："), 9)
+  assert_true(report.contains("范围判断，非欠账"))
+}
+
+///|
+fn count_occurrences(haystack : String, needle : String) -> Int {
+  haystack.split(needle).collect().length() - 1
+}

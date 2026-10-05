@@ -12,6 +12,8 @@ pub fn default_dml_config() -> DmlConfig
 
 pub fn default_ml_plan() -> MlPlan
 
+pub fn design_status_table() -> Array[(String, String)]
+
 pub fn distance_to_rest(@src.SubjectState) -> Int
 
 pub fn dml_in_sample(Array[Double], Array[Double], Array[Array[Double]], DmlConfig) -> DmlResult

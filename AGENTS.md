@@ -12,14 +12,15 @@ Long-form context lives in `README.mbt.md` (English) and `README.zh.mbt.md`
 
 ```console
 moon test                              # all tests (default target: wasm); currently
-                                       # 129/129 on wasm + 2 snnref tests on native
+                                       # 176/176 on wasm + 2 snnref tests on native
 moon test --target native snnref       # spike-sediment experiment (native only)
 moon check                             # type/warn check
 moon info                              # regenerates every pkg.generated.mbti (tracked)
 moon fmt                               # format; `moon fmt --check` must stay clean
 moon run cmd/main -- report            # CLI: report (default) | multi | group | society |
                                        # evolution | cycle | coordinator | dmlref | causal |
-                                       # audit | mermaid | dot | genesis | course |
+                                       # audit | fleet | mutants | mermaid | dot | genesis |
+                                       # course |
                                        # naming | slots | loop | principle | intuition |
                                        # ml | ml-export | all | society-mermaid |
                                        # group-mermaid | nested-mermaid | journey |
@@ -28,6 +29,8 @@ moon run cmd/main -- report            # CLI: report (default) | multi | group |
                                        # (`intuition` = 直觉读法：备忘录读成背景直觉的仓库）
                                        # (`causal` = 0.75.0 深用：敏感性／多重检验／异质性）
                                        # (`audit` = 三鉴自审计（结构鉴／类型鉴／行为鉴）：主体机当程序读）
+                                       # (`fleet` = 同一套三鉴扩到群体机与社会机：两台机无槽无终点）
+                                       # (`mutants` = 迁移表变异网：三台机×六族破坏 18 处逐处被抓）
                                        # (`slots` = 驱动槽归位表, `loop` = 位置 × 槽的执行契约)
                                        # (`nested-mermaid` = 嵌套视图：11 阶段为复合状态容器)
                                        # (`journey` = 行程视图：一次行走的局部图 + 样式标注)
@@ -43,6 +46,18 @@ moon run examples/plr                  # also: examples/irm, examples/cross_chec
                                        # moon run --target native examples/sediment
 moon run --target native cmd/coord     # coordinator CLI with real disk I/O; writes
                                        # .openseek/coordinator-state.txt (gitignored)
+python tools/apply_fmt.py              # copy `moon fmt --check`'s canonical copies back
+                                       # (byte-for-byte: `moon fmt` cannot rewrite files
+                                       # in this sandbox, and a binary copy cannot mangle
+                                       # encoding the way Get-Content/Set-Content does)
+python tools/mutate_review.py          # review harness: mutation table per Loop. Each
+                                       # entry reverts one construct to its old/wrong
+                                       # shape, re-runs `moon test`, and the criteria MUST
+                                       # go red. `python tools/mutate_review.py loop5`
+                                       # runs one group. A compile error is NOT a catch —
+                                       # a mutation rejected by the compiler proves the
+                                       # syntax, not the criteria. Surviving mutations must
+                                       # be classified as equivalent or a named gap.
 ```
 
 - After changing dependencies in `moon.mod`, run `moon update` first.
@@ -85,7 +100,7 @@ node plugin\tools\sync-install.mjs push <checkout> # install, then rebuild + re-
   `node <installed>\tools\update-bundle.mjs <checkout>`, which also rewrites the pin from
   `moon.mod` and re-runs `tools/validate-plugin.mjs`.
 - After any plugin change run the package's own net: `node <installed>\tools\validate-plugin.mjs`
-  (26 checks: the pin, a real MCP handshake, all 28 faces, the model-count invariants including
+  (26 checks: the pin, a real MCP handshake, all 30 faces, the model-count invariants including
   `audit`'s 「未预期 0 条」 tripwire, a page-citation anti-drift rule, and a positive control that
   fires the checkout guard). The plugin's SemVer in `.minimax-plugin/plugin.json` is independent
   of the module's `moon.mod` version — bump it by hand.
@@ -98,7 +113,7 @@ node plugin\tools\sync-install.mjs push <checkout> # install, then rebuild + re-
 
 | Package | Unit | Contents |
 |---------|------|----------|
-| `src` | one subject | Subject state machine (34 states · 53 transitions · 11 phases) + drive slots (8, `slot.mbt`) + step contract (`loop.mbt`: `step` → 迁/守/未定/同归/无路, `step_by_trigger` for trigger granularity, `Trace::detailed` per-step provenance) + adjacency index (`index.mbt`) + durability manifest (`durability.mbt`) + rendering (`render.mbt`: report/dot/mermaid/nested/journey) + spec export (`spec.mbt`: machine as JSON data, `spec_vocabulary` anti-drift; port of python-statemachine's io/neutral-IR, direction inverted for data-as-code) + pathsum & properties (`paths.mbt`: tropical `min_steps`/`distance_to` — the road-to-tranquility ladder; `is_deterministic` per-trigger, `is_acyclic` = false by design; port of FiniteStateTransducers.jl's shortest_distance/properties, marked 模型整理) + machine algebra (`algebra.mbt`: operator mapping, main-line decomposition via `course()`, partition-refinement `minimal_quotient` — 31 blocks = course length with three designed twin pairs 无忆≡无筹/紧迫≡疏离/受赏≡畏怖; port of Ragel's minimization, marked 模型整理) + Petri net face (`petri.mbt`: places=34 states, transitions=53 table rows (one-to-one, token-conserving), immutable `PetriMarking` with `enabled`/`fire` returning Consume/Produce effects, multi-token concurrency demo, 未定 = structural conflict, coloring = genome noted not implemented; port of CarlAdam's marking/occurrence semantics, marked 模型整理) + Aho-Corasick face (`aho.mbt`: the 49 trigger sentences as a keyword trie with failure links and output merging — 失败链 = the algorithmic form of remembering (fall back to the longest shared past), textbook-example tests; port of pyahocorasick, marked 模型整理) + Büchi face (`buchi.mbt`: the machine read as an ω-automaton — no finals + the R11 re-entry loop make the natural acceptance condition Büchi's (recurrence of 宁静); nonemptiness via lasso, liveness potential via distance_to, 11 stall self-loops: 10 rejecting (structure does not enforce liveness — fairness lives in the genome) + 宁静's own 静待下一刻 loop as the one accepted stall; marked 模型整理) |
+| `src` | one subject | Subject state machine (34 states · 53 transitions · 11 phases) + drive slots (8, `slot.mbt`) + step contract (`loop.mbt`: `step` → 迁/守/未定/同归/无路, `step_by_trigger` for trigger granularity, `candidates` as the single source for "what can happen here", `Outcome::forks_from` for programmable branching at 未定, `expand` for all continuations of a slot script, `after_open` for all positions reachable after an 未定 without presuming the next slot, `open_points` listing the 5 未定 points, `Trace::detailed` per-step provenance) + adjacency index (`index.mbt`) + durability manifest (`durability.mbt`) + rendering (`render.mbt`: report/dot/mermaid/nested/journey) + spec export (`spec.mbt`: machine as JSON data, `spec_vocabulary` anti-drift; port of python-statemachine's io/neutral-IR, direction inverted for data-as-code) + pathsum & properties (`paths.mbt`: tropical `min_steps`/`distance_to` — the road-to-tranquility ladder; `is_deterministic` per-trigger, `is_acyclic` = false by design; port of FiniteStateTransducers.jl's shortest_distance/properties, marked 模型整理) + machine algebra (`algebra.mbt`: operator mapping, main-line decomposition via `course()`, partition-refinement `minimal_quotient` — 31 blocks = course length with three designed twin pairs 无忆≡无筹/紧迫≡疏离/受赏≡畏怖; port of Ragel's minimization, marked 模型整理) + Petri net face (`petri.mbt`: places=34 states, transitions=53 table rows (one-to-one, token-conserving), immutable `PetriMarking` with `enabled`/`fire` returning Consume/Produce effects, multi-token concurrency demo, 未定 = structural conflict, coloring = genome with `petri_coloring_status()` stating the boundary and a test locking the claim; port of CarlAdam's marking/occurrence semantics, marked 模型整理) + Aho-Corasick face (`aho.mbt`: the 49 trigger sentences as a keyword trie with failure links and output merging — 失败链 = the algorithmic form of remembering (fall back to the longest shared past), textbook-example tests; port of pyahocorasick, marked 模型整理) + Büchi face (`buchi.mbt`: the machine read as an ω-automaton — no finals + the R11 re-entry loop make the natural acceptance condition Büchi's (recurrence of 宁静); nonemptiness via lasso, liveness potential via distance_to, 11 stall self-loops: 10 rejecting (structure does not enforce liveness — fairness lives in the genome) + 宁静's own 静待下一刻 loop as the one accepted stall; marked 模型整理) |
 | `multi` | two subjects | Normative rules R1–R14, `TruthRegime`, claim schemas, `encounter` verdicts |
 | `group` | one group | Emergence state machine (20 states), member config → group state, R7 write-back; **execution contract** (`loop.mbt`, 0.1.27): no drive slots, so the trigger *is* the driver — `step(state, trigger)` → 迁/守/未定/无路, `walk`, `open_pairs`, `no_dead_end`; the table holds exactly one **one-trigger-two-destinations** pair (`Converging × Attention` → 共语 or 商谈) which the machine reports as `Open` rather than picking — a data question for the author, not for the machine |
 | `society` | one society | Two-level social model from the thesis (13 states), lifeworld vs. system; **execution contract** (`loop.mbt`, 0.1.27): same four receipts, and `one_edge_per_trigger()` asserts the table is trigger-deterministic, so `Open` is unreachable there (arm kept as the landing place if the table ever changes) |
@@ -108,11 +123,12 @@ node plugin\tools\sync-install.mjs push <checkout> # install, then rebuild + re-
 | `dmlref` | — | Cross-check of our DoubleML against `riantr/moonbit_doubleML@0.75.0` |
 | `causal` | one dataset | 0.75.0-deep diagnostics (read-only, data from the state machine): sensitivity (Cinelli–Hazlett `rv = \|θ̂\|/max_bias`), multiple-testing correction (BH/Bonferroni — naive OLS also passes, significance ≠ evidence), BLP heterogeneity (residualized treatment × centered covariates, HC0 se; d̃ recovers θ̂); marked 模型整理 |
 | `audit` | one machine | Three-lens static audit of the real subject machine (`riantr/moonbit_static_analysis/src/statecheck`; the library's moon.mod names pyroduct its reference consumer): real tables → plain-data `MachineSpec` → structural (states are bindings) / type (slots placed, no silent Block) / behavior (course abstractly executed) lenses; findings split 已知设计（无忆／无筹 only-exit, verified 0.1.2）vs 未预期（must stay 0 — live tripwire）; marked 模型整理 |
+| `audit` fleet + mutants | two more machines | 0.1.28: the same three lenses over the group machine (20 states · 42 transitions · 399 无路) and the society machine (13 · 26 · 208) — `fleet.mbt`. Two 口径 differ and are stated up front: **no drive slots** (the trigger *is* the driver, so lens 2's slot layer is skipped via an empty `slot_names`) and **no terminal** (`no_dead_end` holds everywhere; filling one would misreport 不封闭 as a defect). 未预期 is 0 with **no known-design exemption at all** — measured, not assumed. `mutants.mbt` is the standing answer to "can it even see?": 3 machines × 6 breakages = 18, each must be caught **and** report the expected family; `split_fleet`/`probe_finding` exist so the layering itself is testable (on the real tables it is vacuously true); marked 模型整理 |
 | `snnref` | one experiment | Spike-sediment experiment (native only): 49 triggers → Poisson spike trains with slot-correlated rates → Gerstner STDP (CSR, library defaults) → does the sedimented weight structure recover the 8-slot partition? Means, hit rate vs. chance baseline, per-slot table; marked 模型整理 |
 | `viz` | — | Presentation-only: all three state machines as Mermaid `stateDiagram-v2` source plus one self-contained HTML page (`page()` embeds all three plus the subject machine's nested view — 11 phases as composite states — and the demo journey view with styling for now/gap/undecided; mermaid.js CDN loaded at view time — build/run stay offline). Delegates to the per-machine renderers; declares ASCII node ids with Chinese labels everywhere |
-| `cmd/main` | — | wasm CLI (33 named subcommands, incl. `all`, + the default report) |
+| `cmd/main` | — | wasm CLI (35 named subcommands, incl. `all`, + the default report) |
 | `cmd/coord` | — | native CLI with real disk I/O (`supported_targets = "+native"`) |
-| `cmd/jsoncli` | — | JSON bridge for both agent plugins — the DeepSeek Harness one (`riantr/dsh-plugin-pyroduct`) and the MiniMax Code one (`plugin/`) (js target: `moon build --target js` → `_build/js/debug/build/cmd/jsoncli/jsoncli.js`): one JSON request arg `{ "kind": ... }` → one-line JSON reply `{ok, kind, rendered, faces}`. Kinds mirror the model-facing subcommands (28 faces, listed in the bridge's `faces()`); viz composites and `all` stay CLI-only. The bridge is a pure spawner/formatter — all model semantics stay in the renderers it calls |
+| `cmd/jsoncli` | — | JSON bridge for both agent plugins — the DeepSeek Harness one (`riantr/dsh-plugin-pyroduct`) and the MiniMax Code one (`plugin/`) (js target: `moon build --target js` → `_build/js/debug/build/cmd/jsoncli/jsoncli.js`): one JSON request arg `{ "kind": ... }` → one-line JSON reply `{ok, kind, rendered, faces}`. Kinds mirror the model-facing subcommands (30 faces, listed in the bridge's `faces()`); viz composites and `all` stay CLI-only. The bridge is a pure spawner/formatter — all model semantics stay in the renderers it calls |
 | `tools/pdfdump` | — | read-only survey records of the source PDF |
 | `plugin/` | — | **not a MoonBit package** — the MiniMax Code local plugin (`.minimax-plugin/plugin.json` + `server.mjs` MCP server + the `pyroduct-model` skill + `tools/`). This tree is the source of truth; the installed copy lives in the Desktop data dir (`~/.minimax/plugins/pyroduct-model/`, `.mavis` is a junction to it) and is what the runtime loads. `vendor/jsoncli.js` is a build artifact, gitignored and regenerated |
 | `examples/*` | — | one runnable example per package: `plr`, `irm`, `cross_check`, `consumer`, `sediment` (native) |

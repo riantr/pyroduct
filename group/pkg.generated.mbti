@@ -20,6 +20,8 @@ pub fn emerge(Array[@multi.Subject]) -> GroupState
 
 pub fn emergence_table() -> Array[(String, GroupState)]
 
+pub fn exitable(GroupState, GroupTrigger) -> Bool
+
 pub fn feedback(GroupState, @multi.Subject) -> @multi.Subject
 
 pub fn feedback_demo(GroupState) -> String
@@ -27,6 +29,10 @@ pub fn feedback_demo(GroupState) -> String
 pub fn initial() -> GroupState
 
 pub fn is_well_formed(GroupState, Array[@multi.Subject]) -> Bool
+
+pub fn no_dead_end() -> Bool
+
+pub fn open_pairs() -> Array[(GroupState, GroupTrigger, Array[GroupState])]
 
 pub fn reachable(GroupState, GroupState) -> Bool
 
@@ -38,15 +44,30 @@ pub fn render_mermaid() -> String
 
 pub fn resting() -> GroupState
 
+pub fn step(GroupState, GroupTrigger) -> GroupOutcome
+
 pub fn successors(GroupState) -> Array[(GroupTrigger, GroupState)]
 
 pub fn textual_basis() -> Array[(String, String)]
 
 pub fn transitions() -> Array[GroupTransition]
 
+pub fn walk(GroupState, Array[GroupTrigger]) -> GroupTrace
+
 // Errors
 
 // Types and methods
+pub(all) enum GroupOutcome {
+  Moved(GroupTrigger, GroupState)
+  Held(GroupTrigger, GroupState)
+  Open(GroupTrigger, Array[GroupState])
+  Block(String)
+} derive(Eq)
+pub fn GroupOutcome::equal(Self, Self) -> Bool
+pub fn GroupOutcome::label(Self) -> String
+pub fn GroupOutcome::landing(Self) -> GroupState?
+pub fn GroupOutcome::not_equal(Self, Self) -> Bool
+
 pub(all) enum GroupPhase {
   Gathering
   Bodied
@@ -90,6 +111,15 @@ pub fn GroupState::equal(Self, Self) -> Bool
 pub fn GroupState::gloss(Self) -> String
 pub fn GroupState::not_equal(Self, Self) -> Bool
 pub fn GroupState::phase(Self) -> GroupPhase
+
+pub struct GroupTrace {
+  start : GroupState
+  steps : Array[(GroupTrigger, GroupOutcome)]
+} derive(Eq)
+pub fn GroupTrace::at(Self) -> GroupState
+pub fn GroupTrace::equal(Self, Self) -> Bool
+pub fn GroupTrace::not_equal(Self, Self) -> Bool
+pub fn GroupTrace::outcome_labels(Self) -> Array[String]
 
 pub struct GroupTransition {
   from : GroupState

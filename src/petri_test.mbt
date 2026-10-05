@@ -92,3 +92,14 @@ test "petri：使能表随标识变化；全部 53 变迁一对一" {
   // 变迁总数 = 迁移表行数
   assert_eq(@src.petri_transitions().length(), 53)
 }
+
+///|
+/// 着色（托肯之色＝基因组）的「本面不实现」是一句**被断言的声明**，不是散文。
+/// 报告与测试引同一个函数，故两者不会各说各话。是否把基因组做进本面是范围
+/// 判断（基因组住在 `evolution`，`src` 零 import），不在状态机层替人定。
+test "着色：声明与报告同出一处，且明说不实现" {
+  let claim = @src.petri_coloring_status()
+  assert_true(claim.contains("基因组"))
+  assert_true(claim.contains("不实现"))
+  assert_true(@src.render_petri_report().contains(claim))
+}

@@ -174,6 +174,20 @@ fn petri_fmt_count(n : Int) -> String {
 
 ///|
 /// Petri 网面的报告：概念对准、双托肯演示（并发视角）、守恒与冲突判读。
+
+///|
+/// 着色（托肯之色＝基因组）的实现状态：一句话，供报告与测试共用。
+///
+/// 记档自 0.1.17 起就写在文件头与报告里，但**没有人断言它**——散文里的
+/// 「未实现」和代码里的「没有入口」可以各说各话。把它变成一个函数，报告与
+/// 测试引同一处，就不会漂移。是否把基因组做进本面是**范围判断**（基因组住在
+/// `evolution`，`src` 零 import），不在状态机层顺手替人定。
+pub fn petri_coloring_status() -> String {
+  "着色 ↔ 托肯之色＝基因组（进化层）：本面无色（计数标识），色不进 src；本面不实现着色。"
+}
+
+///|
+/// 执行契约的报告：四组对照与并发演示。
 pub fn render_petri_report() -> String {
   let lines : Array[String] = [
     "# Petri 网面（CarlAdam 镜像）", "", "参照 CarlAdam（以 Carl Adam Petri 命名的 Petri 网库）：库所持托肯、",
@@ -193,9 +207,7 @@ pub fn render_petri_report() -> String {
   lines.push(
     "- 结构冲突 ↔ 未定：同一槽的多个变迁共享输入库所——仲裁照旧不在 src（双诚之比）；",
   )
-  lines.push(
-    "- 着色 ↔ 托肯之色＝基因组（进化层）：本面无色（计数标识），色不进 src。",
-  )
+  lines.push(petri_coloring_status())
   lines.push("")
   lines.push(
     "## 并发演示：两个托肯在同一机器上（multi 的结构对准）",

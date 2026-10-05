@@ -7,9 +7,9 @@
 // 支持的 kind = faces() 清单：机器本体（report/slots/loop/mermaid/dot/
 // genesis/course/naming/principle/spec）+ 多主体与涌现（multi/group/society）
 // + agent 层（evolution/cycle/intuition/association）+ 因果与审计（dmlref/
-// causal/audit/ml/ml-export）+ 协调器 + 五条分析面（pathsum/algebra/petri/
-// aho/buchi）。可视化合成页（viz/journey/嵌套视图）与 all 组合不走桥——
-// 它们是呈现层，不是模型事实。
+// causal/audit/fleet/mutants/ml/ml-export）+ 协调器 + 五条分析面（pathsum/
+// algebra/petri/aho/buchi）。可视化合成页（viz/journey/嵌套视图）与 all
+// 组合不走桥——它们是呈现层，不是模型事实。
 
 ///|
 /// 回信信封：rendered 是报告全文；faces 是支持的 kind 清单（防漂移）。
@@ -31,9 +31,9 @@ struct Request {
 fn faces() -> Array[String] {
   [
     "report", "slots", "loop", "multi", "group", "society", "evolution", "cycle",
-    "coordinator", "dmlref", "causal", "audit", "mermaid", "dot", "genesis", "course",
-    "naming", "principle", "intuition", "ml", "ml-export", "spec", "association",
-    "pathsum", "algebra", "petri", "aho", "buchi",
+    "coordinator", "dmlref", "causal", "audit", "fleet", "mutants", "mermaid", "dot",
+    "genesis", "course", "naming", "principle", "intuition", "ml", "ml-export", "spec",
+    "association", "pathsum", "algebra", "petri", "aho", "buchi",
   ]
 }
 
@@ -62,6 +62,8 @@ fn render_kind(kind : String) -> String raise {
     "dmlref" => @dmlref.render_report()
     "causal" => @causal.render_report()
     "audit" => @audit.render_report()
+    "fleet" => @audit.render_fleet_report()
+    "mutants" => @audit.render_mutation_report()
     "mermaid" => @sm.render_mermaid()
     "dot" => @sm.render_dot()
     "genesis" => @sm.render_genesis()

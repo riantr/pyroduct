@@ -2,20 +2,51 @@
 package "riantr/pyroduct/audit"
 
 import {
+  "riantr/moonbit_static_analysis/src/core",
   "riantr/moonbit_static_analysis/src/report",
   "riantr/moonbit_static_analysis/src/statecheck",
 }
 
 // Values
+pub fn build_group_spec() -> @statecheck.MachineSpec
+
+pub fn build_society_spec() -> @statecheck.MachineSpec
+
 pub fn build_spec() -> @statecheck.MachineSpec
+
+pub fn families_of(@statecheck.MachineSpec) -> Array[String]
+
+pub fn probe_finding(@core.Family, String) -> @report.Report
+
+pub fn render_fleet_report() -> String
+
+pub fn render_mutation_report() -> String
 
 pub fn render_report() -> String
 
 pub fn run_audit(@statecheck.MachineSpec) -> (Array[@report.Report], Array[@report.Report])
 
+pub fn run_fleet_audit() -> Array[Verdict]
+
+pub fn split_fleet(String, Array[@report.Report]) -> Verdict
+
+pub fn table_mutants() -> Array[Mutant]
+
 // Errors
 
 // Types and methods
+pub(all) struct Mutant {
+  machine : String
+  label : String
+  spec : @statecheck.MachineSpec
+  expect : String
+}
+
+pub(all) struct Verdict {
+  machine : String
+  known : Array[@report.Report]
+  fresh : Array[@report.Report]
+}
 
 // Type aliases
 

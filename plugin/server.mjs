@@ -28,7 +28,7 @@ const BRIDGE_RELATIVE = path.join('_build', 'js', 'debug', 'build', 'cmd', 'json
 const PROVENANCE_FILE = path.join(PLUGIN_ROOT, 'vendor', 'BUILD.json')
 
 const SERVER_NAME = 'pyroduct-model'
-const SERVER_VERSION = '0.1.2'
+const SERVER_VERSION = '0.2.0'
 const DEFAULT_TIMEOUT_MS = 120_000
 const GATE_TIMEOUT_MS = 900_000
 
@@ -51,6 +51,8 @@ const FACES = [
   ['dmlref', '自研 DoubleML 与 riantr/moonbit_doubleML@0.75.0 的互校（θ̂ 差、se 差）。'],
   ['causal', '0.75.0 深用诊断（模型整理）：敏感性 rv、多重检验 BH/Bonferroni、BLP 异质性。'],
   ['audit', '三鉴自审计（模型整理）：结构鉴／类型鉴／行为鉴；已知设计 4 条、未预期 0 条。'],
+  ['fleet', '三鉴自审计扩到另两台机（模型整理）：群体 20 状态·42 迁移、社会 13 状态·26 迁移；两台机无驱动槽、无终点，故类型鉴的槽层整层跳过；未预期 0 条且不设豁免。'],
+  ['mutants', '迁移表变异网（模型整理）：三台机×六族破坏共 18 处，逐处被抓到且家族对得上——「0 条发现」需要证据才站得住。'],
   ['mermaid', '主体机 Mermaid stateDiagram-v2 源码。'],
   ['dot', '主体机 Graphviz dot 源码。'],
   ['genesis', '主线：从开端到持住的环节序列。'],
@@ -227,7 +229,7 @@ const TOOLS = [
     description:
       '跑一个 pyroduct 分析面，返回该面报告全文。面：report（34 状态 · 53 迁移 · 11 阶段，各阶段下列位置与原文措辞，末节给出处层——默认入口，先读它）、' +
       'slots（49 触发 → 8 驱动槽）、loop（位置 × 槽契约：迁／守／未定／无路）、multi（R1–R14 下两主体遭遇的判词）、' +
-      'group、society、evolution、cycle、coordinator、dmlref、causal、audit、naming、course、genesis、principle、intuition、ml、ml-export、' +
+      'group、society、evolution、cycle、coordinator、dmlref、causal、audit、fleet、mutants、naming、course、genesis、principle、intuition、ml、ml-export、' +
       'spec、association、pathsum、algebra、petri、aho、buchi、mermaid、dot。页码出处（P.xx）只有 multi／group／society／intuition 四面印，' +
       '主体机自己的面没有页码字段。呈现层（viz/journey/嵌套视图/all）不在桥里。凡是需要机器自己的事实而不是记忆里的数字时用它。',
     inputSchema: {

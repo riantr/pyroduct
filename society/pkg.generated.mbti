@@ -12,11 +12,19 @@ pub fn basis() -> Array[(String, String)]
 
 pub fn course() -> Array[State]
 
+pub fn exitable(State, Trigger) -> Bool
+
 pub fn gap() -> State
 
 pub fn initial() -> State
 
+pub fn no_dead_end() -> Bool
+
 pub fn no_final_closure() -> Bool
+
+pub fn one_edge_per_trigger() -> Bool
+
+pub fn open_pairs() -> Array[(State, Trigger, Array[State])]
 
 pub fn reachable(State, State) -> Bool
 
@@ -24,13 +32,28 @@ pub fn render_mermaid() -> String
 
 pub fn render_report() -> String
 
+pub fn step(State, Trigger) -> Outcome
+
 pub fn successors(State) -> Array[(Trigger, State)]
 
 pub fn transitions() -> Array[Transition]
 
+pub fn walk(State, Array[Trigger]) -> Trace
+
 // Errors
 
 // Types and methods
+pub(all) enum Outcome {
+  Moved(Trigger, State)
+  Held(Trigger, State)
+  Open(Trigger, Array[State])
+  Block(String)
+} derive(Eq)
+pub fn Outcome::equal(Self, Self) -> Bool
+pub fn Outcome::label(Self) -> String
+pub fn Outcome::landing(Self) -> State?
+pub fn Outcome::not_equal(Self, Self) -> Bool
+
 pub(all) enum Phase {
   Life
   Language
@@ -66,6 +89,15 @@ pub fn State::gloss(Self) -> String
 pub fn State::not_equal(Self, Self) -> Bool
 pub fn State::phase(Self) -> Phase
 pub fn State::residue(Self) -> Int
+
+pub struct Trace {
+  start : State
+  steps : Array[(Trigger, Outcome)]
+} derive(Eq)
+pub fn Trace::at(Self) -> State
+pub fn Trace::equal(Self, Self) -> Bool
+pub fn Trace::not_equal(Self, Self) -> Bool
+pub fn Trace::outcome_labels(Self) -> Array[String]
 
 pub struct Transition {
   from : State

@@ -113,9 +113,10 @@ function check(label, condition, detail = '') {
 
 const FACES = [
   'report', 'slots', 'loop', 'multi', 'group', 'society', 'evolution', 'cycle',
-  'coordinator', 'dmlref', 'causal', 'audit', 'mermaid', 'dot', 'genesis', 'course',
-  'naming', 'principle', 'intuition', 'ml', 'ml-export', 'spec', 'association',
-  'pathsum', 'algebra', 'petri', 'aho', 'buchi',
+  'coordinator', 'dmlref', 'causal', 'audit', 'fleet', 'mutants', 'mermaid',
+  'dot', 'genesis', 'course', 'naming', 'principle', 'intuition', 'ml',
+  'ml-export', 'spec', 'association', 'pathsum', 'algebra', 'petri', 'aho',
+  'buchi',
 ]
 
 const init = await request('initialize', {
@@ -146,7 +147,7 @@ check('unknown method -> -32601', unknown.error?.code === -32601)
 const cat = await request('tools/call', { name: 'pyroduct_faces', arguments: {} })
 const catText = textOf(cat)
 check('pyroduct_faces ok', cat.result?.isError !== true)
-check('catalog lists all 28 faces', FACES.every((f) => catText.includes(f)))
+check(`catalog lists all ${FACES.length} faces`, FACES.every((f) => catText.includes(f)))
 // Version-agnostic on purpose: the number moves with every release, so pinning a
 // literal here would turn each version bump into a harness edit. What must hold is
 // that the catalog reports the version the pin file records — that pair drifting
@@ -179,7 +180,7 @@ for (const kind of FACES) {
   }
   if (body.trim().length < 80) tiny.push(`${kind} (${body.trim().length} chars)`)
 }
-check('all 28 faces render non-empty', empty.length === 0, empty.join(' | '))
+check(`all ${FACES.length} faces render non-empty`, empty.length === 0, empty.join(' | '))
 check('no face renders a stub', tiny.length === 0, tiny.join(' | '))
 
 // Content invariants, asserted against what the model actually prints.
@@ -199,6 +200,9 @@ const invariants = [
   ['loop', '228'],
   ['audit', '未预期发现：**0 条**'],
   ['audit', '228'],
+  ['fleet', '未预期发现：**0 条**'],
+  ['fleet', '没有驱动槽'],
+  ['mutants', '6／6'],
   ['algebra', '最小商：31 块'],
   ['pathsum', '宁静'],
   ['petri', '守恒'],

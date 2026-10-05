@@ -4,9 +4,13 @@
 // 绑定：绑定／进入／可达）、类型鉴（注解即契约：无路必须说出口）、行为鉴
 // （历程抽象执行）。「鉴」兼照镜与审察二义。已知设计使然的发现（无忆／无筹
 // 只出不进）在报告里注明出处层，未预期发现必须为零（回归绊线）。
+// 0.1.28 起 fleet.mbt 把同一套三鉴扩到群体机与社会机（两台机**没有驱动槽**，
+// 故类型鉴的槽层整层跳过，见该文件头的说明）。
 // 本层只读：不改判据、不修表。
 import {
   "riantr/pyroduct/src" @sm,
+  "riantr/pyroduct/group" @g,
+  "riantr/pyroduct/society" @so,
   "riantr/moonbit_static_analysis/src/statecheck" @sa,
   "riantr/moonbit_static_analysis/src/report" @sareport,
   "riantr/moonbit_static_analysis/src/core" @sacore,

@@ -8,6 +8,48 @@
 ///
 /// 下面九个接口里，第 4、5、9 条已经在本包中实现并做了数值验证，其余给出
 /// 明确的接入点。
+///
+/// 九条接口的**实现状态是一张数据表**（`design_status_table`），报告里的
+/// 「状态：」一行由它生成，不由散文另写一遍——0.1.28 之前那一行是手写的散文，
+/// 结果第 1 条写着「设计点（本包未实现）」而其余只写「设计点」，同一件事两种
+/// 说法，读者无从判断哪个是特例。改成表之后：状态可计数（小节数／已实现数／
+/// 设计点数由测试锁住），散文与表不会各说各话。
+
+///|
+/// 九条接口的实现状态：(小节标题, 状态)。状态取「已实现」或「设计点」。
+///
+/// 「本包未实现」是**范围判断**，不是欠账：本包声明的职责是 DoubleML（见
+/// `moon.pkg` 与 README），第 1 条要的 softmax／HMM／VAE 状态识别器不在其内。
+/// 要不要把它做进来是范围决定，不在状态机层顺手替人定。
+pub fn design_status_table() -> Array[(String, String)] {
+  [
+    ("1. 状态识别（观测 → 状态分布）", "设计点"),
+    ("2. 迁移学习（数据 → 转移概率）", "设计点"),
+    ("3. 结构发现（数据 → 缺边 / 错边）", "设计点"),
+    ("4. 因果效应估计：DoubleML（本包核心）", "已实现"),
+    ("5. 状态机基线的数据生成（本包已实现）", "已实现"),
+    ("6. 异质性效应（CATE）：谁从练习中受益更多", "设计点"),
+    ("7. 序贯 / 动态处置（重入环 → sequential DML）", "设计点"),
+    ("8. 策略学习与离线评估", "设计点"),
+    ("9. 与 Python 生态对接（本包已实现）", "已实现"),
+  ]
+}
+
+///|
+/// 某条接口的「状态：」那一行，由表生成。
+fn design_status_line(title : String) -> String {
+  let mut line = ""
+  for entry in design_status_table() {
+    if entry.0 == title {
+      if entry.1 == "已实现" {
+        line = "- 状态：**已实现**（实现与验证见 `ml` 的实验与测试）。"
+      } else {
+        line = "- 状态：设计点（本包未实现——范围判断，非欠账）。"
+      }
+    }
+  }
+  line
+}
 
 ///|
 /// 设计图文本。
@@ -28,7 +70,7 @@ pub fn render_ml_design() -> String {
   lines.push(
     "- 入口：P(观测 | s) 的编码器 + `SubjectState::gloss()` 作为弱监督种子。",
   )
-  lines.push("- 状态：设计点（本包未实现）。")
+  lines.push(design_status_line("1. 状态识别（观测 → 状态分布）"))
   lines.push("")
   lines.push("### 2. 迁移学习（数据 → 转移概率）")
   lines.push(
@@ -43,7 +85,7 @@ pub fn render_ml_design() -> String {
   lines.push(
     "- 入口：`successors()` 展开成设计矩阵，与 `transitions()` 对照。",
   )
-  lines.push("- 状态：设计点。")
+  lines.push(design_status_line("2. 迁移学习（数据 → 转移概率）"))
   lines.push("")
   lines.push("### 3. 结构发现（数据 → 缺边 / 错边）")
   lines.push("- 状态机侧：`transitions()` 当作图骨架与先验。")
@@ -51,7 +93,9 @@ pub fn render_ml_design() -> String {
     "- 机器学习侧：PC / GES / NOTEARS / 条件独立性检验，在骨架上检验每条边的存在性，",
   )
   lines.push("  并挑出「数据里有、表里没有」的候选边。")
-  lines.push("- 状态：设计点。")
+  lines.push(
+    design_status_line("3. 结构发现（数据 → 缺边 / 错边）"),
+  )
   lines.push("")
   lines.push("### 4. 因果效应估计：DoubleML（本包核心）")
   lines.push(
@@ -70,7 +114,9 @@ pub fn render_ml_design() -> String {
   lines.push(
     "- 入口：`dml_plr`、`dml_in_sample`、`naive_ols`、`linear_adjust_ols`。",
   )
-  lines.push("- 状态：**已实现并验证**（见下方实验）。")
+  lines.push(
+    design_status_line("4. 因果效应估计：DoubleML（本包核心）"),
+  )
   lines.push("")
   lines.push("### 5. 状态机基线的数据生成（本包已实现）")
   lines.push(
@@ -88,7 +134,9 @@ pub fn render_ml_design() -> String {
   lines.push(
     "- 入口：`make_dataset`、`practice_count`、`distance_to_rest`。",
   )
-  lines.push("- 状态：**已实现**。")
+  lines.push(
+    design_status_line("5. 状态机基线的数据生成（本包已实现）"),
+  )
   lines.push("")
   lines.push("### 6. 异质性效应（CATE）：谁从练习中受益更多")
   lines.push("- 状态机侧：阶段 / 状态作为效应修饰变量。")
@@ -98,7 +146,11 @@ pub fn render_ml_design() -> String {
   lines.push(
     "- 入口：把 `linear_adjust_ols` 的 T 列换成 T 与 X 的交互块。",
   )
-  lines.push("- 状态：设计点。")
+  lines.push(
+    design_status_line(
+      "6. 异质性效应（CATE）：谁从练习中受益更多",
+    ),
+  )
   lines.push("")
   lines.push("### 7. 序贯 / 动态处置（重入环 → sequential DML）")
   lines.push(
@@ -115,7 +167,11 @@ pub fn render_ml_design() -> String {
   )
   lines.push("  `DoubleMLDID` 及其面板/序贯扩展。")
   lines.push("- 入口：把 `Dataset` 扩展为 (主体, 阶段) 面板。")
-  lines.push("- 状态：设计点（当前包的 `Dataset` 是横截面）。")
+  lines.push(
+    design_status_line(
+      "7. 序贯 / 动态处置（重入环 → sequential DML）",
+    ),
+  )
   lines.push("")
   lines.push("### 8. 策略学习与离线评估")
   lines.push(
@@ -125,7 +181,7 @@ pub fn render_ml_design() -> String {
     "- 机器学习侧：值迭代 / 策略梯度 / 离线策略评估（DML 版本的 OPE，用于控制方差），",
   )
   lines.push("  目标是学出「在哪个状态该用哪个触发」。")
-  lines.push("- 状态：设计点。")
+  lines.push(design_status_line("8. 策略学习与离线评估"))
   lines.push("")
   lines.push("### 9. 与 Python 生态对接（本包已实现）")
   lines.push(
@@ -138,7 +194,9 @@ pub fn render_ml_design() -> String {
     "  `DRLearner`）或 R 的 `grf`，用参考实现复核本包的 θ̂。",
   )
   lines.push("- 入口：`export_csv`、`csv_preview`。")
-  lines.push("- 状态：**已实现**。")
+  lines.push(
+    design_status_line("9. 与 Python 生态对接（本包已实现）"),
+  )
   lines.push("")
   lines.push("### 一句话总结")
   lines.push(

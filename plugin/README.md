@@ -101,9 +101,9 @@ node tools\update-bundle.mjs D:\src\DeepseekHarness\Projects\pyroduct
 node tools\validate-plugin.mjs
 ```
 
-26 条：哈希钉 → 真 MCP 握手与三个工具（9 条）→ 28 个面全渲染 → 19 条内容不变量
-（含 `audit` 的「未预期 0 条」这条绊线）→ 反漂移规则（3 条）→ checkout 守卫的
-**阳性对照**（3 条）。
+26 条：哈希钉 → 真 MCP 握手与三个工具（9 条）→ 30 个面全渲染 → 22 条内容不变量
+（含 `audit` 的「未预期 0 条」这条绊线与 `fleet` 的两条口径说明）→ 反漂移规则（3 条）
+→ checkout 守卫的**阳性对照**（3 条）。
 
 最后一条是重点：守卫若没人触发就只是一句没人验过的声明。回归网会用一个故意错的
 `PYRODUCT_PROJECT_DIR` 再起一个 server，断言 `pyroduct_gates` 硬失败而

@@ -6,6 +6,8 @@ import {
 }
 
 // Values
+pub fn after_open(SubjectState, Slot, Int) -> Array[(SubjectState, Int)]
+
 pub fn aho_build(Array[String]) -> AhoAutomaton
 
 pub fn all_phases() -> Array[Phase]
@@ -24,6 +26,8 @@ pub fn buchi_nonempty() -> Bool
 
 pub fn buchi_stalls() -> Array[SubjectState]
 
+pub fn candidates(SubjectState, Slot) -> Array[(Trigger, SubjectState)]
+
 pub fn course() -> Array[SubjectState]
 
 pub fn distance_to(SubjectState) -> Array[(SubjectState, Int?)]
@@ -33,6 +37,8 @@ pub fn durability_manifest() -> Array[(String, String, String)]
 pub fn every_phase_has_non_act() -> Bool
 
 pub fn exitable(SubjectState, Slot) -> Bool
+
+pub fn expand(SubjectState, Array[Slot], Int) -> Expansion
 
 pub fn freedom_text(Int) -> String
 
@@ -52,7 +58,13 @@ pub fn min_steps(SubjectState, SubjectState) -> Int?
 
 pub fn minimal_quotient() -> (Int, Array[String])
 
+pub fn one_edge_per_trigger() -> Bool
+
 pub fn only_act_exits() -> Array[SubjectState]
+
+pub fn open_points() -> Array[(SubjectState, Slot, Int)]
+
+pub fn petri_coloring_status() -> String
 
 pub fn petri_marking_of(Array[SubjectState]) -> PetriMarking
 
@@ -98,6 +110,8 @@ pub fn render_slots() -> String
 
 pub fn revision_principle() -> String
 
+pub fn same_target_pairs() -> Array[(SubjectState, Slot, Array[Trigger], SubjectState)]
+
 pub fn slot_tally() -> Array[(Slot, Int)]
 
 pub fn spec_json() -> String
@@ -105,6 +119,8 @@ pub fn spec_json() -> String
 pub fn spec_vocabulary() -> Array[String]
 
 pub fn step(SubjectState, Slot) -> Outcome
+
+pub fn step_by_trigger(SubjectState, Trigger) -> Outcome
 
 pub fn successors(SubjectState) -> Array[(Trigger, SubjectState)]
 
@@ -140,13 +156,23 @@ pub(all) struct AhoStats {
   deepest_branch_path : String
 }
 
+pub(all) struct Expansion {
+  leaves : Array[Trace]
+  truncated : Bool
+} derive(Eq, @debug.Debug)
+pub fn Expansion::equal(Self, Self) -> Bool
+pub fn Expansion::not_equal(Self, Self) -> Bool
+pub fn Expansion::to_repr(Self) -> @debug.Repr
+
 pub(all) enum Outcome {
   Moved(Trigger, SubjectState)
   Held(Trigger, SubjectState)
   Open(Array[(Trigger, SubjectState)])
+  Same(Slot, Array[Trigger], SubjectState)
   Block(String)
 } derive(Eq, @debug.Debug)
 pub fn Outcome::equal(Self, Self) -> Bool
+pub fn Outcome::forks_from(Self, SubjectState) -> Array[Self]
 pub fn Outcome::label(Self) -> String
 pub fn Outcome::landing(Self) -> SubjectState?
 pub fn Outcome::not_equal(Self, Self) -> Bool

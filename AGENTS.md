@@ -12,7 +12,7 @@ Long-form context lives in `README.mbt.md` (English) and `README.zh.mbt.md`
 
 ```console
 moon test                              # all tests (default target: wasm); currently
-                                       # 176/176 on wasm + 2 snnref tests on native
+                                       # 178/178 on wasm + 2 snnref tests on native
 moon test --target native snnref       # spike-sediment experiment (native only)
 moon check                             # type/warn check
 moon info                              # regenerates every pkg.generated.mbti (tracked)
@@ -50,14 +50,22 @@ python tools/apply_fmt.py              # copy `moon fmt --check`'s canonical cop
                                        # (byte-for-byte: `moon fmt` cannot rewrite files
                                        # in this sandbox, and a binary copy cannot mangle
                                        # encoding the way Get-Content/Set-Content does)
-python tools/mutate_review.py          # review harness: mutation table per Loop. Each
-                                       # entry reverts one construct to its old/wrong
-                                       # shape, re-runs `moon test`, and the criteria MUST
-                                       # go red. `python tools/mutate_review.py loop5`
-                                       # runs one group. A compile error is NOT a catch —
-                                       # a mutation rejected by the compiler proves the
-                                       # syntax, not the criteria. Surviving mutations must
-                                       # be classified as equivalent or a named gap.
+python tools/mutate_review.py          # review harness: mutation table for all five
+                                       # Loops (30 mutations). Each entry reverts one
+                                       # construct to its old/wrong shape, re-runs
+                                       # `moon test`, and the criteria MUST go red.
+                                       # `python tools/mutate_review.py loop5` runs one
+                                       # group. Exit 0 only if every mutation turned a
+                                       # criterion red — so it can gate CI rather than
+                                       # depend on someone reading the output. Verdicts
+                                       # are also written to tools/mutation_review_log.md
+                                       # (committed) so the claim is auditable without
+                                       # re-running a working-tree-mutating pass.
+                                       # A compile error is NOT a catch (reported as
+                                       # COMPILE-ERROR) — a mutation rejected by the
+                                       # compiler proves the syntax, not the criteria.
+                                       # Surviving mutations must be classified as
+                                       # equivalent or a named gap.
 ```
 
 - After changing dependencies in `moon.mod`, run `moon update` first.

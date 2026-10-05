@@ -419,6 +419,88 @@ test "表无歧义：同一位置的同一条触发句只出现一次" {
 }
 
 ///|
+/// 上面那条断言在真表上**恒真**，所以它分不出「检查在跑」与「检查恒真」。
+/// 这条给 `one_edge_each` 一份**造出来的**清单：那个 `false` 只有真被跑过才会
+/// 出现。把检查恒真成 `true`（或删掉去重），这里立刻变红。
+test "去重检查在造的重复对上确实返回 false" {
+  let clean : Array[(@src.SubjectState, @src.Trigger)] = [
+    (@src.Standing, @src.ActInFreedom),
+    (@src.Freedom, @src.FeelFinitude),
+    (@src.Freedom, @src.FeelBoundlessness),
+  ]
+  assert_true(@src.one_edge_each(clean))
+  // 同一位置同一句：歧义
+  let same_pair : Array[(@src.SubjectState, @src.Trigger)] = [
+    (@src.Freedom, @src.FeelFinitude),
+    (@src.Freedom, @src.FeelFinitude),
+  ]
+  assert_false(@src.one_edge_each(same_pair))
+  // 同一位置不同句：合法，不该误报
+  let two_from : Array[(@src.SubjectState, @src.Trigger)] = [
+    (@src.Freedom, @src.FeelFinitude),
+    (@src.Freedom, @src.FeelBoundlessness),
+  ]
+  assert_true(@src.one_edge_each(two_from))
+  // 同一句不同位置：也合法（EnactOrder 两处就是这种）
+  let two_to : Array[(@src.SubjectState, @src.Trigger)] = [
+    (@src.Idol, @src.EnactOrder),
+    (@src.Ordered, @src.EnactOrder),
+  ]
+  assert_true(@src.one_edge_each(two_to))
+}
+
+///|
+/// 「表有歧义不猜」那条臂在真表上不可达（同一条触发在同一位置只出现一次），
+/// 故它住在纯函数 `resolve_hits` 里，好让测试用**造出来的**两条命中验它。
+/// 把「不猜」换成「替表挑一条」，这里立刻变红。
+test "有歧义时报缺口而不是替表挑一条" {
+  // 造出来的两条命中：一个自环、一个别处
+  let ambiguous = @src.resolve_hits(@src.Freedom, @src.FeelFinitude, [
+    @src.Freedom,
+    @src.Urgency,
+  ])
+  assert_true(ambiguous.label() == "无路")
+  assert_true(ambiguous.landing() == None)
+  // 零条 → 缺口（不是别的）
+  assert_true(
+    @src.resolve_hits(@src.Freedom, @src.FeelFinitude, []).label() == "无路",
+  )
+  // 唯一一条落回自身 → 守
+  let held = @src.resolve_hits(@src.Freedom, @src.FeelFinitude, [@src.Freedom])
+  assert_true(held.label() == "守")
+  // 唯一一条落到别处 → 迁
+  let moved = @src.resolve_hits(@src.Freedom, @src.FeelFinitude, [@src.Urgency])
+  assert_true(moved.label() == "迁")
+  match moved {
+    @src.Moved(tr, to) => {
+      assert_true(tr == @src.FeelFinitude)
+      assert_true(to == @src.Urgency)
+    }
+    _ => assert_true(false)
+  }
+  // 真实取料路径与纯判定同形：真表上零歧义，故逐条都能复原
+  for s in @src.all_states() {
+    for tr in @src.all_triggers() {
+      let direct = @src.step_by_trigger(s, tr)
+      match direct.landing() {
+        Some(to) => {
+          let hits : Array[@src.SubjectState] = []
+          for t in @src.transitions() {
+            if t.from == s && t.trigger == tr {
+              hits.push(t.to)
+            }
+          }
+          assert_eq(hits.length(), 1)
+          assert_true(@src.resolve_hits(s, tr, hits) == direct)
+          assert_true(to == hits[0])
+        }
+        None => assert_true(direct.label() == "无路")
+      }
+    }
+  }
+}
+
+///|
 /// 三处同归、七条触发句：每一条单独驱动都必须被认出来，且回执里点名的正是它
 /// 自己——不是同组里碰巧排在最前的那一条。
 test "同归的每条触发句各自驱动：回执点名的就是那一句" {

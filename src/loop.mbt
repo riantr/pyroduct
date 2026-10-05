@@ -169,21 +169,17 @@ pub fn step(state : SubjectState, slot : Slot) -> Outcome {
 }
 
 ///|
-/// 触发粒度走一步：只认这一句。
+/// 读回一条边的落点。`hits` 是该 (位置, 触发) 命中的**全部**落点。
 ///
-/// 槽粒度的 `step` 在多条触发同归一个目标时无从知道是哪一条发生过，于是不
-/// 点名（`Same`）；本函数把「是哪一句」交给调用方：这一句确实是此处的出边，
-/// 就给确定的回执（位置若回自身则是 `Held`），不是则如实报缺口。
-///
-/// 前提：同一位置的同一条触发句不出现两次（`one_edge_per_trigger` 锁住）。
-/// 万一表有歧义，也不猜——报缺口而不是替表挑一条。
-pub fn step_by_trigger(state : SubjectState, trigger : Trigger) -> Outcome {
-  let hits : Array[SubjectState] = []
-  for t in transitions() {
-    if t.from == state && t.trigger == trigger {
-      hits.push(t.to)
-    }
-  }
+/// 单独成函数，是因为「多条」那条臂在真表上**不可达**（`one_edge_per_trigger`
+/// 为真，同一位置的同一句触发只出现一次）。把判定与取料分开之后，那条臂才能
+/// 被验：否则它躺在函数里没人走过，变异把「不猜」换成「替表挑一条」也不会
+/// 有任何判据变红。测试拿**造出来的**两条命中喂它。
+pub fn resolve_hits(
+  state : SubjectState,
+  trigger : Trigger,
+  hits : Array[SubjectState],
+) -> Outcome {
   if hits.length() == 0 {
     return Block(
       "「\{trigger.label()}」不是「\{state.designation()}」的出边",
@@ -203,20 +199,57 @@ pub fn step_by_trigger(state : SubjectState, trigger : Trigger) -> Outcome {
 }
 
 ///|
+/// 触发粒度走一步：只认这一句。
+///
+/// 槽粒度的 `step` 在多条触发同归一个目标时无从知道是哪一条发生过，于是不
+/// 点名（`Same`）；本函数把「是哪一句」交给调用方：这一句确实是此处的出边，
+/// 就给确定的回执（位置若回自身则是 `Held`），不是则如实报缺口。
+///
+/// 前提：同一位置的同一条触发句不出现两次（`one_edge_per_trigger` 锁住）。
+/// 万一表有歧义，也不猜——报缺口而不是替表挑一条（那条臂在 `resolve_hits` 里，
+/// 独立可测）。
+pub fn step_by_trigger(state : SubjectState, trigger : Trigger) -> Outcome {
+  let hits : Array[SubjectState] = []
+  for t in transitions() {
+    if t.from == state && t.trigger == trigger {
+      hits.push(t.to)
+    }
+  }
+  resolve_hits(state, trigger, hits)
+}
+
+///|
+/// (位置, 触发) 对的清单里，每个 (位置, 触发) 只出现一次。
+///
+/// 取料与判定分开，同 `resolve_hits` 的理由：真表上恒为真，所以只看真表的
+/// 判据分不出「检查在跑」与「检查恒真」。测试给它一份**造出来的**清单
+/// （含一个重复对），那条 `false` 才验得住。
+pub fn one_edge_each(pairs : Array[(SubjectState, Trigger)]) -> Bool {
+  let seen : Array[(SubjectState, Trigger)] = []
+  for p in pairs {
+    let mut dup = false
+    for s in seen {
+      if s.0 == p.0 && s.1 == p.1 {
+        dup = true
+      }
+    }
+    if dup {
+      return false
+    }
+    seen.push(p)
+  }
+  true
+}
+
+///|
 /// 同一位置的同一条触发句不出现两次（`step_by_trigger` 的前提；表若有歧义，
 /// 那处本身就该复查，不该由机器替它选一条）。
 pub fn one_edge_per_trigger() -> Bool {
-  for s in all_states() {
-    let seen : Array[Trigger] = []
-    for t in transitions() {
-      if t.from == s && !contains_trigger(seen, t.trigger) {
-        seen.push(t.trigger)
-      } else if t.from == s {
-        return false
-      }
-    }
+  let pairs : Array[(SubjectState, Trigger)] = []
+  for t in transitions() {
+    pairs.push((t.from, t.trigger))
   }
-  true
+  one_edge_each(pairs)
 }
 
 ///|

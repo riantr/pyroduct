@@ -265,7 +265,9 @@ Expand, Colonize, Distort, Hinder, Reconstruct, Circulate。
 `src`（主体机）· `multi`（规范规则）· `group`（群体涌现）· `society`（双层
 社会模型）· `ml`（自研 DoubleML）· `evolution`（Agent 状态机）· `coordinator`
 （科研 Agent 运行时）· `dmlref`（外部互校）· `causal`（因果诊断）· `audit`
-（三鉴静态审计）· `snnref`（脉冲沉淀实验）。
+（三鉴静态审计，0.1.28 起扩到群体机与社会机，另有 `fleet`／`mutants` 两个面
+——变异网用 18 处故意的破坏证明「0 条发现」不是「什么都看不见」）· `snnref`
+（脉冲沉淀实验）。
 
 ### 纪律用语
 

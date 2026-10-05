@@ -289,7 +289,9 @@ Claim phases: 事前 Before · 事中 During · 事后 After.
 `society` (two-level social model) · `ml` (from-scratch DoubleML) · `evolution`
 (agent state machine) · `coordinator` (research-agent runtime) · `dmlref`
 (external cross-check) · `causal` (causal diagnostics) · `audit` (three-mirror
-static audit) · `snnref` (spike-sediment experiment).
+static audit of the subject machine, and `fleet`/`mutants` for the group and
+society machines plus a mutation net proving the audit can see) · `snnref`
+(spike-sediment experiment).
 
 ### Discipline terms
 

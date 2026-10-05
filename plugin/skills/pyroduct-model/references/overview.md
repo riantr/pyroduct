@@ -21,7 +21,7 @@
 | `snnref` | 一个实验 | 脉冲沉淀实验（native 专属）：49 触发 → Poisson spike trains（槽内共现高率）→ Gerstner STDP → 权重结构能否恢复驱动槽八分（比值、命中率对基线、分槽表）；标模型整理 |
 | `audit` 的另两台 | 两台机器 | 0.1.28：同一套三鉴扩到群体机（20 状态·42 迁移）与社会机（13 状态·26 迁移）。两台机**没有驱动槽**（驱动就是触发本身）与**没有终点**（不封闭是结构事实），故类型鉴的槽层整层跳过、`terminal` 留空；真表上未预期 0 条且**不设豁免**。另有 `mutants`：三台机×六族破坏共 18 处，逐处被抓——「0 条发现」需要证据才站得住。标模型整理 |
 | `viz` | — | 纯呈现：四台机的 Mermaid 源码 + 一页自包含 HTML（视时才拉 mermaid.js CDN，构建零网络） |
-| `cmd/main` | — | wasm CLI（三十三个子命令） |
+| `cmd/main` | — | wasm CLI（三十五个子命令） |
 | `cmd/coord` | — | native CLI，真实落盘（`supported_targets = "+native"`） |
 | `cmd/jsoncli` | — | 插件桥（js 目标）：一个 `{kind}` JSON 请求入、一行 `{ok,kind,rendered,faces}` JSON 回信出——本插件与 dsh 插件共用的 spawner 面 |
 | `tools/pdfdump` | — | 源 PDF 的只读勘察记录 |
@@ -46,7 +46,7 @@
 
 ```console
 moon check                              # 类型/告警检查
-moon test                               # 全部测试（wasm），当前 129/129 + snnref 2（native）
+moon test                               # 全部测试（wasm），当前 176/176 + snnref 2（native）
 moon test --target native snnref        # 脉冲沉淀实验（native 专属）
 moon fmt --check                        # 格式必须干净
 moon run --target native cmd/coord      # 检查点落盘往返（往返一致 true）

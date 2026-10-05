@@ -5,7 +5,7 @@
 /// 接到仓库已有的机制上，三条对应关系：
 ///
 ///   - **位置**＝`@sm.SubjectState`（发生论位置，不是内部变量）；推进只走
-///     `@sm.step(位置, 槽)`，其回执（迁／守／未定／无路）是迁移表给的，不是这里算的。
+///     `@sm.step(位置, 槽)`，其回执（迁／守／未定／同归／无路）是迁移表给的，不是这里算的。
 ///   - **世界回应**＝`@multi.encounter` 的真决断（复用 `evaluate`）——不造
 ///     `感知(环境, S_t)` 这样的函数，回应就是遭遇的判词，且**回应只能在该位置可走的
 ///     槽里挑**（`cycle_slot`）：回应不编造出路。
@@ -217,6 +217,8 @@ pub fn run_cycle(
     let raw_note = match raw {
       @sm.Open(_) => "并存未定，已按双诚之比裁决"
       @sm.Block(_) => "此槽在此位置无路，位置不动"
+      @sm.Same(_, named, _) =>
+        "去处确定、来处不名（\{named.length()} 条触发同归一处，机器不替环境点名）"
       _ => "回执唯一"
     }
     let remainder = "\{cur.state.designation()}由「\{slot.designation()}」驱动：\{raw_note}；残余 \{next_genome.carry}、他之诚 \{next_genome.toward_other}、己之诚 \{next_genome.toward_self}——界域随时重开，本步未穷尽。"

@@ -190,6 +190,16 @@ pub fn render_mermaid_journey(trace : Trace) -> String {
           "    %% 未定：\{st.from.designation()} × \{st.slot.designation()}（\{cands.length()} 条出路并存，位置不变）",
         )
       }
+      Same(_, named, to) => {
+        // 去处确定，故照常画边；来处不名，故边上不写触发句，只在注释里说清。
+        let key = "\{from_id}-->\{Repr(to)}:同归:\{st.slot.designation()}"
+        if !contains_str(drawn, key) {
+          lines.push(
+            "    \{from_id} --> \{Repr(to)} : \{st.slot.designation()}·同归（\{named.length()} 条来处，未点名）",
+          )
+          drawn.push(key)
+        }
+      }
       Block(reason) => {
         if !contains_str(gap, from_id) {
           gap.push(from_id)

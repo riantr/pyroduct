@@ -8,7 +8,7 @@
 ///   moon run cmd/main -- course    历程（可重入的环节序列）
 ///   moon run cmd/main -- naming    定名对照表（通用定名 / 原文名）
 ///   moon run cmd/main -- slots     驱动槽对照表（触发 → 八个槽）
-///   moon run cmd/main -- loop      执行契约（位置 × 槽：迁／守／未定／无路）
+///   moon run cmd/main -- loop      执行契约（位置 × 槽：迁／守／未定／同归／无路）
 ///   moon run cmd/main -- principle 修订所依据的主体通用性原则
 ///   moon run cmd/main -- intuition 直觉读法：把裁决备忘录读成背景直觉的仓库（模型整理）
 ///   moon run cmd/main -- ml       机器学习/DoubleML 与状态机的接口 + 因果实验

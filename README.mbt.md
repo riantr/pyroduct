@@ -43,8 +43,12 @@ One society: 13 · 26 · 8. Two subjects: 14 normative rules.
   Orientation 取向 / Antecedent 先行 / Act 行动 / Feedback 反馈 / Hold 持存 /
   CoBeing 共在 / Unveil 揭蔽) with an exhaustive match — an unplaced trigger
   fails the build. `step(position, slot)` answers only Moved (迁) / Held (守) /
-  Undecided (未定) / No-way (无路); of 272 position × slot combinations, 228
-  honestly answer No-way. The machine never invents a move.
+  Undecided (未定) / Same-destination (同归) / No-way (无路); of 272 position × slot
+  combinations, 228 honestly answer No-way. The machine never invents a move — and
+  since 0.1.26 it never invents *which sentence* moved it either: on the three
+  position × slot pairs where several triggers lead to one target it answers 同归
+  (destination known, cause unnamed) instead of naming the first one in the table.
+  `step_by_trigger(position, sentence)` takes the sentence as given.
 
 * An agent whose updates must clear a gate
 

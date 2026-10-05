@@ -16,10 +16,20 @@
 
 ///|
 /// 一次 `step` 的回执。
+///
+/// 五个回执：`Moved`（唯一出路）／`Held`（出路回到自身，即 17 条自环）／
+/// `Open`（多条**去处**并存，未定）／`Same`（多条**来处**归到同一个去处——
+/// 去处确定，来的那句不确定，机器不点名）／`Block`（缺口）。
+///
+/// `Same` 与 `Open` 分开是必要的：两者的「不确定」不在一个维度上。
+/// `Open` 是**去哪儿**没定，要主体决断；`Same` 是**从哪句来**没定而去哪儿已定，
+/// 无需决断，只需不编造（0.1.26 增；此前 `step` 在这种组合上直接报出迁移表
+/// 里第一条，等于替环境说了一句它没说过的话）。
 pub(all) enum Outcome {
   Moved(Trigger, SubjectState) // 唯一出路：由该触发迁到该位置
   Held(Trigger, SubjectState) // 出路回到自身：位置不变（沉淀、静待）
   Open(Array[(Trigger, SubjectState)]) // 多条出路并存：未定，不替主体决断
+  Same(Slot, Array[Trigger], SubjectState) // 同归：多条触发归到同一目标，只给槽与目标
   Block(String) // 此槽在此位置无路：缺口，不许强行推进
 } derive(Eq, Debug)
 
@@ -37,17 +47,22 @@ pub fn Outcome::label(self : Outcome) -> String {
     Moved(_, _) => "迁"
     Held(_, _) => "守"
     Open(_) => "未定"
+    Same(_, _, _) => "同归"
     Block(_) => "无路"
   }
 }
 
 ///|
 /// 回执落到的位置；`Open` 与 `Block` 无定位（返回 `None`，由调用方决定如何记录）。
+///
+/// `Same` **有**定位：它的目标就是确定的（多条来处同归一处），只有来处不名，
+/// 所以行程照常推进——不确定的是「为什么」，不是「到哪儿」。
 pub fn Outcome::landing(self : Outcome) -> SubjectState? {
   match self {
     Moved(_, to) => Some(to)
     Held(_, s) => Some(s)
     Open(_) => None
+    Same(_, _, to) => Some(to)
     Block(_) => None
   }
 }
@@ -56,6 +71,11 @@ pub fn Outcome::landing(self : Outcome) -> SubjectState? {
 /// 走一步：取 `state` 出发、由 `slot` 驱动的全部边，据其数目给回执。
 ///
 /// 候选按迁移表的顺序收集，故结果与表的书写顺序一致、可重放。
+///
+/// 槽粒度**认不出是哪一句**——同一槽在这个位置可能挂着多条触发句。所以只有
+/// 候选恰好一条时它才点名（`Moved`／`Held`）；多条归到同一目标时给 `Same`
+/// （去处确定、来处不名），多条归到不同目标时给 `Open`。要知道是哪一句，
+/// 调 `step_by_trigger`。
 pub fn step(state : SubjectState, slot : Slot) -> Outcome {
   let cands : Array[(Trigger, SubjectState)] = []
   for t in transitions() {
@@ -76,12 +96,109 @@ pub fn step(state : SubjectState, slot : Slot) -> Outcome {
   }
   let first = cands[0]
   if targets.length() > 1 {
-    Open(cands)
-  } else if first.1 == state {
+    return Open(cands)
+  }
+  if cands.length() > 1 {
+    // 同归：多条不同的触发句归到同一个目标。报出其中一条就是编造——`Block`
+    // 存在的全部意义是不许编造下一步，同一条纪律不许编造上一步的触发。
+    let named : Array[Trigger] = []
+    for entry in cands {
+      named.push(entry.0)
+    }
+    return Same(slot, named, first.1)
+  }
+  if first.1 == state {
     Held(first.0, state)
   } else {
     Moved(first.0, first.1)
   }
+}
+
+///|
+/// 触发粒度走一步：只认这一句。
+///
+/// 槽粒度的 `step` 在多条触发同归一个目标时无从知道是哪一条发生过，于是不
+/// 点名（`Same`）；本函数把「是哪一句」交给调用方：这一句确实是此处的出边，
+/// 就给确定的回执（位置若回自身则是 `Held`），不是则如实报缺口。
+///
+/// 前提：同一位置的同一条触发句不出现两次（`one_edge_per_trigger` 锁住）。
+/// 万一表有歧义，也不猜——报缺口而不是替表挑一条。
+pub fn step_by_trigger(state : SubjectState, trigger : Trigger) -> Outcome {
+  let hits : Array[SubjectState] = []
+  for t in transitions() {
+    if t.from == state && t.trigger == trigger {
+      hits.push(t.to)
+    }
+  }
+  if hits.length() == 0 {
+    return Block(
+      "「\{trigger.label()}」不是「\{state.designation()}」的出边",
+    )
+  }
+  if hits.length() > 1 {
+    return Block(
+      "「\{trigger.label()}」从「\{state.designation()}」出发有多条出边——表有歧义，不猜",
+    )
+  }
+  let to = hits[0]
+  if to == state {
+    Held(trigger, state)
+  } else {
+    Moved(trigger, to)
+  }
+}
+
+///|
+/// 同一位置的同一条触发句不出现两次（`step_by_trigger` 的前提；表若有歧义，
+/// 那处本身就该复查，不该由机器替它选一条）。
+pub fn one_edge_per_trigger() -> Bool {
+  for s in all_states() {
+    let seen : Array[Trigger] = []
+    for t in transitions() {
+      if t.from == s && !contains_trigger(seen, t.trigger) {
+        seen.push(t.trigger)
+      } else if t.from == s {
+        return false
+      }
+    }
+  }
+  true
+}
+
+///|
+/// 槽粒度下「多条触发同归一个目标」的组合：`step` 对这些组合不再点名触发。
+/// 报告与测试都从这里取料，不另写一份清单。
+pub fn same_target_pairs() -> Array[
+  (SubjectState, Slot, Array[Trigger], SubjectState),
+] {
+  let out : Array[(SubjectState, Slot, Array[Trigger], SubjectState)] = []
+  for s in all_states() {
+    for k in all_slots() {
+      let cands : Array[(Trigger, SubjectState)] = []
+      for t in transitions() {
+        if t.from == s && t.trigger.slot() == k {
+          cands.push((t.trigger, t.to))
+        }
+      }
+      if cands.length() < 2 {
+        continue
+      }
+      let targets : Array[SubjectState] = []
+      for entry in cands {
+        if !contains_state(targets, entry.1) {
+          targets.push(entry.1)
+        }
+      }
+      if targets.length() == 1 {
+        let named : Array[Trigger] = []
+        for entry in cands {
+          named.push(entry.0)
+        }
+        out.push((s, k, named, targets[0]))
+      }
+    }
+  }
+  out
 }
 
 ///|
@@ -285,6 +402,23 @@ pub fn render_loop_report() -> String {
     lines.push("- \{s.designation()}　\{s.gloss()}")
   }
   lines.push("")
+  lines.push("## 同归：去处确定，来处不名")
+  lines.push(
+    "槽粒度认不出是哪一句——下列组合在同一个位置挂着多条触发句且同归一个目标，",
+  )
+  lines.push(
+    "故 `step` 给 `Same`（只给槽与目标，不点名）；要知道是哪一句，用 `step_by_trigger`。",
+  )
+  for pair in same_target_pairs() {
+    let (s, k, named, to) = pair
+    lines.push(
+      "- \{s.designation()} × \{k.designation()} → \{to.designation()}（\{named.length()} 条）",
+    )
+    for tr in named {
+      lines.push("    · \{tr.label()}")
+    }
+  }
+  lines.push("")
   lines.push("## 示范：从立位起，按八槽巡回走三轮")
   let plan : Array[Slot] = []
   for round = 0; round < 3; round = round + 1 {
@@ -296,12 +430,14 @@ pub fn render_loop_report() -> String {
   let mut moved = 0
   let mut held = 0
   let mut open = 0
+  let mut same = 0
   let mut blocked_count = 0
   for entry in trace.steps {
     match entry.1 {
       Moved(_, _) => moved += 1
       Held(_, _) => held += 1
       Open(_) => open += 1
+      Same(_, _, _) => same += 1
       Block(_) => blocked_count += 1
     }
   }
@@ -309,7 +445,7 @@ pub fn render_loop_report() -> String {
   lines.push("行走：\{trace.outcome_labels().join(" → ")}")
   lines.push("")
   lines.push(
-    "共 \{trace.steps.length()} 步：迁 \{moved} · 守 \{held} · 未定 \{open} · 无路 \{blocked_count}；起于 \{trace.start.designation()}，止于 \{trace.at().designation()}。",
+    "共 \{trace.steps.length()} 步：迁 \{moved} · 守 \{held} · 未定 \{open} · 同归 \{same} · 无路 \{blocked_count}；起于 \{trace.start.designation()}，止于 \{trace.at().designation()}。",
   )
   lines.push("")
   lines.push(

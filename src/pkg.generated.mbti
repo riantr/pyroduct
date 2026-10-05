@@ -10,6 +10,8 @@ pub fn after_open(SubjectState, Slot, Int) -> Array[(SubjectState, Int)]
 
 pub fn aho_build(Array[String]) -> AhoAutomaton
 
+pub fn all_covered(Array[SubjectState], Array[SubjectState]) -> Bool
+
 pub fn all_phases() -> Array[Phase]
 
 pub fn all_slots() -> Array[Slot]
@@ -17,6 +19,8 @@ pub fn all_slots() -> Array[Slot]
 pub fn all_states() -> Array[SubjectState]
 
 pub fn all_triggers() -> Array[Trigger]
+
+pub fn any_returns_to(Array[SubjectState], Array[SubjectState]) -> Bool
 
 pub fn buchi_accepting() -> Array[SubjectState]
 
@@ -35,6 +39,8 @@ pub fn distance_to(SubjectState) -> Array[(SubjectState, Int?)]
 pub fn durability_manifest() -> Array[(String, String, String)]
 
 pub fn every_phase_has_non_act() -> Bool
+
+pub fn every_phase_has_non_act_of(Array[Phase], Array[Phase]) -> Bool
 
 pub fn exitable(SubjectState, Slot) -> Bool
 

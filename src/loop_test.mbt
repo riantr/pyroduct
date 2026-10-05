@@ -674,3 +674,17 @@ test "执行契约与迁移表一致：每条边由其槽走得出，报告可�
   assert_true(report.contains("未定"))
   assert_true(report.contains("无路"))
 }
+
+///|
+/// 上面那条只验了「走得出的都认得出」。反过来「认得出却走不出」那一侧也得锁，
+/// 否则把 `exitable` 改成恒真它照样过——真表恒真的判据分不出检查在跑还是在空转。
+/// 缺口清单 `gaps()` 就是那份真表反例的来源：它列出的组合一律走不出。
+test "缺口清单上的组合一律走不出（exitable 的反例侧）" {
+  let blocked = @src.gaps()
+  assert_true(blocked.length() > 0)
+  for g in blocked {
+    assert_true(!@src.exitable(g.0, g.1))
+  }
+  // 迁移表里确实有这一处：宁静不因共在而动。
+  assert_true(!@src.exitable(@src.Tranquility, @src.CoBeing))
+}

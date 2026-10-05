@@ -12,7 +12,7 @@ Long-form context lives in `README.mbt.md` (English) and `README.zh.mbt.md`
 
 ```console
 moon test                              # all tests (default target: wasm); currently
-                                       # 181/181 on wasm + 2 snnref tests on native
+                                       # 185/185 on wasm + 2 snnref tests on native
 moon test --target native snnref       # spike-sediment experiment (native only)
 moon check                             # type/warn check
 moon info                              # regenerates every pkg.generated.mbti (tracked)
@@ -51,7 +51,8 @@ python tools/apply_fmt.py              # copy `moon fmt --check`'s canonical cop
                                        # in this sandbox, and a binary copy cannot mangle
                                        # encoding the way Get-Content/Set-Content does)
 python tools/mutate_review.py          # review harness: mutation table for all five
-                                       # Loops (35 mutations, counted from the table —
+                                       # Loops plus the predicate census
+                                       # (41 mutations, counted from the table —
                                        # don't hardcode it). Each entry reverts one
                                        # construct to its old/wrong shape, re-runs
                                        # `moon test`, and the criteria MUST go red.

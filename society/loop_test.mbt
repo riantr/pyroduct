@@ -83,6 +83,31 @@ test "不封闭的检查在造的无出边位置上确实返回 false" {
 }
 
 ///|
+/// `no_final_closure` 有**两条** `return false` 臂：出现终态、某个位置到不了缺口。
+/// 真表上两条都不可达，所以只看真表的判据分不出「检查在跑」与「检查恒真」。这条
+/// 给纯函数**造出来的**三份清单，把两条臂各验一次。
+test "不封闭的判别在造的终态与到不了的缺口上确实返回 false" {
+  let states = @society.all_states()
+  assert_true(states.length() > 2)
+  let all = states
+  let no_terminal : Array[@society.State] = []
+  // 无终态、处处到得了缺口：成立
+  assert_true(@society.no_final_closure_of(all, no_terminal, all))
+  // 造一个终态：第一条臂
+  let with_terminal : Array[@society.State] = [all[0]]
+  assert_false(@society.no_final_closure_of(all, with_terminal, all))
+  // 缺口只到一处：第二条臂（某个共识被彻底封口）
+  let one_gap : Array[@society.State] = [all[0]]
+  assert_false(@society.no_final_closure_of(all, no_terminal, one_gap))
+  // 缺口清单落在表外：同样封口
+  let no_gap : Array[@society.State] = []
+  assert_false(@society.no_final_closure_of(all, no_terminal, no_gap))
+  // 没有位置：空集平凡成立
+  let none : Array[@society.State] = []
+  assert_true(@society.no_final_closure_of(none, none, none))
+}
+
+///|
 test "缺口：此处无此事，位置不动" {
   let out = @society.step(@society.Colony, @society.Justify)
   assert_true(out.label() == "无路")

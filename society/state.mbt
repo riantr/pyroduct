@@ -359,21 +359,44 @@ fn contains(xs : Array[State], s : State) -> Bool {
 }
 
 ///|
-/// 「不封闭」的判别：模型中没有一个终态，且「缺口」自任一状态皆可达。
-/// 论文：「商谈理论逃不脱『乌托邦』的命运」（P.46）；「文字不是已被说出的僵死之物，
-/// 它还在生长。对于我们而言，真理问题果真有一个最终的结论吗？」（P.53）。
-pub fn no_final_closure() -> Bool {
-  for s in all_states() {
-    // 无终态：每个状态都至少有一条出边。
-    if successors(s).length() == 0 {
-      return false
-    }
-    // 缺口处处可达：任何共识都不能被彻底封口。
-    if !reachable(s, Gap) {
+/// 纯函数版：给全部位置、终态位置与「能到缺口」位置三份清单，不封闭 = 终态空
+/// 且每个位置都在第三份里。
+///
+/// 取料与判定分开，同 `group::no_dead_end_of` 的理由：真表上恒为 `true`，只看
+/// 真表的判据分不出「检查在跑」与「检查恒真」。测试给它**造出来的**清单——
+/// 造一个有终态的位置、再造一个到不了缺口的位置，那两条 `false` 才验得住。
+pub fn no_final_closure_of(
+  states : Array[State],
+  terminal : Array[State],
+  gap_reachable : Array[State],
+) -> Bool {
+  if terminal.length() > 0 {
+    return false
+  }
+  for s in states {
+    if !gap_reachable.contains(s) {
       return false
     }
   }
   true
+}
+
+///|
+/// 「不封闭」的判别：模型中没有一个终态，且「缺口」自任一状态皆可达。
+/// 论文：「商谈理论逃不脱『乌托邦』的命运」（P.46）；「文字不是已被说出的僵死之物，
+/// 它还在生长。对于我们而言，真理问题果真有一个最终的结论吗？」（P.53）。
+pub fn no_final_closure() -> Bool {
+  let terminal : Array[State] = []
+  let gap_reachable : Array[State] = []
+  for s in all_states() {
+    if successors(s).length() == 0 {
+      terminal.push(s)
+    }
+    if reachable(s, Gap) {
+      gap_reachable.push(s)
+    }
+  }
+  no_final_closure_of(all_states(), terminal, gap_reachable)
 }
 
 ///|

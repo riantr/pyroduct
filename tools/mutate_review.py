@@ -121,6 +121,54 @@ LOOP2 = [
     ),
 ]
 
+# P 组：空判据普查。
+#
+# B4 那次抓到的是一个**形状**而不是一条变异：零参数的性质谓词在真表上恒为
+# true，它那条 `return false` 臂不可达，而唯一的判据是 `assert_true(那个调用)`
+# ——于是把函数改成恒真，一条测试都不会红。修好 B4/B5/B6 之后我按这个形状把
+# 全仓的谓词扫了一遍，又查出六处同形的空判据（详见 P1~P6 的注释）。这六条的
+# 锚点一律打在**有牙齿的那一层**（纯函数），不打只包一层取料的外壳。
+PROPS = [
+    (
+        "P1 src::exitable 恒真（缺口那侧不再被认出来）",
+        "src/loop.mbt",
+        "pub fn exitable(state : SubjectState, slot : Slot) -> Bool {\n  let mut found = false",
+        "pub fn exitable(state : SubjectState, slot : Slot) -> Bool {\n  if true {\n    return true\n  }\n  let mut found = false",
+    ),
+    (
+        "P2 src::every_phase_has_non_act_of 恒真",
+        "src/loop.mbt",
+        "  for p in phases {\n    if !covered.contains(p) {",
+        "  if true {\n    return true\n  }\n  for p in phases {\n    if !covered.contains(p) {",
+    ),
+    (
+        "P3 src::any_returns_to 恒真（非空性不再被检查）",
+        "src/buchi.mbt",
+        "  for u in reachable {\n    if back.contains(u) {",
+        "  if true {\n    return true\n  }\n  for u in reachable {\n    if back.contains(u) {",
+    ),
+    (
+        "P4 src::all_covered 恒真（活性潜势不再被检查）",
+        "src/buchi.mbt",
+        "  for s in states {\n    if !covered.contains(s) {",
+        "  if true {\n    return true\n  }\n  for s in states {\n    if !covered.contains(s) {",
+    ),
+    (
+        # 这条与别处不同：委托之后**恒真反而是等价的**（表本来就确定），恒真变异
+        # 会存活。所以打**反相**：答案必须真来自那次检查，不能是写死的。
+        "P5 src::is_deterministic 反相（答案不是来自那次检查）",
+        "src/paths.mbt",
+        "pub fn is_deterministic() -> Bool {\n  one_edge_per_trigger()",
+        "pub fn is_deterministic() -> Bool {\n  !one_edge_per_trigger()",
+    ),
+    (
+        "P6 society::no_final_closure_of 恒真（两条 false 臂都不再跑）",
+        "society/state.mbt",
+        "  if terminal.length() > 0 {\r\n    return false\r\n  }",
+        "  if true {\r\n    return true\r\n  }\r\n  if terminal.length() > 0 {\r\n    return false\r\n  }",
+    ),
+]
+
 LOOP3 = [
     (
         "M1 缺口被编造出一条边",
@@ -348,12 +396,13 @@ GROUPS = {
     "loop3": LOOP3,
     "loop4": LOOP4,
     "loop5": LOOP5,
+    "props": PROPS,
     # 单条复查用的别名，**不进默认跑**：它与 loop5 里的一条重复，默认跑带上
     # 就会在留档里出现两行同名的判定，看起来像跑了两次。
     "l3": [LOOP5[2]],
 }
 # 默认跑只取真正的一组一 Loop，别名要显式点名。
-DEFAULT_GROUPS = ["loop1", "loop2", "loop3", "loop4", "loop5"]
+DEFAULT_GROUPS = ["loop1", "loop2", "loop3", "loop4", "loop5", "props"]
 
 # 变异条数**由表算出来**，不写死。我在这份头部里写死过「30 条」，而表里其实
 # 是 34 条（A5+B5+M9+S6+L9）——写死的数字在表增长时不会跟着动，漂了也没人知道。

@@ -646,20 +646,35 @@ pub fn only_act_exits() -> Array[SubjectState] {
 }
 
 ///|
-/// 每个阶段都至少有一条非「行动」的出边（否则整段被还原成目的—手段回路）。
-pub fn every_phase_has_non_act() -> Bool {
-  for p in all_phases() {
-    let mut found = false
-    for t in transitions() {
-      if t.from.phase() == p && t.trigger.slot() != Act {
-        found = true
-      }
-    }
-    if !found {
+/// 纯函数版：给全部阶段与「有非行动出边的阶段」两份清单，性质成立 = 后者覆盖前者。
+///
+/// 取料与判定分开，同 `one_edge_each` 的理由：真表上本判定恒为 `true`，只看真表
+/// 的判据分不出「检查在跑」与「检查恒真」。测试给它一份**造出来的**清单。
+pub fn every_phase_has_non_act_of(
+  phases : Array[Phase],
+  covered : Array[Phase],
+) -> Bool {
+  for p in phases {
+    if !covered.contains(p) {
       return false
     }
   }
   true
+}
+
+///|
+/// 每个阶段都至少有一条非「行动」的出边（否则整段被还原成目的—手段回路）。
+pub fn every_phase_has_non_act() -> Bool {
+  let covered : Array[Phase] = []
+  for t in transitions() {
+    if t.trigger.slot() != Act {
+      let p = t.from.phase()
+      if !covered.contains(p) {
+        covered.push(p)
+      }
+    }
+  }
+  every_phase_has_non_act_of(all_phases(), covered)
 }
 
 ///|

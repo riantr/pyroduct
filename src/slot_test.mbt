@@ -64,6 +64,33 @@ test "机器不是纯 agent 回路：每阶段有非行动的出边，只能由�
 }
 
 ///|
+/// 上面那条只验了真表为真的一面。真表上它恒为 `true`，所以只看真表的判据分不出
+/// 「检查在跑」与「检查恒真」——把 `every_phase_has_non_act` 改成恒真照样过。这条
+/// 给 `every_phase_has_non_act_of` 一份**造出来的**阶段清单：一个阶段不在覆盖
+/// 清单里，那个 `false` 才验得住。
+test "阶段覆盖的检查在造的缺档阶段上确实返回 false" {
+  let all : Array[@src.Phase] = @src.all_phases()
+  let all_phases = all
+  assert_true(all_phases.length() > 1)
+  // 全覆盖：成立
+  assert_true(@src.every_phase_has_non_act_of(all_phases, all_phases))
+  // 少一个阶段的覆盖：那个阶段整段被还原成目的—手段回路
+  let p = all_phases[0]
+  let partial : Array[@src.Phase] = []
+  for q in all_phases {
+    if q != p {
+      partial.push(q)
+    }
+  }
+  assert_false(@src.every_phase_has_non_act_of(all_phases, partial))
+  // 覆盖清单落在表外：同样不成立
+  let none : Array[@src.Phase] = []
+  assert_false(@src.every_phase_has_non_act_of(all_phases, none))
+  // 没有阶段：空集平凡成立
+  assert_true(@src.every_phase_has_non_act_of(none, none))
+}
+
+///|
 test "先行槽只收原文的接触未来、尝试与静待，不给数值" {
   let touch : @src.Trigger = @src.TouchFuture
   let wait : @src.Trigger = @src.WaitNext

@@ -105,16 +105,12 @@ pub fn distance_to(to : SubjectState) -> Array[(SubjectState, Int?)] {
 
 ///|
 /// 性质谓词：每 (位置, 触发) 至多一条边——触发粒度恒确定。
+///
+/// 这条原先是**一份独立的 O(n²) 实现**，与 `loop.mbt` 的 `one_edge_per_trigger`
+/// 查同一件事；两份各自演化，将来修一份不会修另一份，而报告会把它们当两条独立
+/// 性质印出来。现委托给那个已被变异 A4 覆盖的实现——牙齿在唯一一份逻辑上。
 pub fn is_deterministic() -> Bool {
-  let ts = transitions()
-  for i = 0; i < ts.length(); i = i + 1 {
-    for j = 0; j < ts.length(); j = j + 1 {
-      if i < j && ts[i].from == ts[j].from && ts[i].trigger == ts[j].trigger {
-        return false
-      }
-    }
-  }
-  true
+  one_edge_per_trigger()
 }
 
 ///|

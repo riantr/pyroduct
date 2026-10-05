@@ -69,6 +69,25 @@ pub fn buchi_stalls() -> Array[SubjectState] {
 }
 
 ///|
+/// 纯函数版：给「从起点 ≥1 步可达的位置」与「能回到起点」两份清单，判定 = 两者
+/// 有交集。
+///
+/// 取料与判定分开，同 `one_edge_each` 的理由：真表上非空性恒为 `true`（重入环
+/// 使它成立），所以那条 `false` 在真表上不可达——而且本机图高度连通，随便挑个
+/// 位置都回得到宁静，**造不出真表上的反例**。故两份清单都当作参数交给测试造。
+pub fn any_returns_to(
+  reachable : Array[SubjectState],
+  back : Array[SubjectState],
+) -> Bool {
+  for u in reachable {
+    if back.contains(u) {
+      return true
+    }
+  }
+  false
+}
+
+///|
 /// 非空性：存在经过验收集的可达环——从宁静走 ≥1 步可达的位置里，有一个
 /// 能回到宁静（lasso 的核；重入环使它成立）。
 pub fn buchi_nonempty() -> Bool {
@@ -104,25 +123,42 @@ pub fn buchi_nonempty() -> Bool {
       }
     }
   }
+  let back : Array[SubjectState] = []
   for u in queue {
     match min_steps(u, s) {
-      Some(_) => return true
+      Some(_) => back.push(u)
       None => ()
     }
   }
-  false
+  any_returns_to(queue, back)
+}
+
+///|
+/// 纯函数版：给「能回到验收集」的位置清单，活性潜势 = 覆盖全部位置。
+/// 测试喂一份**造出来的**缺一个位置的清单。
+pub fn all_covered(
+  states : Array[SubjectState],
+  covered : Array[SubjectState],
+) -> Bool {
+  for s in states {
+    if !covered.contains(s) {
+      return false
+    }
+  }
+  true
 }
 
 ///|
 /// 活性潜势：每个位置都可达验收集——没有位置是 ω-语言的死端。
 pub fn buchi_live_potential() -> Bool {
+  let covered : Array[SubjectState] = []
   for s in all_states() {
     match min_steps(s, Tranquility) {
-      Some(_) => ()
-      None => return false
+      Some(_) => covered.push(s)
+      None => ()
     }
   }
-  true
+  all_covered(all_states(), covered)
 }
 
 ///|

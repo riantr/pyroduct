@@ -44,7 +44,7 @@
 
 ```console
 moon check                              # 类型/告警检查
-moon test                               # 全部测试（wasm），当前 181/181 + snnref 2（native）
+moon test                               # 全部测试（wasm），当前 185/185 + snnref 2（native）
 moon test --target native snnref        # 脉冲沉淀实验（native 专属）
 moon fmt --check                        # 格式必须干净
 moon run --target native cmd/coord      # 检查点落盘往返（往返一致 true）

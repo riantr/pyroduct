@@ -17,6 +17,37 @@ test "buchi：验收集与非空性——重入环给出 lasso" {
 }
 
 ///|
+/// 非空性与活性潜势在真表上恒为 `true`（重入环使它成立），所以只看真表的判据
+/// 分不出「检查在跑」与「检查恒真」。这两条给纯函数**造出来的**清单：一个回不到
+/// 起点的集合、一个到不了验收集的位置，那两条 `false` 才验得住。
+test "ω 面的两条判定在造的集合上确实返回 false" {
+  // 非空性：可达集合里没有能回到起点的位置 ⇒ 空 ω 语言
+  let none_back : Array[@src.SubjectState] = []
+  assert_false(@src.any_returns_to([@src.Standing], none_back))
+  // 同一个位置，但标成回得到 ⇒ 交集非空，成立
+  assert_true(@src.any_returns_to([@src.Standing], [@src.Standing]))
+  // 交集在第二个元素上：不能只看头一个
+  assert_true(@src.any_returns_to([@src.Standing, @src.Guilt], [@src.Guilt]))
+  // 可达集合为空：无环
+  assert_false(@src.any_returns_to(none_back, [@src.Standing]))
+  assert_false(@src.any_returns_to(none_back, none_back))
+  // 活性潜势：缺一个位置的覆盖 ⇒ 那个位置是 ω-语言的死端
+  let states = @src.all_states()
+  assert_true(states.length() > 1)
+  assert_true(@src.all_covered(states, states))
+  let partial : Array[@src.SubjectState] = []
+  for s in states {
+    if s != states[0] {
+      partial.push(s)
+    }
+  }
+  assert_false(@src.all_covered(states, partial))
+  let none : Array[@src.SubjectState] = []
+  assert_false(@src.all_covered(states, none))
+  assert_true(@src.all_covered(none, none))
+}
+
+///|
 test "buchi：活性潜势——每个位置都可达宁静（0 处不可达）" {
   assert_true(@src.buchi_live_potential())
   for s in @src.all_states() {

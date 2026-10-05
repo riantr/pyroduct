@@ -82,21 +82,38 @@ pub fn exitable(state : State, trigger : Trigger) -> Bool {
 }
 
 ///|
+/// 纯函数版：一份 (位置, 触发) 对的清单里，每对只出现一次。
+///
+/// 取料与判定分开，同 `src::one_edge_each` 的理由：真表上
+/// `one_edge_per_trigger` 恒为 `true`，所以那条「返回 false」的臂在真表上不可达
+/// ——去掉它，真表结果一点不变。测试喂一份**造出来的**清单（含一个重复对），
+/// 那条 `false` 才验得住。
+pub fn one_edge_each(pairs : Array[(State, Trigger)]) -> Bool {
+  let seen : Array[(State, Trigger)] = []
+  for p in pairs {
+    let mut dup = false
+    for q in seen {
+      if q.0 == p.0 && q.1 == p.1 {
+        dup = true
+      }
+    }
+    if dup {
+      return false
+    }
+    seen.push(p)
+  }
+  true
+}
+
+///|
 /// 同一状态的同一触发只出现一次——社会机的表在触发粒度上确定，故 `step` 的回执
 /// 只有迁／守／无路三种（`Open` 那条臂备而不用，见文件头）。
 pub fn one_edge_per_trigger() -> Bool {
-  for s in all_states() {
-    let seen : Array[Trigger] = []
-    for t in transitions() {
-      if t.from == s {
-        if seen.contains(t.trigger) {
-          return false
-        }
-        seen.push(t.trigger)
-      }
-    }
+  let pairs : Array[(State, Trigger)] = []
+  for t in transitions() {
+    pairs.push((t.from, t.trigger))
   }
-  true
+  one_edge_each(pairs)
 }
 
 ///|
@@ -126,21 +143,27 @@ pub fn open_pairs() -> Array[(State, Trigger, Array[State])] {
 }
 
 ///|
-/// 不封闭：每个状态都有出边（`no_final_closure` 是「宁静↺反顾」那条重入边的
-/// 另一种说法，这里补上「没有走完即止的末态」这一层）。
-pub fn no_dead_end() -> Bool {
-  for s in all_states() {
-    let mut found = false
-    for t in transitions() {
-      if t.from == s {
-        found = true
-      }
-    }
-    if !found {
+/// 纯函数版：给全部位置与「有出边的位置」两份清单，不封闭 = 后者覆盖前者。
+/// 同 `group::no_dead_end_of` 与 `src::one_edge_each` 的理由：真表上恒为
+/// `true`，只看真表的判据分不出「检查在跑」与「检查恒真」。
+pub fn no_dead_end_of(states : Array[State], froms : Array[State]) -> Bool {
+  for s in states {
+    if !froms.contains(s) {
       return false
     }
   }
   true
+}
+
+///|
+/// 不封闭：每个状态都有出边（`no_final_closure` 是「宁静↺反顾」那条重入边的
+/// 另一种说法，这里补上「没有走完即止的末态」这一层）。
+pub fn no_dead_end() -> Bool {
+  let froms : Array[State] = []
+  for t in transitions() {
+    froms.push(t.from)
+  }
+  no_dead_end_of(all_states(), froms)
 }
 
 ///|

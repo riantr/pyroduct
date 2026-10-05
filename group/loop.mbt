@@ -119,21 +119,33 @@ pub fn open_pairs() -> Array[(GroupState, GroupTrigger, Array[GroupState])] {
 }
 
 ///|
-/// 不封闭：每个状态都有出边，故群体机没有「走完即止」的末态
-/// （`src` 的 `no_final_closure` 在这里的对应物）。
-pub fn no_dead_end() -> Bool {
-  for s in all_states() {
-    let mut found = false
-    for t in transitions() {
-      if t.from == s {
-        found = true
-      }
-    }
-    if !found {
+/// 纯函数版：给全部位置与「有出边的位置」两份清单，不封闭 = 后者覆盖前者。
+///
+/// 取料与判定分开，同 `src::one_edge_each` 的理由：真表上 `no_dead_end` 恒为
+/// `true`，只看真表的判据分不出「检查在跑」与「检查恒真」——把函数改成
+/// `if true { return true }` 在真表上照样通过。测试给它一份**造出来的**清单
+/// （有位置不在出边清单里），那条 `false` 才验得住。
+pub fn no_dead_end_of(
+  states : Array[GroupState],
+  froms : Array[GroupState],
+) -> Bool {
+  for s in states {
+    if !froms.contains(s) {
       return false
     }
   }
   true
+}
+
+///|
+/// 不封闭：每个状态都有出边，故群体机没有「走完即止」的末态
+/// （`src` 的 `no_final_closure` 在这里的对应物）。
+pub fn no_dead_end() -> Bool {
+  let froms : Array[GroupState] = []
+  for t in transitions() {
+    froms.push(t.from)
+  }
+  no_dead_end_of(all_states(), froms)
 }
 
 ///|

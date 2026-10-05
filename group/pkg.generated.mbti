@@ -32,6 +32,8 @@ pub fn is_well_formed(GroupState, Array[@multi.Subject]) -> Bool
 
 pub fn no_dead_end() -> Bool
 
+pub fn no_dead_end_of(Array[GroupState], Array[GroupState]) -> Bool
+
 pub fn open_pairs() -> Array[(GroupState, GroupTrigger, Array[GroupState])]
 
 pub fn reachable(GroupState, GroupState) -> Bool

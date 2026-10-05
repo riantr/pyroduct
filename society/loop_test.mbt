@@ -32,6 +32,57 @@ test "社会机的表在触发粒度上确定：open_pairs 为空" {
 }
 
 ///|
+/// 上面那条 `one_edge_per_trigger` 在真表上**恒真**（这句触发、两个去处那条臂在
+/// 真表上不可达），所以它分不出「检查在跑」与「检查恒真」：把那条 `return false`
+/// 换成空语句，真表结果一点不变。这条给 `one_edge_each` 一份**造出来的**清单，
+/// 那个 `false` 只有真被跑过才会出现。
+test "触发粒度的确定性在造的重复对上确实返回 false" {
+  let clean : Array[(@society.State, @society.Trigger)] = [
+    (@society.World, @society.SpeakLanguage),
+    (@society.Colony, @society.RaiseClaims),
+    (@society.Colony, @society.Filter),
+  ]
+  assert_true(@society.one_edge_each(clean))
+  // 同一位置同一句：歧义
+  let same_pair : Array[(@society.State, @society.Trigger)] = [
+    (@society.Colony, @society.Filter),
+    (@society.Colony, @society.Filter),
+  ]
+  assert_false(@society.one_edge_each(same_pair))
+  // 同一位置不同句：合法，不该误报
+  let two_from : Array[(@society.State, @society.Trigger)] = [
+    (@society.Colony, @society.RaiseClaims),
+    (@society.Colony, @society.Filter),
+  ]
+  assert_true(@society.one_edge_each(two_from))
+  // 同一句不同位置：也合法
+  let two_to : Array[(@society.State, @society.Trigger)] = [
+    (@society.World, @society.SpeakLanguage),
+    (@society.Colony, @society.SpeakLanguage),
+  ]
+  assert_true(@society.one_edge_each(two_to))
+  // 空清单：平凡成立
+  let empty : Array[(@society.State, @society.Trigger)] = []
+  assert_true(@society.one_edge_each(empty))
+}
+
+///|
+/// `no_dead_end` 同理：真表上恒真，所以判据得落在纯函数上，用造出来的
+/// 「有位置没有出边」验那条 `false`。
+test "不封闭的检查在造的无出边位置上确实返回 false" {
+  let states : Array[@society.State] = [@society.World, @society.Colony]
+  let full : Array[@society.State] = [@society.World, @society.Colony]
+  assert_true(@society.no_dead_end_of(states, full))
+  let missing : Array[@society.State] = [@society.World]
+  assert_false(@society.no_dead_end_of(states, missing))
+  let outside : Array[@society.State] = [@society.Suprasubjective]
+  assert_false(@society.no_dead_end_of(states, outside))
+  let no_states : Array[@society.State] = []
+  let no_froms : Array[@society.State] = []
+  assert_true(@society.no_dead_end_of(no_states, no_froms))
+}
+
+///|
 test "缺口：此处无此事，位置不动" {
   let out = @society.step(@society.Colony, @society.Justify)
   assert_true(out.label() == "无路")

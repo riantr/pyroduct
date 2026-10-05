@@ -20,7 +20,11 @@ pub fn initial() -> State
 
 pub fn no_dead_end() -> Bool
 
+pub fn no_dead_end_of(Array[State], Array[State]) -> Bool
+
 pub fn no_final_closure() -> Bool
+
+pub fn one_edge_each(Array[(State, Trigger)]) -> Bool
 
 pub fn one_edge_per_trigger() -> Bool
 

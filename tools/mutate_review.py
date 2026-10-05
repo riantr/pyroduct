@@ -99,16 +99,25 @@ LOOP2 = [
         "      if to.length() > 99 {\n        out.push((s, k, to))\n      }",
     ),
     (
-        "B4 group::no_dead_end 恒真",
+        # 打在**纯函数**上，不是包一层取料的那层。真表上 `no_dead_end` 恒为
+        # true，所以只把 `no_dead_end()` 改成恒真，真表照样通过——牙齿在
+        # `no_dead_end_of` 上，测试用造出来的「有位置没出边」驱动它。
+        "B4 group::no_dead_end_of 恒真（不封闭的检查不再跑）",
         "group/loop.mbt",
-        "pub fn no_dead_end() -> Bool {\n  for s in all_states() {",
-        "pub fn no_dead_end() -> Bool {\n  if true {\n    return true\n  }\n  for s in all_states() {",
+        "for s in states {\n    if !froms.contains(s) {",
+        "if true {\n    return true\n  }\n  for s in states {\n    if !froms.contains(s) {",
     ),
     (
-        "B5 society::one_edge_per_trigger 恒真（触发粒度的确定性不再被锁）",
+        "B5 society::one_edge_each 去掉去重（触发粒度的确定性不再被锁）",
         "society/loop.mbt",
-        "        if seen.contains(t.trigger) {\n          return false\n        }",
-        "        if seen.contains(t.trigger) {\n          ()\n        }",
+        "    if dup {\n      return false\n    }\n    seen.push(p)",
+        "    if dup {\n      ()\n    }\n    seen.push(p)",
+    ),
+    (
+        "B6 society::no_dead_end_of 恒真（不封闭的检查不再跑）",
+        "society/loop.mbt",
+        "for s in states {\n    if !froms.contains(s) {",
+        "if true {\n    return true\n  }\n  for s in states {\n    if !froms.contains(s) {",
     ),
 ]
 
@@ -362,16 +371,19 @@ LOG_HEADER = """# 变异表判定记录（生成物，勿手改）
 另写 `mutation_review_log.loop3.md`，不会碰这份——单组跑曾经把这份全量记录
 覆盖成自己那几行，而我把截断版提交了；工具静默毁掉自己的记录比没有工具更糟。
 
-判读四态：
+判读五态：
 - `CAUGHT` + 失败数 > 0 —— 判据真的变红了。这是要的结果。
 - `COMPILE-ERROR` —— 变异在**编译期**被拒。这**不是**抓取：它证明的是语法，
   不是判据有牙齿。首版四条 `arr[..n]` 切片死在这里，全部重写后才算数。
 - `ANCHOR-ERROR` —— 源码形状与表里记的不符（改动导致锚点漂移）。不是抓取，
   得先修表。
+- `LEAK-ERROR` —— 施加这条之前工作树就不干净，说明上一条没还原。不是判定，
+  是 harness 的错；它存在是为了让那种错当场炸，而不是静默产出假数字。
 - `SURVIVED` —— 变异活着。必须归类为「等价」或「具名缺口」，不能悬着。
 
-纪律两条：变异必须**编译得过**（见上）；每条结束时校验 sha256 与开跑前一致
-——改源码的脚本要自己证明没留痕迹。
+纪律三条：变异必须**编译得过**（见上）；每条必须在**干净**的工作树上测
+（换文件的条目不还原上一条，失败会算到别人头上——B4 曾记着 A5 的 failed=3）；
+每条结束时校验 sha256 与开跑前一致——改源码的脚本要自己证明没留痕迹。
 
 """ % MUT_COUNT
 
@@ -450,6 +462,21 @@ def main():
             hashes[rel] = hashlib.sha256(originals[rel]).hexdigest()
 
     report = []
+
+    def restore_all():
+        for rel, blob in originals.items():
+            with open(os.path.join(ROOT, rel), "wb") as fh:
+                fh.write(blob)
+
+    def dirty_files():
+        """源文件里当前与开跑前不一致的那些——只该是本条变异动过的那一个。"""
+        out = []
+        for rel, blob in originals.items():
+            with open(os.path.join(ROOT, rel), "rb") as fh:
+                if fh.read() != blob:
+                    out.append(rel)
+        return out
+
     try:
         rc, text = run_tests()
         m = SUMMARY.search(text)
@@ -457,6 +484,18 @@ def main():
             ("BASELINE (no mutation)", "0" if rc == 0 else "rc=%d" % rc, m.group(0) if m else "no summary")
         )
         for name, rel, old, new in table:
+            # 每条都在**干净**的工作树上测。这一条不是洁癖：还原原先只发生在
+            # 最外层 finally，于是换文件的条目会带着上一个文件的变异跑。
+            # B4 因此记了 failed=3，而那 3 条其实是还挂在 src/loop.mbt 上的
+            # A5 留下的——B4 单独跑其实是 failed=0，一条**等价变异**，
+            # 却因为别人的失败而记成 CAUGHT。数字对不上，判据却看着有牙齿。
+            leaked = dirty_files()
+            if leaked:
+                report.append(
+                    (name, "LEAK-ERROR", "working tree dirty before mutation: %s" % ", ".join(leaked))
+                )
+                restore_all()
+                continue
             src = originals[rel]
             hits = src.count(old.encode("utf-8"))
             if hits != 1:
@@ -464,21 +503,24 @@ def main():
                 continue
             with open(os.path.join(ROOT, rel), "wb") as fh:
                 fh.write(src.replace(old.encode("utf-8"), new.encode("utf-8"), 1))
-            rc, text = run_tests()
-            m = SUMMARY.search(text)
-            if m:
-                verdict = "CAUGHT" if int(m.group(3)) > 0 else "SURVIVED"
-                detail = m.group(0)
-            else:
-                # 编译错**不算**抓住：它证明的是语法，不是判据有牙齿。留成
-                # ANCHOR/COMPILE 两态让人看见，而不是并进 CAUGHT 里好看。
-                verdict = "COMPILE-ERROR" if rc != 0 else "SURVIVED"
-                detail = "compile error rc=%d (NOT a catch)" % rc
-            report.append((name, verdict, detail))
+            try:
+                rc, text = run_tests()
+                m = SUMMARY.search(text)
+                if m:
+                    verdict = "CAUGHT" if int(m.group(3)) > 0 else "SURVIVED"
+                    detail = m.group(0)
+                else:
+                    # 编译错**不算**抓住：它证明的是语法，不是判据有牙齿。留成
+                    # ANCHOR/COMPILE 两态让人看见，而不是并进 CAUGHT 里好看。
+                    verdict = "COMPILE-ERROR" if rc != 0 else "SURVIVED"
+                    detail = "compile error rc=%d (NOT a catch)" % rc
+                report.append((name, verdict, detail))
+            finally:
+                # 立刻还原，让下一条从干净状态起跑。
+                with open(os.path.join(ROOT, rel), "wb") as fh:
+                    fh.write(src)
     finally:
-        for rel, blob in originals.items():
-            with open(os.path.join(ROOT, rel), "wb") as fh:
-                fh.write(blob)
+        restore_all()
 
     for rel, digest in hashes.items():
         with open(os.path.join(ROOT, rel), "rb") as fh:

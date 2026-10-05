@@ -60,6 +60,28 @@ test "不封闭：20 个状态都有出边，没有走完即止的末态" {
 }
 
 ///|
+/// 上面那条在真表上**恒真**，所以它分不出「检查在跑」与「检查恒真」：把
+/// `no_dead_end` 改成 `if true { return true }`，真表照样通过。这条给
+/// `no_dead_end_of` 一份**造出来的**清单——有位置不在出边清单里，那个 `false`
+/// 只有真被跑过才会出现。
+test "不封闭的检查在造的无出边位置上确实返回 false" {
+  let states : Array[@group.GroupState] = [@group.Dispersed, @group.Converging]
+  // 每个位置都有出边：不封闭
+  let full : Array[@group.GroupState] = [@group.Dispersed, @group.Converging]
+  assert_true(@group.no_dead_end_of(states, full))
+  // 少一个位置的出边：那个位置成了末态
+  let missing : Array[@group.GroupState] = [@group.Dispersed]
+  assert_false(@group.no_dead_end_of(states, missing))
+  // 出边落在表外：同样不封闭
+  let outside : Array[@group.GroupState] = [@group.Settled]
+  assert_false(@group.no_dead_end_of(states, outside))
+  // 没有位置：空集平凡成立
+  let no_states : Array[@group.GroupState] = []
+  let no_froms : Array[@group.GroupState] = []
+  assert_true(@group.no_dead_end_of(no_states, no_froms))
+}
+
+///|
 test "凡点名的回执，那个状态的该触发恰有一条边（不编造）" {
   for s in @group.all_states() {
     let triggers : Array[@group.GroupTrigger] = []

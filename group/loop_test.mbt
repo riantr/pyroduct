@@ -33,7 +33,8 @@ test "一句触发、两个去处：表里真的有一处，机器不替它挑" 
   assert_true(k == @group.Attention)
   assert_eq(to.length(), 2)
   assert_true(to.contains(@group.CommonTongue) && to.contains(@group.Discourse))
-  // 走一步得到并列，不落地：注意汇聚到底通向哪一处，表没定，机器也不定。
+  // 走一步得到并列，不落地：注意汇聚可通向共语、也可通向商谈——这**是表里
+  // 有意的一处**（作者已确认本意如此），不是笔误；机器照旧不替表挑一个。
   let out = @group.step(@group.Converging, @group.Attention)
   assert_true(out.label() == "未定")
   assert_true(out.landing() == None)

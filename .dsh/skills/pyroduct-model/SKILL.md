@@ -30,7 +30,9 @@ description: '读取本仓库（riantr/pyroduct）的可运行哲学状态机：
 | `all` | 报告 + 历程 + Mermaid |
 
 先跑一次 `report` 与 `slots` 再回答模型事实问题；引用具体状态时给出 `naming`
-里的一行（定名＋原文措辞＋出处层）。
+里的一行（定名｜原文名｜原文措辞），要交代出处层则取 `report` 的「派生表与
+持久度」一节或 `slots` 的逐槽标注；页码出处只在 `multi`／`group`／`society`
+三面印出来，主体机的面没有页码字段。
 
 ## 读法纪律
 

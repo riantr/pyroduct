@@ -28,12 +28,12 @@ test "viz：三张图的内容与边数锁定" {
   assert_true(group.contains("[*] --> Scattered"))
   assert_true(group.contains("Settled"))
   assert_eq(arrow_lines(group), 45)
-  // 社会：13 状态声明 + 1 个 [*] 起始 + 26 迁移 = 27 条箭头行
+  // 社会：13 状态声明 + 1 个 [*] 起始 + 28 迁移 = 29 条箭头行
   let society = @viz.society()
   assert_true(society.has_prefix("stateDiagram-v2"))
   assert_true(society.contains("state \"世界\" as World"))
   assert_true(society.contains("Gap"))
-  assert_eq(arrow_lines(society), 27)
+  assert_eq(arrow_lines(society), 29)
 }
 
 ///|

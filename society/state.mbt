@@ -22,6 +22,14 @@
 /// 世界）的任务乃是一项荒谬的任务」（P.44、第四章第五节 P.49-50）。这是两种取向的对照，
 /// 也是本模型的入口分歧。
 ///
+/// 但对照不等于高下：本模型对两者**等量齐观**——「以波粒二象性等量齐观」。超主体性与
+/// 主体间性不是「正确／错误」「高级／低级」的两级，而是**如同波粒二象性那样互为
+/// 不可偏废的两相**：同一个交往行为，在不同的相位上读出不同的取向；哪个相位当下显影，
+/// 由行为的结果判定，不由模型预设。故表里两相各有自环（延续当前相位）且有**双向**
+/// 跨态边（换相）：`Suprasubjective --RaiseClaims--> Intersubjective`（超体上冒出
+/// 有效性主张）、`Intersubjective --SpeakLanguage--> Suprasubjective`（主体间性本就
+/// 「是用语言建立起来的」，语言承担理解即回到超体）。
+///
 /// 本模型是**我们的实现形态**（离散状态机），「双层次社会交往模型」是对**对象**的定名；
 /// 它**不是**把主体状态机的节奏抬到群体尺度重演（那是同工作区 `group` 包的模型延伸）。
 ///
@@ -32,8 +40,8 @@
 /// 模型中的状态（13 个，两字）。
 pub(all) enum State {
   World // 世界：生活世界（语言层）
-  Suprasubjective // 超体：超主体性
-  Intersubjective // 间性：主体间性
+  Suprasubjective // 超体：超主体性（与间体等量齐观，见文件头「波粒二象性」）
+  Intersubjective // 间性：主体间性（与超体等量齐观，见文件头「波粒二象性」）
   Claim // 主张：有效性主张
   Discourse // 商谈
   Justification // 辩护
@@ -289,6 +297,12 @@ pub fn transitions() -> Array[Transition] {
     { from: Suprasubjective, trigger: DemandThird, to: Gap, },
     // 主体间性一系：从主张经辩护到共识。
     { from: Intersubjective, trigger: RaiseClaims, to: Claim, },
+    // 两相之间的震荡：**以波粒二象性等量齐观**——超主体性与主体间性同为常态的两
+    // 相，由交往行为的结果判定，不是一次性的达成，谁也不比谁更根本。自环是延续
+    // 当前相位，跨态边是换相，与 `group` 机「成体」的读法同构（那边用
+    // `RaiseClaims`／`SharedMedium`，这边用本表自己的词汇）。
+    { from: Suprasubjective, trigger: RaiseClaims, to: Intersubjective, },
+    { from: Intersubjective, trigger: SpeakLanguage, to: Suprasubjective, },
     { from: Claim, trigger: RaiseClaims, to: Claim, },
     { from: Claim, trigger: EnterDiscourse, to: Discourse, },
     { from: Discourse, trigger: Filter, to: Discourse, },

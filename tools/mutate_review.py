@@ -191,6 +191,18 @@ PROPS = [
         "    { from: CommonTongue, trigger: RaiseClaims, to: Discourse, },\r\n    { from: Discourse, trigger: SharedMedium, to: CommonTongue, },",
         "    { from: CommonTongue, trigger: SharedMedium, to: Discourse, },\r\n    { from: Discourse, trigger: RaiseClaims, to: CommonTongue, },",
     ),
+    (
+        "P11 社会两相震荡只剩单向（超体上不再冒出有效性主张）",
+        "society/state.mbt",
+        "    { from: Suprasubjective, trigger: RaiseClaims, to: Intersubjective, },\r\n    { from: Intersubjective, trigger: SpeakLanguage, to: Suprasubjective, },\r\n",
+        "",
+    ),
+    (
+        "P12 社会两相震荡边接反（超体与间体倒置）",
+        "society/state.mbt",
+        "    { from: Suprasubjective, trigger: RaiseClaims, to: Intersubjective, },\r\n    { from: Intersubjective, trigger: SpeakLanguage, to: Suprasubjective, },",
+        "    { from: Suprasubjective, trigger: SpeakLanguage, to: Intersubjective, },\r\n    { from: Intersubjective, trigger: RaiseClaims, to: Suprasubjective, },",
+    ),
 ]
 
 LOOP3 = [

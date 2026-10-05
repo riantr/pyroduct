@@ -21,7 +21,7 @@ test "规格转写：群体机与社会机的真表原样进入 MachineSpec" {
   assert_eq(group.terminal, "")
   let society = @audit.build_society_spec()
   assert_eq(society.states.length(), 13)
-  assert_eq(society.transitions.length(), 26)
+  assert_eq(society.transitions.length(), 28)
   assert_eq(society.trigger_slots.length(), 18)
   assert_eq(society.course.length(), 10)
   assert_eq(society.initial, @so.initial().designation())
@@ -96,7 +96,7 @@ test "不留豁免也没让报警闭嘴：填一个不可达终点，两台机�
 
 ///|
 /// 无路全部说出口：两台机的每一个 (位置, 触发) 无出边组合都带非空理由。
-test "无路全部说出口：群体 397 条、社会 208 条理由逐条非空" {
+test "无路全部说出口：群体 397 条、社会 206 条理由逐条非空" {
   let group = @audit.build_group_spec()
   assert_eq(group.blocks.length(), 397)
   for b in group.blocks {
@@ -104,7 +104,7 @@ test "无路全部说出口：群体 397 条、社会 208 条理由逐条非空"
     assert_true(!reason.is_empty())
   }
   let society = @audit.build_society_spec()
-  assert_eq(society.blocks.length(), 208)
+  assert_eq(society.blocks.length(), 206)
   for b in society.blocks {
     let (_, _, reason) = b
     assert_true(!reason.is_empty())

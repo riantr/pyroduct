@@ -5,9 +5,42 @@
 test "规模与构成" {
   assert_eq(@society.all_states().length(), 13)
   assert_eq(@society.all_phases().length(), 8)
-  assert_eq(@society.transitions().length(), 26)
+  assert_eq(@society.transitions().length(), 28)
   assert_eq(@society.initial().designation(), "世界")
   assert_eq(@society.gap().designation(), "缺口")
+}
+
+///|
+/// 两相之间的震荡：**以波粒二象性等量齐观**——超主体性与主体间性同为常态的两相，
+/// 由交往行为的结果判定，谁也不比谁更根本。自环延续当前相位，跨态边换相。
+test "两相震荡：超体与间体双向可通，且触发粒度上仍确定" {
+  // 跨相：超体上冒出有效性主张 → 间体
+  let to_inter = @society.step(@society.Suprasubjective, @society.RaiseClaims)
+  assert_true(to_inter.label() == "迁")
+  assert_true(to_inter.landing() == Some(@society.Intersubjective))
+  // 跨相：主体间性本就「是用语言建立起来的」，语言承担理解 → 超体
+  let to_supra = @society.step(@society.Intersubjective, @society.SpeakLanguage)
+  assert_true(to_supra.label() == "迁")
+  assert_true(to_supra.landing() == Some(@society.Suprasubjective))
+  // 自环保留（延续当前相位）
+  assert_true(
+    @society.step(@society.Suprasubjective, @society.SpeakLanguage).landing() ==
+    Some(@society.Suprasubjective),
+  )
+  // 来回闭合
+  match to_inter.landing() {
+    Some(g) => {
+      let back = @society.step(g, @society.SpeakLanguage)
+      assert_true(back.landing() == Some(@society.Suprasubjective))
+    }
+    None => assert_true(false)
+  }
+  // 加了震荡边**不**破坏触发确定性：两相各有两句不同触发、各一个去处，故
+  // `one_edge_per_trigger` 仍恒真、`Open` 在这台机上仍不可达。这是它与 `group`
+  // 机结构上的差别，别混。
+  assert_true(@society.one_edge_per_trigger())
+  assert_eq(@society.open_pairs().length(), 0)
+  assert_true(@society.no_dead_end())
 }
 
 ///|

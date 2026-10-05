@@ -18,7 +18,7 @@
 | `dmlref` | — | 自研 DoubleML 与 `riantr/moonbit_doubleML@0.75.0` 的互校 |
 | `causal` | 一份数据 | 0.75.0 深用诊断（只读，数据来自状态机）：敏感性（Cinelli–Hazlett rv）、多重检验校正（BH/Bonferroni——天真 OLS 也过线，显著性≠证据）、BLP 异质性（d̃ 回收 θ̂）；标模型整理 |
 | `audit` | 一台机器 | 三鉴自审计：真实主体机的表 → 纯数据 MachineSpec → 结构鉴／类型鉴／行为鉴（库的 moon.mod 点名 pyroduct 为参考消费者；「鉴」兼照镜与审察）；发现分已知设计（无忆／无筹只出不进，0.1.2 已验证）与未预期（必须为零——活的绊线）；标模型整理 |
-| `audit` 的另两台 | 两台机器 | 0.1.28：同一套三鉴扩到群体机（20 状态·44 迁移）与社会机（13 状态·26 迁移）。两台机**没有驱动槽**（驱动就是触发本身）与**没有终点**（不封闭是结构事实），故类型鉴的槽层整层跳过、`terminal` 留空；真表上未预期 0 条且**不设豁免**。另有 `mutants`：三台机×六族破坏共 18 处，逐处被抓——「0 条发现」需要证据才站得住。标模型整理 |
+| `audit` 的另两台 | 两台机器 | 0.1.28：同一套三鉴扩到群体机（20 状态·44 迁移）与社会机（13 状态·28 迁移）。两台机**没有驱动槽**（驱动就是触发本身）与**没有终点**（不封闭是结构事实），故类型鉴的槽层整层跳过、`terminal` 留空；真表上未预期 0 条且**不设豁免**。另有 `mutants`：三台机×六族破坏共 18 处，逐处被抓——「0 条发现」需要证据才站得住。标模型整理 |
 | `snnref` | 一个实验 | 脉冲沉淀实验（native 专属）：49 触发 → Poisson spike trains（槽内共现高率）→ Gerstner STDP → 权重结构能否恢复驱动槽八分（比值、命中率对基线、分槽表）；标模型整理 |
 | `cmd/main` | — | wasm CLI（三十五个子命令） |
 | `cmd/coord` | — | native CLI，真实落盘（`supported_targets = "+native"`） |
@@ -44,7 +44,7 @@
 
 ```console
 moon check                              # 类型/告警检查
-moon test                               # 全部测试（wasm），当前 188/188 + snnref 2（native）
+moon test                               # 全部测试（wasm），当前 189/189 + snnref 2（native）
 moon test --target native snnref        # 脉冲沉淀实验（native 专属）
 moon fmt --check                        # 格式必须干净
 moon run --target native cmd/coord      # 检查点落盘往返（往返一致 true）

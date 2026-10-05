@@ -8,6 +8,12 @@ target/
 # tool / session artifacts
 .openseek/
 .worktrees/
+__pycache__/
+_muts.log
+
+# 单组跑的变异留档（mutation_review_log.loop1.md 之类）：是全量记录的子集，
+# 入库只会让人误当成全量。权威的那份是 mutation_review_log.md，由全量跑生成。
+tools/mutation_review_log.*.md
 
 # MiniMax 插件的构建产物：1.1 MB 的 JS 桥由 `moon build --target js` 生成，
 # 不入库；plugin/tools/sync-install.mjs 把它从安装目录带回，或由

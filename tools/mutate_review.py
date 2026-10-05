@@ -346,14 +346,21 @@ GROUPS = {
 # 默认跑只取真正的一组一 Loop，别名要显式点名。
 DEFAULT_GROUPS = ["loop1", "loop2", "loop3", "loop4", "loop5"]
 
+# 变异条数**由表算出来**，不写死。我在这份头部里写死过「30 条」，而表里其实
+# 是 34 条（A5+B5+M9+S6+L9）——写死的数字在表增长时不会跟着动，漂了也没人知道。
+# 硬写的计数本身就是一处会骗人的判据。
+MUT_COUNT = sum(len(GROUPS[n]) for n in DEFAULT_GROUPS)
+
 SUMMARY = re.compile(r"Total tests:\s*(\d+),\s*passed:\s*(\d+),\s*failed:\s*(\d+)")
 
 LOG_HEADER = """# 变异表判定记录（生成物，勿手改）
 
 这张表是 `python tools/mutate_review.py` 的**输出留档**，为的是让
 「每条变异都被判据抓住」这句话不必靠重跑一次破坏工作树的运行来核对。
-重跑方式：`python tools/mutate_review.py`（30 条变异 × 全量测试，约 20-30 分钟；
-`python tools/mutate_review.py loop3` 只跑一组）。
+重跑方式：`python tools/mutate_review.py`（%d 条变异 × 全量测试，约 20-30 分钟）。
+本文件**只由全量跑生成**。`python tools/mutate_review.py loop3` 这样的单组跑会
+另写 `mutation_review_log.loop3.md`，不会碰这份——单组跑曾经把这份全量记录
+覆盖成自己那几行，而我把截断版提交了；工具静默毁掉自己的记录比没有工具更糟。
 
 判读四态：
 - `CAUGHT` + 失败数 > 0 —— 判据真的变红了。这是要的结果。
@@ -366,18 +373,59 @@ LOG_HEADER = """# 变异表判定记录（生成物，勿手改）
 纪律两条：变异必须**编译得过**（见上）；每条结束时校验 sha256 与开跑前一致
 ——改源码的脚本要自己证明没留痕迹。
 
-"""
+""" % MUT_COUNT
 
 
-def write_log(report):
+def render_log(report, full_run, groups):
+    """Render the record to text. Split out from write_log on purpose.
+
+    Anything that needs to reproduce the file must go through HERE, not through
+    a second copy of the layout. I once rebuilt the header by hand and produced
+    a file that was self-consistent and wrong: one blank line after the header
+    where the generator writes three. A hand-rolled reconstruction that checks
+    itself against itself proves nothing — only this function defines the truth.
+    """
     lines = [LOG_HEADER, ""]
+    if not full_run:
+        lines.insert(
+            1,
+            "> **这是单组跑的留档（%s），只覆盖本次跑的那几组。**"
+            "全量记录在 `mutation_review_log.md`，本次运行**没有**覆盖它。"
+            % ", ".join(groups),
+        )
     lines.append("机 | 变异 | 判定 | 详情 |")
     lines.append("|---|---|---|---|")
     for name, verdict, detail in report:
         cells = [c.replace("|", "\\|") for c in (name, verdict, detail)]
         lines.append("| " + " | ".join(cells) + " |")
-    with open(LOG, "w", encoding="utf-8", newline="\n") as fh:
-        fh.write("\n".join(lines) + "\n")
+    return "\n".join(lines) + "\n"
+
+
+def write_log(report, full_run, groups):
+    """Write the verdict record — but a PARTIAL run must not clobber the full one.
+
+    I once re-ran `loop1` alone to double-check two mutations after restoring a
+    refactor, and it overwrote the committed full record with its own few rows.
+    Then I committed that. A tool that silently truncates its own evidence is
+    worse than no tool: the record looked authoritative and was wrong.
+
+    So: the full run owns mutation_review_log.md; a partial run writes
+    mutation_review_log.<groups>.md instead and says so out loud.
+    """
+    if full_run:
+        path = LOG
+    else:
+        tag = "-".join(groups)
+        path = os.path.join(ROOT, "tools", "mutation_review_log.%s.md" % tag)
+    with open(path, "w", encoding="utf-8", newline="\n") as fh:
+        fh.write(render_log(report, full_run, groups))
+    print("wrote " + os.path.relpath(path, ROOT))
+    if not full_run:
+        print(
+            "NOTE: partial run — the full record in mutation_review_log.md was "
+            "left untouched (a partial run used to overwrite it; that silently "
+            "truncated the committed evidence once already)."
+        )
 
 
 def run_tests():
@@ -437,7 +485,8 @@ def main():
             same = hashlib.sha256(fh.read()).hexdigest() == digest
         report.append(("RESTORED " + rel, "OK" if same else "HASH-MISMATCH", digest[:16]))
 
-    write_log(report)
+    # 「全量」= 没点名任何组。传了组名就是部分跑，留档另写，不覆盖全量记录。
+    write_log(report, not sys.argv[1:], wanted)
     for name, verdict, detail in report:
         print("%-46s %-14s %s" % (name, verdict, detail))
 

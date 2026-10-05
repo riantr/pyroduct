@@ -51,7 +51,8 @@ python tools/apply_fmt.py              # copy `moon fmt --check`'s canonical cop
                                        # in this sandbox, and a binary copy cannot mangle
                                        # encoding the way Get-Content/Set-Content does)
 python tools/mutate_review.py          # review harness: mutation table for all five
-                                       # Loops (30 mutations). Each entry reverts one
+                                       # Loops (34 mutations, counted from the table —
+                                       # don't hardcode it). Each entry reverts one
                                        # construct to its old/wrong shape, re-runs
                                        # `moon test`, and the criteria MUST go red.
                                        # `python tools/mutate_review.py loop5` runs one

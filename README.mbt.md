@@ -1,5 +1,7 @@
 # Pyroduct
 
+![pyroduct](pyroduct.png)
+
 A runnable, tested MoonBit state-machine family modelled from two Chinese
 philosophy texts — 《通往宁静之路：个体道德发生论纲要》 (*The Road to
 Tranquility: An Outline of the Genesis of Individual Morality*) and its parent
@@ -296,7 +298,7 @@ Add the module, then run the suite:
 
 ```
 moon add riantr/pyroduct
-moon test             # Total tests: 105, passed: 105, failed: 0.
+moon test             # Total tests: 129, passed: 129, failed: 0.
 ```
 
 From this repository, every layer prints a report:

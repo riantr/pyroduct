@@ -1,5 +1,7 @@
 # Pyroduct
 
+![pyroduct](pyroduct.png)
+
 一个可运行、可测试的 MoonBit 状态机族，以两部中文哲学文本为模——《通往宁静
 之路：个体道德发生论纲要》及其母本《伽达默尔与哈贝马斯真理观比较》（上海社会
 科学院，2008）——外加一个过闸进化的 Agent 状态机与一个科研 Agent 协调器。
@@ -278,7 +280,7 @@ behavior)* · 往返一致 *round-trips identically*。
 
 ```
 moon add riantr/pyroduct
-moon test             # Total tests: 105, passed: 105, failed: 0.
+moon test             # Total tests: 129, passed: 129, failed: 0.
 ```
 
 在本仓库里，每一层都打印一份报告：

@@ -616,7 +616,8 @@ pub fn initial() -> SubjectState {
 }
 
 ///|
-/// 终态：宁静。
+/// 静定极（并非终态：机器无终态封闭——见 `no_final_closure` 测试与 buchi
+/// 面的 ω-读法；历程走完即重入，静定是反复发生的「好事」）。
 pub fn terminal() -> SubjectState {
   Tranquility
 }

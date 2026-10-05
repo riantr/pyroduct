@@ -16,6 +16,18 @@ test "algebra：最小商——31 块，三对孪生（成双是设计）" {
 }
 
 ///|
+test "algebra：49 条触发句两两不同（refine 的轮廓键以句为键——绊线）" {
+  // 分区细化按「触发句 → 目标块」构造未来轮廓：两句相同会静默合并状态。
+  // 锁死触发句唯一性，键的前提就永远成立。
+  let seen : Map[String, Bool] = Map([])
+  for t in @src.all_triggers() {
+    assert_false(seen.contains(t.label()))
+    seen[t.label()] = true
+  }
+  assert_eq(seen.length(), 49)
+}
+
+///|
 test "algebra：主线是链，差集恰为四处设计状态" {
   let course = @src.course()
   // 主线 31 项 = 30 站 + 重入的反顾；无重复；首尾锚定

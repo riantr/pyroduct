@@ -12,13 +12,13 @@ Long-form context lives in `README.mbt.md` (English) and `README.zh.mbt.md`
 
 ```console
 moon test                              # all tests (default target: wasm); currently
-                                       # 128/128 on wasm + 2 snnref tests on native
+                                       # 129/129 on wasm + 2 snnref tests on native
 moon test --target native snnref       # spike-sediment experiment (native only)
 moon check                             # type/warn check
 moon info                              # regenerates every pkg.generated.mbti (tracked)
 moon fmt                               # format; `moon fmt --check` must stay clean
 moon run cmd/main -- report            # CLI: report (default) | multi | group | society |
-                                       # evolution | coordinator | dmlref | causal |
+                                       # evolution | cycle | coordinator | dmlref | causal |
                                        # audit | mermaid | dot | genesis | course |
                                        # naming | slots | loop | principle | intuition |
                                        # ml | ml-export | all | society-mermaid |

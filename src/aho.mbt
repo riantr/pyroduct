@@ -195,15 +195,17 @@ pub fn render_aho_report() -> String {
   lines.push(
     "- 词典：\{words.length()} 条触发句；自动机 \{s.nodes} 节点、\{s.links} 条边、最长句 \{s.longest_word} 字；",
   )
-  // 最深失败链指向的节点：找出以它为开头的句子（共享已往落在谁的开头上）
-  let mut fail_owner = ""
+  // 最深失败链指向的节点：找出以它为开头的句子（共享已往落在谁的开头上；
+  // 取迁移表顺序的**首个**——多句共享同一开头时报告仍确定且不点错名）
+  let owners : Array[String] = []
   let target = s.deepest_fail_target
   let ti = target.length()
   for w in words {
     if w.length() > ti && w[:ti].to_owned() == target {
-      fail_owner = w
+      owners.push(w)
     }
   }
+  let fail_owner = if owners.length() > 0 { owners[0] } else { "" }
   lines.push(
     "- 失败链：\{s.fail_links} 条非平凡——读入失败时能想起已往的位置；最深一条 \{s.deepest_fail} 字（标记地图失效的那句）；它的已往「\{s.deepest_fail_target}」恰是「\{fail_owner}」的开头——最深的一次回忆，落在残渣句的起点上：地图被推翻之处，正是已往沉积之处；",
   )

@@ -64,6 +64,36 @@ moon run --target native cmd/coord     # coordinator CLI with real disk I/O; wri
   may need elevated file access once. Everything else (build, test, run, format) works
   inside the workspace.
 
+## MiniMax Code plugin (`plugin/`)
+
+The module ships as a local MiniMax plugin. `plugin/` is the source of truth; the
+installed copy in the Desktop data dir (`~/.minimax/plugins/pyroduct-model/`) is what the
+runtime loads, and the two are kept in agreement explicitly:
+
+```console
+node plugin\tools\sync-install.mjs push            # repo -> installed copy (install step)
+node plugin\tools\sync-install.mjs pull            # installed copy -> repo (capture edits made there)
+node plugin\tools\sync-install.mjs push <checkout> # install, then rebuild + re-pin + regression
+```
+
+- Editing the plugin means editing `plugin/`, then pushing. If you edited inside the data dir
+  instead, `pull` first. Never hand-maintain both trees: `push`/`pull` delete files the source
+  no longer has, so a rename cannot leave a stale `server.mjs` or skill reference behind.
+- `plugin/vendor/jsoncli.js` is a build artifact (gitignored). It is produced by
+  `moon build --target js` and pinned by SHA-256 in `plugin/vendor/BUILD.json`; `push` refuses
+  to install when the recorded hash and the file disagree. Refresh it with
+  `node <installed>\tools\update-bundle.mjs <checkout>`, which also rewrites the pin from
+  `moon.mod` and re-runs `tools/validate-plugin.mjs`.
+- After any plugin change run the package's own net: `node <installed>\tools\validate-plugin.mjs`
+  (26 checks: the pin, a real MCP handshake, all 28 faces, the model-count invariants including
+  `audit`'s 「未预期 0 条」 tripwire, a page-citation anti-drift rule, and a positive control that
+  fires the checkout guard). The plugin's SemVer in `.minimax-plugin/plugin.json` is independent
+  of the module's `moon.mod` version — bump it by hand.
+- The plugin holds **no model facts**: every fact comes from the module through
+  `cmd/jsoncli`. If you add a fact to the plugin, it belongs in the module instead.
+- A live MCP server keeps the old code until it restarts, so a description fix shows up in the
+  next session, not the current one.
+
 ## Layout
 
 | Package | Unit | Contents |
@@ -82,8 +112,9 @@ moon run --target native cmd/coord     # coordinator CLI with real disk I/O; wri
 | `viz` | — | Presentation-only: all three state machines as Mermaid `stateDiagram-v2` source plus one self-contained HTML page (`page()` embeds all three plus the subject machine's nested view — 11 phases as composite states — and the demo journey view with styling for now/gap/undecided; mermaid.js CDN loaded at view time — build/run stay offline). Delegates to the per-machine renderers; declares ASCII node ids with Chinese labels everywhere |
 | `cmd/main` | — | wasm CLI (33 named subcommands, incl. `all`, + the default report) |
 | `cmd/coord` | — | native CLI with real disk I/O (`supported_targets = "+native"`) |
-| `cmd/jsoncli` | — | JSON bridge for the DeepSeek Harness plugin `riantr/dsh-plugin-pyroduct` (js target: `moon build --target js` → `_build/js/debug/build/cmd/jsoncli/jsoncli.js`): one JSON request arg `{ "kind": ... }` → one-line JSON reply `{ok, kind, rendered, faces}`. Kinds mirror the model-facing subcommands (28 faces, listed in the bridge's `faces()`); viz composites and `all` stay CLI-only. The bridge is a pure spawner/formatter — all model semantics stay in the renderers it calls |
+| `cmd/jsoncli` | — | JSON bridge for both agent plugins — the DeepSeek Harness one (`riantr/dsh-plugin-pyroduct`) and the MiniMax Code one (`plugin/`) (js target: `moon build --target js` → `_build/js/debug/build/cmd/jsoncli/jsoncli.js`): one JSON request arg `{ "kind": ... }` → one-line JSON reply `{ok, kind, rendered, faces}`. Kinds mirror the model-facing subcommands (28 faces, listed in the bridge's `faces()`); viz composites and `all` stay CLI-only. The bridge is a pure spawner/formatter — all model semantics stay in the renderers it calls |
 | `tools/pdfdump` | — | read-only survey records of the source PDF |
+| `plugin/` | — | **not a MoonBit package** — the MiniMax Code local plugin (`.minimax-plugin/plugin.json` + `server.mjs` MCP server + the `pyroduct-model` skill + `tools/`). This tree is the source of truth; the installed copy lives in the Desktop data dir (`~/.minimax/plugins/pyroduct-model/`, `.mavis` is a junction to it) and is what the runtime loads. `vendor/jsoncli.js` is a build artifact, gitignored and regenerated |
 | `examples/*` | — | one runnable example per package: `plr`, `irm`, `cross_check`, `consumer`, `sediment` (native) |
 
 Each package directory contains a `moon.pkg` whose first lines are a comment explaining the

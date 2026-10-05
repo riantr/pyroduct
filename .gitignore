@@ -9,6 +9,11 @@ target/
 .openseek/
 .worktrees/
 
+# MiniMax 插件的构建产物：1.1 MB 的 JS 桥由 `moon build --target js` 生成，
+# 不入库；plugin/tools/sync-install.mjs 把它从安装目录带回，或由
+# <plugin>\tools\update-bundle.mjs 重建。哈希钉记在 plugin/vendor/BUILD.json。
+plugin/vendor/jsoncli.js
+
 # OS noise
 .DS_Store
 Thumbs.db

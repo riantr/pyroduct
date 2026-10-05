@@ -82,6 +82,7 @@ moon run --target native cmd/coord     # coordinator CLI with real disk I/O; wri
 | `viz` | — | Presentation-only: all three state machines as Mermaid `stateDiagram-v2` source plus one self-contained HTML page (`page()` embeds all three plus the subject machine's nested view — 11 phases as composite states — and the demo journey view with styling for now/gap/undecided; mermaid.js CDN loaded at view time — build/run stay offline). Delegates to the per-machine renderers; declares ASCII node ids with Chinese labels everywhere |
 | `cmd/main` | — | wasm CLI (33 named subcommands, incl. `all`, + the default report) |
 | `cmd/coord` | — | native CLI with real disk I/O (`supported_targets = "+native"`) |
+| `cmd/jsoncli` | — | JSON bridge for the DeepSeek Harness plugin `riantr/dsh-plugin-pyroduct` (js target: `moon build --target js` → `_build/js/debug/build/cmd/jsoncli/jsoncli.js`): one JSON request arg `{ "kind": ... }` → one-line JSON reply `{ok, kind, rendered, faces}`. Kinds mirror the model-facing subcommands (28 faces, listed in the bridge's `faces()`); viz composites and `all` stay CLI-only. The bridge is a pure spawner/formatter — all model semantics stay in the renderers it calls |
 | `tools/pdfdump` | — | read-only survey records of the source PDF |
 | `examples/*` | — | one runnable example per package: `plr`, `irm`, `cross_check`, `consumer`, `sediment` (native) |
 

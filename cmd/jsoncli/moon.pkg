@@ -1,0 +1,22 @@
+// 主体机 JSON 桥（JS 目标可执行）：dsh-plugin-pyroduct 在 Node 下 spawn 本桥，
+// 传一个 JSON 请求参数、读一行 JSON 回信。全部模型语义在 @sm 及各层渲染器
+// 里——桥只做 kind 分发与信封封装，不实现任何模型逻辑。
+
+import {
+  "riantr/pyroduct/src" @sm,
+  "riantr/pyroduct/ml",
+  "riantr/pyroduct/multi",
+  "riantr/pyroduct/group",
+  "riantr/pyroduct/society",
+  "riantr/pyroduct/evolution",
+  "riantr/pyroduct/coordinator",
+  "riantr/pyroduct/dmlref",
+  "riantr/pyroduct/causal",
+  "riantr/pyroduct/audit",
+  "moonbitlang/core/json",
+  "moonbitlang/core/env",
+}
+
+pkgtype(kind: "executable")
+
+supported_targets = "native+wasm+wasm-gc+js"

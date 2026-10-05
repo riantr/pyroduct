@@ -2,6 +2,7 @@
 package "riantr/pyroduct/evolution"
 
 import {
+  "riantr/pyroduct/group",
   "riantr/pyroduct/ml",
   "riantr/pyroduct/multi",
   "riantr/pyroduct/src",
@@ -49,6 +50,12 @@ pub fn evaluate(Genome, Array[Opponent]) -> Fitness
 pub fn evolve(Genome, Array[Opponent], Criterion, Int) -> Ledger
 
 pub fn genome(Voice, @multi.TruthRegime, Int, Int, Int, Int) -> Genome
+
+pub fn group_lean(Genome) -> @group.GroupLean
+
+pub fn group_lean_of(Int, Int) -> @group.GroupLean
+
+pub fn group_step(@group.GroupState, @group.GroupTrigger, Genome) -> @group.GroupOutcome
 
 pub fn intuition_disciplines() -> Array[(String, String)]
 

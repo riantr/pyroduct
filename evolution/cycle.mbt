@@ -113,6 +113,42 @@ fn cycle_slot(f : Fitness, at : @sm.SubjectState) -> @sm.Slot {
 }
 
 ///|
+/// 偏向的判定本体：只吃双诚之比那两根轴的数值，纯函数。
+///
+/// 取料与判定分开，`group_lean` 只是它的读取器。`Genome` 在包外是**只读类型**、
+/// 构造不了，所以判据要能验就得能喂数——两根 `Int` 造得出来，两个轴换位也验得了。
+/// 边界一并可测：两轴相等（缺省基因组就是 70:70）归 `共见`。
+pub fn group_lean_of(toward_other : Int, toward_self : Int) -> @g.GroupLean {
+  if toward_other > toward_self {
+    @g.Argue
+  } else {
+    @g.Common
+  }
+}
+
+///|
+/// 群体层「一句触发、两个去处」的裁决：与上面的 `resolve_open` 同一根轴。
+///
+/// `toward_self`（朝向自身与已往，即多代积累的传统）更盛或持平 → `共见`：取基础
+/// 层面的常见，不付商谈代价。`toward_other`（朝向他者与未来）更盛 → `共辩`：付
+/// 有效性主张的代价。缺省基因组双诚 70:70 持平，故缺省走 `共见`。
+///
+/// 群体机仍如实给 `Open`，本函数只是把偏向递下去；两个去处都还在表里。
+pub fn group_lean(genome : Genome) -> @g.GroupLean {
+  group_lean_of(genome.toward_other, genome.toward_self)
+}
+
+///|
+/// 群体层一步：走一步并按基因组裁决 `Open`。
+pub fn group_step(
+  state : @g.GroupState,
+  trigger : @g.GroupTrigger,
+  genome : Genome,
+) -> @g.GroupOutcome {
+  @g.resolve_open(@g.step(state, trigger), group_lean(genome), state)
+}
+
+///|
 /// 「未定」的裁决：由主体的**双诚之比**在并存的路里挑一条（模型整理）。
 ///
 /// 他之诚更盛→空间侧（后一条：疏离／交织／敬畏，朝向他者与未来）；

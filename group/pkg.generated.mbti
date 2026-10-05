@@ -16,6 +16,8 @@ pub fn clashing_pairs(Array[@multi.Subject]) -> Int
 
 pub fn course() -> Array[GroupState]
 
+pub fn default_lean() -> GroupLean
+
 pub fn emerge(Array[@multi.Subject]) -> GroupState
 
 pub fn emergence_table() -> Array[(String, GroupState)]
@@ -44,6 +46,8 @@ pub fn render_group_report() -> String
 
 pub fn render_mermaid() -> String
 
+pub fn resolve_open(GroupOutcome, GroupLean, GroupState) -> GroupOutcome
+
 pub fn resting() -> GroupState
 
 pub fn step(GroupState, GroupTrigger) -> GroupOutcome
@@ -59,6 +63,14 @@ pub fn walk(GroupState, Array[GroupTrigger]) -> GroupTrace
 // Errors
 
 // Types and methods
+pub(all) enum GroupLean {
+  Common
+  Argue
+} derive(Eq)
+pub fn GroupLean::equal(Self, Self) -> Bool
+pub fn GroupLean::label(Self) -> String
+pub fn GroupLean::not_equal(Self, Self) -> Bool
+
 pub(all) enum GroupOutcome {
   Moved(GroupTrigger, GroupState)
   Held(GroupTrigger, GroupState)

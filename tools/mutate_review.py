@@ -167,6 +167,18 @@ PROPS = [
         "  if terminal.length() > 0 {\r\n    return false\r\n  }",
         "  if true {\r\n    return true\r\n  }\r\n  if terminal.length() > 0 {\r\n    return false\r\n  }",
     ),
+    (
+        "P7 group::resolve_open 两种偏向取同一条（能耗原则不成立）",
+        "group/loop.mbt",
+        "      let to = match lean {\n        Common => cands[0]\n        Argue => cands[cands.length() - 1]\n      }",
+        "      let to = cands[0]\n      match lean {\n        Common => ()\n        Argue => ()\n      }",
+    ),
+    (
+        "P8 evolution::group_lean_of 偏向反相（双诚之比读反了）",
+        "evolution/cycle.mbt",
+        "  if toward_other > toward_self {\n    @g.Argue",
+        "  if toward_self >= toward_other {\n    @g.Argue",
+    ),
 ]
 
 LOOP3 = [

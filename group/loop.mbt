@@ -34,6 +34,77 @@ pub(all) enum GroupOutcome {
 pub extend GroupOutcome with Eq::{not_equal, equal}
 
 ///|
+/// 群体在「一句触发、两个去处」上的**偏向**：付多少代价去找那个共同关注。
+///
+/// 这是把能耗原则**写成参数**，而不是写成硬规则：`step` 依旧如实给 `Open`，
+/// 由调用方把偏向递给 `resolve_open` 决定走哪边。偏向可换，所以「默认取基础」
+/// 是一条可被改写的设定，不是一条不可撤销的本体论断言。
+///
+/// 命名沿用两字纪律，只指称结构关系：
+pub(all) enum GroupLean {
+  Common // 共见：取基础层面的常见（多代积累的共同语言／传统），代价低
+  Argue // 共辩：付商谈的代价（有效性主张／理由），代价高
+} derive(Eq)
+
+///|
+pub extend GroupLean with Eq::{not_equal, equal}
+
+///|
+pub fn GroupLean::label(self : GroupLean) -> String {
+  match self {
+    Common => "共见"
+    Argue => "共辩"
+  }
+}
+
+///|
+/// 缺省偏向：多代积累的基础共识。
+///
+/// 理由（模型整理）：多方汇聚时由差异引起共同关注；若**无必要**——没有增加新成员、
+/// 新判据，也没有出现新问题——那就没有理由支付商谈的代价，应取基础层面的常见。
+///
+/// 「无必要」这个守卫**不写成机器的检查**：迁移表里没有「新成员到了」「出现了新
+/// 问题」这样的通道，写一个恒真的守卫等于把上一轮刚拆掉的空判据又装回去。守卫的
+/// 生效方式是**由上层选偏向**——上层知道有没有新情况，于是递给 `Common` 或
+/// `Argue`。这样「无必要」成了一个可写入、可回放、可变异验证的输入。
+pub fn default_lean() -> GroupLean {
+  Common
+}
+
+///|
+/// `Open` 的裁决：在并存的去处里按偏向挑一个，其余回执原样透传。
+///
+/// 取料与判定分开，同 `open_pairs`／`one_edge_each` 的理由：真表上只有一处 `Open`
+/// 且偏向恒为缺省时，这里分辨不出「裁决在跑」与「裁决恒定」。测试用**造出来的**
+/// 候选清单与两种偏向各驱动一次。
+///
+/// 候选按迁移表行序，故 `Common` 取第一条（表里是共语）、`Argue` 取最后一条
+/// （表里是商谈）——与 `step` 收集候选的读法一致，可重放。
+pub fn resolve_open(
+  out : GroupOutcome,
+  lean : GroupLean,
+  at : GroupState,
+) -> GroupOutcome {
+  match out {
+    Open(trig, cands) => {
+      if cands.length() < 2 {
+        return out
+      }
+      let to = match lean {
+        Common => cands[0]
+        Argue => cands[cands.length() - 1]
+      }
+      if to == at {
+        Held(trig, to)
+      } else {
+        Moved(trig, to)
+      }
+    }
+    other => other
+  }
+}
+
+///|
 /// 回执的名。
 pub fn GroupOutcome::label(self : GroupOutcome) -> String {
   match self {

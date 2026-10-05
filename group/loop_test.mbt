@@ -33,11 +33,24 @@ test "一句触发、两个去处：表里真的有一处，机器不替它挑" 
   assert_true(k == @group.Attention)
   assert_eq(to.length(), 2)
   assert_true(to.contains(@group.CommonTongue) && to.contains(@group.Discourse))
-  // 走一步得到并列，不落地：注意汇聚可通向共语、也可通向商谈——这**是表里
-  // 有意的一处**（作者已确认本意如此），不是笔误；机器照旧不替表挑一个。
+  // 机器这一层仍然只给未定：裁决是上层递进来的偏向，不在表里。
+  let raw = @group.step(@group.Converging, @group.Attention)
+  assert_true(raw.label() == "未定")
+  assert_true(raw.landing() == None)
+  // 偏好在：共见取第一条（共语），共辩取最后一条（商谈）。两个去处都还在表里。
+  let seen = @group.resolve_open(raw, @group.Common, @group.Converging)
+  assert_true(seen.label() == "迁")
+  assert_true(seen.landing() == Some(@group.CommonTongue))
+  let argued = @group.resolve_open(raw, @group.Argue, @group.Converging)
+  assert_true(argued.label() == "迁")
+  assert_true(argued.landing() == Some(@group.Discourse))
+  // 缺省偏好在「共见」：无必要时不付商谈的代价。
+  assert_true(@group.default_lean() == @group.Common)
+  assert_true(@group.Common.label() == "共见")
+  assert_true(@group.Argue.label() == "共辩")
+  // 表没变：裁决不动迁移表。
+  assert_eq(@group.open_pairs().length(), 1)
   let out = @group.step(@group.Converging, @group.Attention)
-  assert_true(out.label() == "未定")
-  assert_true(out.landing() == None)
   match out {
     @group.Open(tr, tos) => {
       assert_true(tr == @group.Attention)
@@ -45,6 +58,43 @@ test "一句触发、两个去处：表里真的有一处，机器不替它挑" 
     }
     _ => assert_true(false)
   }
+}
+
+///|
+/// 裁决器的反例侧。真表上只有一处 `Open`，所以「共见取第一条、共辩取最后一条」
+/// 那两句若写反，表上仍会给出同一个落点（只有一个候选族）——判据分不出对错。
+/// 这条用**造出来的**三条候选驱动：共见取头、共辩取尾，两者必须不同。
+test "裁决按偏向取首／取尾（造三条候选才分得出）" {
+  let three = @group.Open(@group.Attention, [
+    @group.CommonTongue,
+    @group.Normed,
+    @group.Discourse,
+  ])
+  let seen = @group.resolve_open(three, @group.Common, @group.Converging)
+  assert_true(seen.landing() == Some(@group.CommonTongue))
+  let argued = @group.resolve_open(three, @group.Argue, @group.Converging)
+  assert_true(argued.landing() == Some(@group.Discourse))
+  // 落点与当前位置相同就是「守」，不是「迁」——与 step 的读法一致。
+  let held = @group.resolve_open(
+    @group.Open(@group.Attention, [@group.Converging, @group.Discourse]),
+    @group.Common,
+    @group.Converging,
+  )
+  assert_true(held.label() == "守")
+  // 只有一个候选时不动它：并列不足两条就不裁决，原样回传。
+  let single = @group.Open(@group.Attention, [@group.Discourse])
+  assert_true(
+    @group.resolve_open(single, @group.Common, @group.Converging) == single,
+  )
+  // 非 Open 的回执原样透传，不被裁决器改写。
+  let moved = @group.Moved(@group.Appear, @group.Scattered)
+  assert_true(
+    @group.resolve_open(moved, @group.Argue, @group.Converging) == moved,
+  )
+  let block = @group.Block("此处无此事")
+  assert_true(
+    @group.resolve_open(block, @group.Argue, @group.Converging) == block,
+  )
 }
 
 ///|

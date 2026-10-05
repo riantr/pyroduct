@@ -147,7 +147,18 @@ const cat = await request('tools/call', { name: 'pyroduct_faces', arguments: {} 
 const catText = textOf(cat)
 check('pyroduct_faces ok', cat.result?.isError !== true)
 check('catalog lists all 28 faces', FACES.every((f) => catText.includes(f)))
-check('catalog states its provenance', catText.includes('0.1.24'), catText.split('\n')[2])
+// Version-agnostic on purpose: the number moves with every release, so pinning a
+// literal here would turn each version bump into a harness edit. What must hold is
+// that the catalog reports the version the pin file records — that pair drifting
+// apart is the real defect.
+const buildInfo = JSON.parse(
+  await import('node:fs').then((fs) => fs.readFileSync(path.join(PLUGIN, 'vendor', 'BUILD.json'), 'utf8')),
+)
+check(
+  'catalog states the version the pin file records',
+  catText.includes(`${buildInfo.module}@${buildInfo.version}`),
+  catText.split('\n')[2],
+)
 
 const badKind = await request('tools/call', {
   name: 'pyroduct_face',

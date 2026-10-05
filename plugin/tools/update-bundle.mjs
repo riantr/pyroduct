@@ -134,4 +134,4 @@ if (verify.code !== 0) {
   process.stderr.write(verify.stderr)
   fail('刷新后的包没过自己的回归网——快照已更新，但先别用，查清哪条不变量动了')
 }
-console.log('\n刷新完成：新快照 + 新哈希钉 + 24 项回归全过。记得同步 plugin.json 的 version。')
+console.log('\n刷新完成：新快照 + 新哈希钉 + 自带回归网全过。记得同步 plugin.json 的 version。')

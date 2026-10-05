@@ -41,7 +41,12 @@ const DATA_DIR = process.env.MINIMAX_DATA_DIR
   : path.join(os.homedir(), '.minimax')
 const INSTALLED = path.join(DATA_DIR, 'plugins', 'pyroduct-model')
 const SELF = 'sync-install.mjs'
-const SKIP = new Set([SELF, 'jsoncli.js'])
+const BUNDLE = 'vendor/jsoncli.js'
+// The bundle is not *tracked* (gitignored) but it IS part of the installed
+// package, so it must travel when the source has one. A source without it (fresh
+// clone before any build) must not delete a working install — the pin check
+// below is what catches a stale artifact.
+const SKIP = new Set([SELF])
 
 const mode = process.argv[2]
 const checkout = process.argv[3] ?? process.env.PYRODUCT_PROJECT_DIR ?? null
@@ -96,9 +101,14 @@ for (const rel of rels) {
 
 // Drop files the destination no longer has, so a rename does not leave a ghost
 // behind (a stale server.mjs or skill reference is exactly the kind of drift
-// this project treats as a defect).
+// this project treats as a defect). The bundle is exempt: a source that has
+// never been built should not uninstall a working one.
 const stale = filesOf(to).filter((rel) => !rels.includes(rel))
 for (const rel of stale) {
+  if (rel === BUNDLE) {
+    console.log(`   = ${rel} (源里没有构建产物，保留安装目录这份)`)
+    continue
+  }
   rmSync(path.join(to, rel), { force: true })
   console.log(`   - ${rel} (源里已无，删掉)`)
 }
@@ -129,22 +139,45 @@ if (mode === 'push') {
     console.log('钉：安装目录还没有桥（首次安装正常）；下一步跑 update-bundle.mjs 生成它')
   }
 }
-
 if (mode === 'push' && checkout) {
-  const updater = path.join(INSTALLED, 'tools', 'update-bundle.mjs')
+  // The repo is the source of truth, so the artifact is rebuilt *there* and then
+  // installed. Refreshing the installed copy instead would leave the repo
+  // holding a stale bundle and a BUILD.json that disagrees with it.
+  const updater = path.join(REPO_PLUGIN, 'tools', 'update-bundle.mjs')
   if (!existsSync(updater)) {
     process.stderr.write(`sync: 找不到 ${updater}\n`)
     process.exit(1)
   }
-  console.log(`\n接上 update-bundle.mjs（重建桥 + 重钉 + 跑回归）`)
+  console.log(`\n接上 update-bundle.mjs（重建桥 + 重钉 + 跑回归，跑在仓库这份上）`)
   const child = spawn(process.execPath, [updater, checkout], {
-    cwd: INSTALLED,
+    cwd: REPO_PLUGIN,
     stdio: 'inherit',
   })
   const code = await new Promise((resolve) => child.on('close', resolve))
   if (code !== 0) {
-    process.stderr.write('sync: update-bundle 失败，安装目录现在是半新半旧的状态，别用它回答问题\n')
+    process.stderr.write('sync: update-bundle 失败，别拿它回答问题——先查清哪条不变量动了\n')
     process.exit(code ?? 1)
+  }
+  // The bundle is rebuilt after the copy pass, so install it and the pin now.
+  const bundleSrc = path.join(REPO_PLUGIN, BUNDLE)
+  const bundleDst = path.join(INSTALLED, BUNDLE)
+  if (existsSync(bundleSrc)) {
+    mkdirSync(path.dirname(bundleDst), { recursive: true })
+    copyFileSync(bundleSrc, bundleDst)
+    copyFileSync(
+      path.join(REPO_PLUGIN, 'vendor', 'BUILD.json'),
+      path.join(INSTALLED, 'vendor', 'BUILD.json'),
+    )
+    const { createHash } = await import('node:crypto')
+    const sha = createHash('sha256').update(readFileSync(bundleDst)).digest('hex')
+    const pinned = JSON.parse(readFileSync(path.join(INSTALLED, 'vendor', 'BUILD.json'), 'utf8'))
+    if (pinned.bundleSha256 !== sha) {
+      process.stderr.write(
+        `sync: 重建后的桥与 BUILD.json 不符（${sha.slice(0, 12)}… vs ${String(pinned.bundleSha256).slice(0, 12)}…）\n`,
+      )
+      process.exit(1)
+    }
+    console.log(`已安装新桥：sha ${sha.slice(0, 12)}… · ${statSync(bundleDst).size} 字节`)
   }
 }
 

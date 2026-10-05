@@ -150,9 +150,11 @@ package's purpose — those comments are package-level docs, keep them accurate.
   the exported surface; explicit `extend T with Eq::{equal, not_equal}` instead of relying
   on implicit Eq promotion; `derive(Eq, Debug)` on data enums/structs.
 - **Data-as-code**: models are literal data tables (states, transitions, phases) with a
-  source citation attached to every construct (`gloss` text ending in `P.xx` page refs).
-  Distinguish 原文直述 (direct from the text) from 模型整理 (model reconstruction) when
-  adding constructs.
+  source citation attached to every construct — `gloss` holds the text's own wording
+  verbatim. There is no page-number field: `P.xx` appears only where the pdfdump survey
+  really recorded one (`multi`/`group`/`society`, plus three spots in `evolution`), never in
+  `src`. Do not claim a page ref the table does not carry. Distinguish 原文直述 (direct from
+  the text) from 模型整理 (model reconstruction) when adding constructs.
 - **Naming discipline**: state and phase names are exactly two characters (designations in
   `general.mbt`); keep new names in that register and structural only. Drive slots
   (`src::Slot`) follow the same rule.

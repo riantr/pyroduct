@@ -28,7 +28,7 @@ const BRIDGE_RELATIVE = path.join('_build', 'js', 'debug', 'build', 'cmd', 'json
 const PROVENANCE_FILE = path.join(PLUGIN_ROOT, 'vendor', 'BUILD.json')
 
 const SERVER_NAME = 'pyroduct-model'
-const SERVER_VERSION = '0.1.1'
+const SERVER_VERSION = '0.1.2'
 const DEFAULT_TIMEOUT_MS = 120_000
 const GATE_TIMEOUT_MS = 900_000
 

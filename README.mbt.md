@@ -16,9 +16,12 @@ One society: 13 · 26 · 8. Two subjects: 14 normative rules.
 
 * Paper-executable, not paraphrased
 
-  Every state, transition and phase is literal data with a page citation:
-  `gloss()` ends in `P.xx`, and each construct is tagged 原文直述 (verbatim from
-  the source) or 模型整理 (model reconstruction).
+  Every state, transition and phase is literal data with a source citation:
+  `gloss()` carries the text's own wording verbatim, and each construct is tagged
+  原文直述 (verbatim from the source) or 模型整理 (model reconstruction). Page
+  numbers are not part of that discipline: `P.xx` appears only where the source
+  survey actually recorded one — `multi`/`group`/`society` — and never in the
+  subject machine's own tables.
 
 * One language, four units
 

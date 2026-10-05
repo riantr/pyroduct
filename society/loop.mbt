@@ -117,6 +117,19 @@ pub fn one_edge_per_trigger() -> Bool {
 }
 
 ///|
+/// 纯函数版：给一句触发在某个位置上的全部去处，判定 = 是不是两个及以上去处。
+///
+/// 取料与判定分开，同 `one_edge_each` 的理由，而且**这里更必要**：本表真表上
+/// `open_pairs` 恒为空，所以「一条边也不报」和「这个检查恒返回空」在真表上给出
+/// 同一个结果——判据分不出两者。造一份**两个去处**的清单，那条 `true` 才验得住。
+///
+/// `group` 那边不需要这个函数：它真表上真的有一处并列，所以「`open_pairs` 为空」
+/// 那条断言自己就有牙。两台机的差别在这里。
+pub fn ambiguous(tos : Array[State]) -> Bool {
+  tos.length() > 1
+}
+
+///|
 /// 一句触发、两个去处的组合（本表应为空；非空即说明表变了，`step` 会给 `Open`）。
 pub fn open_pairs() -> Array[(State, Trigger, Array[State])] {
   let out : Array[(State, Trigger, Array[State])] = []
@@ -134,7 +147,7 @@ pub fn open_pairs() -> Array[(State, Trigger, Array[State])] {
           to.push(t.to)
         }
       }
-      if to.length() > 1 {
+      if ambiguous(to) {
         out.push((s, k, to))
       }
     }

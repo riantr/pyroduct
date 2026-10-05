@@ -67,6 +67,28 @@ test "触发粒度的确定性在造的重复对上确实返回 false" {
 }
 
 ///|
+/// 「本表触发粒度确定」那条断言在真表上**恒真**（真表本来就没有一句触发两个去处），
+/// 所以它分不出「检查在跑」与「检查恒返回空」——后者是**等价变异**，真表结果不变。
+/// 这条给 `ambiguous` 一份**造出来的**清单：一个去处、两个、三个，那条边界才验得住。
+test "并列判定在造的多去处清单上确实返回 true" {
+  // 一个去处：确定，不并列
+  assert_false(@society.ambiguous([@society.Colony]))
+  // 两个去处：并列
+  assert_true(@society.ambiguous([@society.Colony, @society.Discourse]))
+  // 三个去处：仍是并列（不是恰好两条才算）
+  assert_true(
+    @society.ambiguous([@society.Colony, @society.Discourse, @society.Norm]),
+  )
+  // 空清单：无处可去，不并列
+  let none : Array[@society.State] = []
+  assert_false(@society.ambiguous(none))
+  // 真表侧每个触发都只有一个去处——所以真表那条断言恒真，不是这条
+  for t in @society.transitions() {
+    assert_false(@society.ambiguous([t.to]))
+  }
+}
+
+///|
 /// `no_dead_end` 同理：真表上恒真，所以判据得落在纯函数上，用造出来的
 /// 「有位置没有出边」验那条 `false`。
 test "不封闭的检查在造的无出边位置上确实返回 false" {

@@ -203,6 +203,17 @@ PROPS = [
         "    { from: Suprasubjective, trigger: RaiseClaims, to: Intersubjective, },\r\n    { from: Intersubjective, trigger: SpeakLanguage, to: Suprasubjective, },",
         "    { from: Suprasubjective, trigger: SpeakLanguage, to: Intersubjective, },\r\n    { from: Intersubjective, trigger: RaiseClaims, to: Suprasubjective, },",
     ),
+    (
+        "P13 society::ambiguous 恒假（并列永远看不见）",
+        "society/loop.mbt",
+        "pub fn ambiguous(tos : Array[State]) -> Bool {\n  tos.length() > 1\n}",
+        "pub fn ambiguous(tos : Array[State]) -> Bool {\n  tos.length() == 99\n}",
+    ),
+    # **不入表的一条**，记在这里免得下一个人重新发现：
+    # 「`one_edge_per_trigger` 改成恒真」是个**等价变异**——本表真表上它本来就恒真，
+    # 包装层恒真给出同一个答案。它分不出「检查在跑」与「检查恒真」，而逻辑本身
+    # 已被 B5（`one_edge_each` 的造重复对判据）覆盖。同 `src::is_deterministic`
+    # 那条 P5：不靠给包装层加变异来制造「抓到了」的假象。
 ]
 
 LOOP3 = [

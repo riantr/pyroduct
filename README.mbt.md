@@ -9,8 +9,8 @@ thesis 《伽达默尔与哈贝马斯真理观比较》 (*Gadamer and Habermas o
 Comparison*, Shanghai Academy of Social Sciences, 2008) — plus a gated agent
 state machine and a research-agent coordinator.
 
-One subject: 34 positions · 53 transitions · 11 phases. One group: 20 · 42 · 9.
-One society: 13 · 26 · 8. Two subjects: 14 normative rules.
+One subject: 34 positions · 53 transitions · 11 phases. One group: 20 · 44 · 9.
+One society: 13 · 28 · 8. Two subjects: 14 normative rules.
 
 ## Features
 
@@ -26,8 +26,8 @@ One society: 13 · 26 · 8. Two subjects: 14 normative rules.
 * One language, four units
 
   Subject (主体) / group (群体) / society (社会) share the same state + trigger +
-  transition vocabulary at three scales: `src` (34·53·11), `group` (20·42·9,
-  member config → emergence with R7 write-back), `society` (13·26·8, lifeworld
+  transition vocabulary at three scales: `src` (34·53·11), `group` (20·44·9,
+  member config → emergence with R7 write-back), `society` (13·28·8, lifeworld
   vs. system). `multi` is the normative face: rules R1–R14 for two subjects —
   regime precedence, validity-claim timing, the two-sincerity distinction
   (两诚区分), unconcealment–concealment (解蔽—遮蔽) — each rule citing the thesis.
@@ -307,7 +307,7 @@ Add the module, then run the suite:
 
 ```
 moon add riantr/pyroduct
-moon test             # Total tests: 129, passed: 129, failed: 0.
+moon test             # Total tests: 190, passed: 190, failed: 0.
 ```
 
 From this repository, every layer prints a report:

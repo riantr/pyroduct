@@ -8,6 +8,8 @@ pub fn all_phases() -> Array[Phase]
 
 pub fn all_states() -> Array[State]
 
+pub fn ambiguous(Array[State]) -> Bool
+
 pub fn basis() -> Array[(String, String)]
 
 pub fn course() -> Array[State]

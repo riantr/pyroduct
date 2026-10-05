@@ -248,7 +248,7 @@ const TOOLS = [
   {
     name: 'pyroduct_gates',
     description:
-      'Run the pyroduct module gate suite in a configured checkout: moon check + moon fmt --check + moon test (wasm target, 129 tests), returning per-command exit codes and the tail of each output. Requires PYRODUCT_PROJECT_DIR to point at a riantr/pyroduct checkout; with only the bundled snapshot it reports that the gate is unavailable instead of failing. Use it before and after changing the model.',
+      'Run the pyroduct module gate suite in a configured checkout: moon check + moon fmt --check + moon test (wasm target, 190 tests), returning per-command exit codes and the tail of each output. Requires PYRODUCT_PROJECT_DIR to point at a riantr/pyroduct checkout; with only the bundled snapshot it reports that the gate is unavailable instead of failing. Use it before and after changing the model.',
     inputSchema: { type: 'object', properties: {}, additionalProperties: false },
     readOnly: true,
   },
@@ -326,7 +326,7 @@ async function callTool(name, args, signal) {
             '',
             '要用门禁请在本会话的环境里设 PYRODUCT_PROJECT_DIR 指向 riantr/pyroduct 的 checkout，',
             '然后重试；首次调用会自动跑 `moon build --target js`。',
-            '要跑哪些：moon check、moon fmt --check、moon test（wasm target，129 个测试）。',
+            '要跑哪些：moon check、moon fmt --check、moon test（wasm target，190 个测试）。',
           ].join('\n'),
         )
       }

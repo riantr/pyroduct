@@ -19,7 +19,7 @@ description: '读取 riantr/pyroduct 的可运行哲学状态机：主体道德�
 |---|---|
 | `pyroduct_faces` | 面目录：30 个面各一行读法，附模型版本与「这次答案来自内置快照还是本地 checkout」。**先调它**再选面。 |
 | `pyroduct_face(kind)` | 跑一个面，返回该面报告全文。`kind` 取面目录里的名字。 |
-| `pyroduct_gates` | 门禁套件（`moon check` + `fmt --check` + `test`，129 个测试）。需要配置了 checkout；只有内置快照时它如实说「不可用」而不报错。 |
+| `pyroduct_gates` | 门禁套件（`moon check` + `fmt --check` + `test`，190 个测试）。需要配置了 checkout；只有内置快照时它如实说「不可用」而不报错。 |
 
 要跑**呈现层**（`viz` 合成页、`journey` 行程视图、嵌套视图、`all` 组合）时工具面
 没有这些面：它们是渲染不是模型事实，去有 checkout 的地方用

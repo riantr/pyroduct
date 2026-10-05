@@ -145,6 +145,41 @@ pub fn render_group_report() -> String {
     "- R10「谬误残余」：任何成员、任何群体的残余都不为零（`is_well_formed`）。",
   )
   lines.push("")
+  lines.push("## 执行契约：位置 × 群体触发")
+  lines.push(
+    "群体机没有驱动槽（那是主体机的建模装置），触发句本身就是驱动，故回执只有",
+  )
+  lines.push(
+    "迁／守／未定／无路四种，入口是 `group::step(位置, 触发)` 与 `group::walk`。",
+  )
+  lines.push(
+    "它与 `emerge(成员配置)` 回答两个不同问题：前者是**表上的投影**（这句群体事件",
+  )
+  lines.push(
+    "把它推向哪里），后者是**配置到涌现态的分类函数**（这群人现在是什么状态）。",
+  )
+  lines.push("")
+  lines.push(
+    "一句触发、两个去处的组合（回执为 `未定`，机器不替表挑一个）：",
+  )
+  for triple in open_pairs() {
+    let (s, k, tos) = triple
+    let names = []
+    for g in tos {
+      names.push(g.designation())
+    }
+    lines.push(
+      "- \{s.designation()} × \{k.label()} → \{names.join(" 或 ")}（\{tos.length()} 条边）",
+    )
+  }
+  lines.push(
+    "  ⚠ 这一处**是表里的数据问题**：一句「注意汇聚」同时挂着「共语」与「商谈」",
+  )
+  lines.push(
+    "  两条边。机器的职责是如实并列（`Open`），不是替作者决定本该是两句触发；",
+  )
+  lines.push("  是否本意如此，属数据问题，由人回答。")
+  lines.push("")
   lines.push(
     "## 另见（论文自身的理论构造：双层次社会交往模型）",
   )

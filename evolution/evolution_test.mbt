@@ -22,17 +22,17 @@ fn first_constitutional(
 /// 在包外是只读类型、构造不了，故这里不靠造基因组来验。
 test "群体层：双诚之比决定共见／共辩，且表仍如实给未定" {
   // 他之诚更盛：愿意付商谈的代价 ⇒ 共辩
-  assert_true(@evolution.group_lean_of(90, 10) == @g.Argue)
+  assert_true(@evolution.group_lean_of(90, 10) == @g.Inter)
   // 己之诚更盛：朝向多代积累的基础共识 ⇒ 共见
-  assert_true(@evolution.group_lean_of(10, 90) == @g.Common)
+  assert_true(@evolution.group_lean_of(10, 90) == @g.Supra)
   // 边界：两轴相等（缺省基因组 70:70 就是这样）⇒ 共见，无必要不付代价
-  assert_true(@evolution.group_lean_of(70, 70) == @g.Common)
-  assert_true(@evolution.group_lean_of(0, 0) == @g.Common)
+  assert_true(@evolution.group_lean_of(70, 70) == @g.Supra)
+  assert_true(@evolution.group_lean_of(0, 0) == @g.Supra)
   // 差一就该翻面——证明判的是大小，不是某个阈值常量
-  assert_true(@evolution.group_lean_of(50, 49) == @g.Argue)
-  assert_true(@evolution.group_lean_of(49, 50) == @g.Common)
+  assert_true(@evolution.group_lean_of(50, 49) == @g.Inter)
+  assert_true(@evolution.group_lean_of(49, 50) == @g.Supra)
   // 读取器与本体一致
-  assert_true(@evolution.group_lean(@evolution.default_agent()) == @g.Common)
+  assert_true(@evolution.group_lean(@evolution.default_agent()) == @g.Supra)
   // 表那一步仍然只给未定：裁决不在机器里
   let raw = @g.step(@g.Converging, @g.Attention)
   assert_true(raw.label() == "未定")

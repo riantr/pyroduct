@@ -299,6 +299,12 @@ pub fn transitions() -> Array[GroupTransition] {
     { from: Converging, trigger: Attention, to: Discourse, },
     { from: CommonTongue, trigger: SharedMedium, to: CommonTongue, },
     { from: Discourse, trigger: RaiseClaims, to: Discourse, },
+    // 成体内的震荡：超主体性与主体间性如同波的振动，**是常态**——两者由群体
+    // 行为的结果判定，不是一次的达成。同一句触发既维持当前相位，也可能把群体
+    // 推过节点：自环是延续，跨态边是换相。哪一侧当下显影，由行为判读
+    // （`emerge` 从成员体制读，迁移表是它在时间上的投影）。
+    { from: CommonTongue, trigger: RaiseClaims, to: Discourse, },
+    { from: Discourse, trigger: SharedMedium, to: CommonTongue, },
     // 成体 → 立序
     { from: CommonTongue, trigger: NormFromTradition, to: Normed, },
     { from: Discourse, trigger: NormFromReason, to: Normed, },

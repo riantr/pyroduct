@@ -38,17 +38,17 @@ test "一句触发、两个去处：表里真的有一处，机器不替它挑" 
   assert_true(raw.label() == "未定")
   assert_true(raw.landing() == None)
   // 偏好在：共见取第一条（共语），共辩取最后一条（商谈）。两个去处都还在表里。
-  let seen = @group.resolve_open(raw, @group.Common, @group.Converging)
+  let seen = @group.resolve_open(raw, @group.Supra, @group.Converging)
   assert_true(seen.label() == "迁")
   assert_true(seen.landing() == Some(@group.CommonTongue))
-  let argued = @group.resolve_open(raw, @group.Argue, @group.Converging)
+  let argued = @group.resolve_open(raw, @group.Inter, @group.Converging)
   assert_true(argued.label() == "迁")
   assert_true(argued.landing() == Some(@group.Discourse))
-  // 缺省偏好在「共见」：无必要时不付商谈的代价。
-  assert_true(@group.default_lean() == @group.Common)
-  assert_true(@group.Common.label() == "共见")
-  assert_true(@group.Argue.label() == "共辩")
-  // 表没变：裁决不动迁移表。
+  // 缺省口径在「超体」——这是叙述口径，不是优先级：两侧同为常态震荡的两相。
+  assert_true(@group.default_lean() == @group.Supra)
+  assert_true(@group.Supra.label() == "超体")
+  assert_true(@group.Inter.label() == "间体")
+  // 表的震荡边不改变那处并列：仍只有一处「一句触发、两个去处」。
   assert_eq(@group.open_pairs().length(), 1)
   let out = @group.step(@group.Converging, @group.Attention)
   match out {
@@ -70,31 +70,65 @@ test "裁决按偏向取首／取尾（造三条候选才分得出）" {
     @group.Normed,
     @group.Discourse,
   ])
-  let seen = @group.resolve_open(three, @group.Common, @group.Converging)
+  let seen = @group.resolve_open(three, @group.Supra, @group.Converging)
   assert_true(seen.landing() == Some(@group.CommonTongue))
-  let argued = @group.resolve_open(three, @group.Argue, @group.Converging)
+  let argued = @group.resolve_open(three, @group.Inter, @group.Converging)
   assert_true(argued.landing() == Some(@group.Discourse))
   // 落点与当前位置相同就是「守」，不是「迁」——与 step 的读法一致。
   let held = @group.resolve_open(
     @group.Open(@group.Attention, [@group.Converging, @group.Discourse]),
-    @group.Common,
+    @group.Supra,
     @group.Converging,
   )
   assert_true(held.label() == "守")
   // 只有一个候选时不动它：并列不足两条就不裁决，原样回传。
   let single = @group.Open(@group.Attention, [@group.Discourse])
   assert_true(
-    @group.resolve_open(single, @group.Common, @group.Converging) == single,
+    @group.resolve_open(single, @group.Supra, @group.Converging) == single,
   )
   // 非 Open 的回执原样透传，不被裁决器改写。
   let moved = @group.Moved(@group.Appear, @group.Scattered)
   assert_true(
-    @group.resolve_open(moved, @group.Argue, @group.Converging) == moved,
+    @group.resolve_open(moved, @group.Inter, @group.Converging) == moved,
   )
   let block = @group.Block("此处无此事")
   assert_true(
-    @group.resolve_open(block, @group.Argue, @group.Converging) == block,
+    @group.resolve_open(block, @group.Inter, @group.Converging) == block,
   )
+}
+
+///|
+/// 成体内的震荡：超主体性与主体间性同为常态，两相之间**双向**可通，同一句触发
+/// 既维持当前相位也可能换相。
+test "成体震荡：两相之间双向可通，且自环仍在" {
+  // 跨相：共语上冒出有效性主张 → 商谈
+  let up = @group.step(@group.CommonTongue, @group.RaiseClaims)
+  assert_true(up.label() == "迁")
+  assert_true(up.landing() == Some(@group.Discourse))
+  // 跨相：商谈里差异消弭、共同语言承担理解 → 共语
+  let down = @group.step(@group.Discourse, @group.SharedMedium)
+  assert_true(down.label() == "迁")
+  assert_true(down.landing() == Some(@group.CommonTongue))
+  // 自环（维持当前相位）仍在，且落在同侧
+  assert_true(
+    @group.step(@group.CommonTongue, @group.SharedMedium).landing() ==
+    Some(@group.CommonTongue),
+  )
+  assert_true(
+    @group.step(@group.Discourse, @group.RaiseClaims).landing() ==
+    Some(@group.Discourse),
+  )
+  // 震荡闭合：一来一回能回到原处
+  let there = @group.step(@group.CommonTongue, @group.RaiseClaims)
+  match there.landing() {
+    Some(g) => {
+      let back = @group.step(g, @group.SharedMedium)
+      assert_true(back.landing() == Some(@group.CommonTongue))
+    }
+    None => assert_true(false)
+  }
+  // 另一侧不封闭：两相都各有出边，不是死路
+  assert_true(@group.no_dead_end())
 }
 
 ///|
@@ -205,8 +239,8 @@ test "emerge 与 step 回答不同问题，互不替代" {
   assert_true(st == @group.Converging)
   let m = [@multi.subject(1, @sm.Standing, @multi.ChengRan, 1, 9, 5)]
   assert_true(@group.is_well_formed(st, m))
-  // 执行契约：表上的投影（42 条边，与成员配置无关）
+  // 执行契约：表上的投影（44 条边，与成员配置无关）
   let out = @group.step(@group.Converging, @group.Attention)
   assert_true(out.label() == "未定")
-  assert_eq(@group.transitions().length(), 42)
+  assert_eq(@group.transitions().length(), 44)
 }

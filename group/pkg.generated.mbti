@@ -64,8 +64,8 @@ pub fn walk(GroupState, Array[GroupTrigger]) -> GroupTrace
 
 // Types and methods
 pub(all) enum GroupLean {
-  Common
-  Argue
+  Supra
+  Inter
 } derive(Eq)
 pub fn GroupLean::equal(Self, Self) -> Bool
 pub fn GroupLean::label(Self) -> String

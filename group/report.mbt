@@ -182,37 +182,44 @@ pub fn render_group_report() -> String {
     "  本意如此。机器的职责到此为止：如实并列（`Open`），不替表挑一个去处。",
   )
   lines.push("")
-  lines.push("### 裁决不在机器里：偏向由上层递进来")
+  lines.push("### 成体内的震荡：两相同为常态")
   lines.push("")
   let lean = default_lean()
   let why = match lean {
-    Common => "取基础层面的常见——共同语言／传统，代价低"
-    Argue => "付商谈代价——有效性主张／理由"
+    Supra => "超主体性显影——共同语言／传统承担理解"
+    Inter => "主体间性显影——相互提出有效性主张"
   }
   lines.push(
-    "缺省偏向：**\{lean.label()}**（\{why}）。多方汇聚时由差异引起共同关注；若无必要",
+    "两侧**同为常态**：超主体性与主体间性如同波的振动，**由群体行为的结果判定**——",
   )
   lines.push(
-    "（没有增加新成员、新判据，也没有出现新问题），就不付商谈的代价，取多代积累",
+    "这一轮群体做出什么行为就判读到哪一侧，下一轮可能换相。表里两相之间的自环是",
   )
-  lines.push("的基础共识。")
+  lines.push(
+    "「延续当前相位」，跨态边（`RaiseClaims`／`SharedMedium`）是「换相」。",
+  )
   lines.push("")
   lines.push(
-    "「无必要」这个守卫**不写成机器的检查**：迁移表里没有「新成员到了」「出现了新问题」",
+    "`Converging × Attention` 给「未定」是因为那一刻群体**还没做任何事**——行为未",
   )
   lines.push(
-    "这样的通道，写一个恒真的守卫等于把空判据又装回去。守卫的生效方式是**由上层选",
-  )
-  lines.push(
-    "偏向**——上层知道有没有新情况，于是递给 `GroupLean::Common` 或 `GroupLean::Argue`。",
-  )
-  lines.push(
-    "在进化层，这个偏向由**双诚之比**给出（`evolution::group_lean_of`）：他之诚更盛",
-  )
-  lines.push(
-    "取共辩，己之诚更盛或持平取共见——与主体机裁决「未定」同一根轴。",
+    "发生，结果就还没定。这是判据成立之前的样子，机器不补，也不替表挑。",
   )
   lines.push("")
+  lines.push(
+    "本轮判读到哪一侧由**上层**递给 `resolve_open`（`GroupLean`），机器不预判。",
+  )
+  lines.push(
+    "在进化层由**双诚之比**给出（`evolution::group_lean_of`）：他之诚更盛取间体，",
+  )
+  lines.push(
+    "己之诚更盛或持平取超体——与主体机裁决「未定」同一根轴。",
+  )
+  lines.push("")
+  lines.push(
+    "下例按 `default_lean()` 的叙述口径（**这不是优先级**；上层未另行判读时的取用值，",
+  )
+  lines.push("此处为「\{lean.label()}」——\{why}）：")
   for triple in open_pairs() {
     let (s, k, _tos) = triple
     let picked = resolve_open(step(s, k), lean, s)
@@ -221,7 +228,7 @@ pub fn render_group_report() -> String {
       None => "（无）"
     }
     lines.push(
-      "- 按缺省裁决：\{s.designation()} × \{k.label()} → \{landed}。两个去处都还在表里，机器不删边。",
+      "- \{lean.label()}：\{s.designation()} × \{k.label()} → \{landed}。",
     )
   }
   lines.push("")

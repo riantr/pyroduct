@@ -113,27 +113,26 @@ fn cycle_slot(f : Fitness, at : @sm.SubjectState) -> @sm.Slot {
 }
 
 ///|
-/// 偏向的判定本体：只吃双诚之比那两根轴的数值，纯函数。
+/// 相位的判定本体：只吃双诚之比那两根轴的数值，纯函数。
 ///
 /// 取料与判定分开，`group_lean` 只是它的读取器。`Genome` 在包外是**只读类型**、
 /// 构造不了，所以判据要能验就得能喂数——两根 `Int` 造得出来，两个轴换位也验得了。
-/// 边界一并可测：两轴相等（缺省基因组就是 70:70）归 `共见`。
+/// 边界一并可测：两轴相等（缺省基因组就是 70:70）归 `超体`。
 pub fn group_lean_of(toward_other : Int, toward_self : Int) -> @g.GroupLean {
   if toward_other > toward_self {
-    @g.Argue
+    @g.Inter
   } else {
-    @g.Common
+    @g.Supra
   }
 }
 
 ///|
-/// 群体层「一句触发、两个去处」的裁决：与上面的 `resolve_open` 同一根轴。
+/// 成体内**本轮显影的那一侧**——不是偏好。超主体性与主体间性同为常态震荡的两相，
+/// 由群体行为的结果判定；`toward_self`（朝向自身与已往，即多代积累的传统）更盛
+/// 或持平 → `超体`，`toward_other`（朝向他者与未来）更盛 → `间体`。缺省基因组双诚
+/// 70:70 持平，故缺省落在 `超体`。
 ///
-/// `toward_self`（朝向自身与已往，即多代积累的传统）更盛或持平 → `共见`：取基础
-/// 层面的常见，不付商谈代价。`toward_other`（朝向他者与未来）更盛 → `共辩`：付
-/// 有效性主张的代价。缺省基因组双诚 70:70 持平，故缺省走 `共见`。
-///
-/// 群体机仍如实给 `Open`，本函数只是把偏向递下去；两个去处都还在表里。
+/// 群体机仍如实给 `Open`，本函数只是把本轮读到的那一侧递下去；两个去处都还在表里。
 pub fn group_lean(genome : Genome) -> @g.GroupLean {
   group_lean_of(genome.toward_other, genome.toward_self)
 }

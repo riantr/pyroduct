@@ -170,14 +170,26 @@ PROPS = [
     (
         "P7 group::resolve_open 两种偏向取同一条（能耗原则不成立）",
         "group/loop.mbt",
-        "      let to = match lean {\n        Common => cands[0]\n        Argue => cands[cands.length() - 1]\n      }",
-        "      let to = cands[0]\n      match lean {\n        Common => ()\n        Argue => ()\n      }",
+        "      let to = match lean {\n        Supra => cands[0]\n        Inter => cands[cands.length() - 1]\n      }",
+        "      let to = cands[0]\n      match lean {\n        Supra => ()\n        Inter => ()\n      }",
     ),
     (
         "P8 evolution::group_lean_of 偏向反相（双诚之比读反了）",
         "evolution/cycle.mbt",
-        "  if toward_other > toward_self {\n    @g.Argue",
-        "  if toward_self >= toward_other {\n    @g.Argue",
+        "  if toward_other > toward_self {\n    @g.Inter",
+        "  if toward_self >= toward_other {\n    @g.Inter",
+    ),
+    (
+        "P9 震荡边只剩单向（共语上不再冒出有效性主张）",
+        "group/machine.mbt",
+        "    { from: CommonTongue, trigger: RaiseClaims, to: Discourse, },\r\n    { from: Discourse, trigger: SharedMedium, to: CommonTongue, },\r\n",
+        "",
+    ),
+    (
+        "P10 震荡边接反（超体与间体倒置）",
+        "group/machine.mbt",
+        "    { from: CommonTongue, trigger: RaiseClaims, to: Discourse, },\r\n    { from: Discourse, trigger: SharedMedium, to: CommonTongue, },",
+        "    { from: CommonTongue, trigger: SharedMedium, to: Discourse, },\r\n    { from: Discourse, trigger: RaiseClaims, to: CommonTongue, },",
     ),
 ]
 

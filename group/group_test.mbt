@@ -5,7 +5,7 @@
 test "规模与构成" {
   assert_eq(@group.all_states().length(), 20)
   assert_eq(@group.all_phases().length(), 9)
-  assert_eq(@group.transitions().length(), 42)
+  assert_eq(@group.transitions().length(), 44)
   assert_eq(@group.initial().designation(), "散在")
   assert_eq(@group.resting().designation(), "宁定")
 }

@@ -78,7 +78,7 @@ One society: 13 · 28 · 8. Two subjects: 14 normative rules.
   `moonbitlang/async@0.22.4` → `cmd/coord` (native disk I/O) and
   `tools/ifacescan` / `cmd/ifacescan` (the `.mbti` drift tripwire, native);
   `riantr/moonbit_doubleML@0.75.0` → `dmlref` / `causal`;
-  `riantr/snn_mbt@0.84.0` → `snnref` (native); `riantr/moonbit_static_analysis@0.2.0`
+  `riantr/snn_mbt@0.84.0` → `snnref` (native); `riantr/moonbit_static_analysis@0.3.4`
   → `audit`. Every other package uses official `moonbitlang/*` only.
 
 ## Terminology

@@ -58,7 +58,7 @@
   `cmd/coord`（native 落盘）与 `tools/ifacescan`／`cmd/ifacescan`（`.mbti` 漂移
   绊线，native）；`riantr/moonbit_doubleML@0.75.0` → `dmlref` /
   `causal`；`riantr/snn_mbt@0.84.0` → `snnref`（native）；`riantr/
-  moonbit_static_analysis@0.2.0` → `audit`。其余包只用官方 `moonbitlang/*`。
+  moonbit_static_analysis@0.3.4` → `audit`。其余包只用官方 `moonbitlang/*`。
 
 ## 术语表
 

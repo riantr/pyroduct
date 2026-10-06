@@ -49,5 +49,5 @@ test "报告对称：三鉴小节、出处层标注、判读齐全" {
   assert_true(report.contains("已知设计"))
   assert_true(report.contains("未预期"))
   assert_true(report.contains("设计使然"))
-  assert_true(report.contains("0.2.0"))
+  assert_true(report.contains("0.3.4"))
 }

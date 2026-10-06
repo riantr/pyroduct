@@ -57,7 +57,7 @@
   四个具名的第三方依赖，各自限于其消费者：`moonbitlang/async@0.22.4` →
   `cmd/coord`（native 落盘）；`riantr/moonbit_doubleML@0.75.0` → `dmlref` /
   `causal`；`riantr/snn_mbt@0.84.0` → `snnref`（native）；`riantr/
-  moonbit_static_analysis@0.1.0` → `audit`。其余包只用官方 `moonbitlang/*`。
+  moonbit_static_analysis@0.1.2` → `audit`。其余包只用官方 `moonbitlang/*`。
 
 ## 术语表
 

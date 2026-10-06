@@ -158,7 +158,7 @@ package's purpose — those comments are package-level docs, keep them accurate.
   (spike-sediment experiment, cross-check only). `snn_mbt` declares native as its only
   target, so `snnref` and `examples/sediment` are `+native`: the wasm gate skips them,
   run `moon test --target native snnref` separately.
-- `riantr/moonbit_static_analysis@0.1.0` — sole consumer `audit` (three-lens
+- `riantr/moonbit_static_analysis@0.1.2` — sole consumer `audit` (three-lens
   static audit of the subject machine: the library's moon.mod names pyroduct
   its reference consumer; `src` stays zero-import — `audit` converts the real
   tables into a plain-data `MachineSpec` above it).

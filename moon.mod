@@ -39,5 +39,5 @@ import {
   "moonbitlang/async@0.22.4",
   "riantr/moonbit_doubleML@0.75.0",
   "riantr/snn_mbt@0.84.0",
-  "riantr/moonbit_static_analysis@0.1.2",
+  "riantr/moonbit_static_analysis@0.2.0",
 }

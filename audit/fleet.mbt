@@ -28,7 +28,7 @@
 /// ambiguous drive，故它进「已知设计」而非「未预期」，见 `is_known_fleet`。
 
 ///|
-/// 群体机的 MachineSpec（20 状态 · 42 迁移 · 无槽 · 无终点）。
+/// 群体机的 MachineSpec（20 状态 · 44 迁移 · 无槽 · 无终点）。
 pub fn build_group_spec() -> @sa.MachineSpec {
   let states : Array[String] = []
   for s in @g.all_states() {
@@ -101,7 +101,7 @@ fn group_triggers() -> Array[(@g.GroupTrigger, String)] {
 }
 
 ///|
-/// 社会机的 MachineSpec（13 状态 · 26 迁移 · 无槽 · 无终点）。
+/// 社会机的 MachineSpec（13 状态 · 28 迁移 · 无槽 · 无终点）。
 pub fn build_society_spec() -> @sa.MachineSpec {
   let states : Array[String] = []
   for s in @so.all_states() {

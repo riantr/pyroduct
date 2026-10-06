@@ -7,15 +7,24 @@
 #   * Authentication is NOT an environment variable. `moon publish` reads
 #     $HOME/.moon/credentials.json, so the secret is written there, used, and
 #     removed by a trap on the way out — including on failure.
-#   * `moon publish` exits 255 both when it cannot authenticate and when the
-#     registry rejects it, so the secret is checked for emptiness first;
-#     otherwise the two are indistinguishable in the log.
 #   * The secret's VALUE is the whole contents of ~/.moon/credentials.json, not
 #     the bare token. That file is a JSON object:
 #         { "token": "<...>", "username": "riantr" }
-#     so pasting only the token writes an invalid credentials.json and
-#     `moon publish` then fails with the same opaque 255 as a real rejection.
 #     Copy the file (it lands there after `moon login`), not one field of it.
+#   * Every failure mode was MEASURED (moon 0.1.20260920), by re-running each one
+#     against a deliberately bogus token in a throwaway HOME:
+#         malformed credentials file -> `failed to parse credentials file: <path>:
+#             expected value at line 1 column 1`   (local, names the file)
+#         invalid token              -> `Server status: 401 Unauthorized,
+#             detail: Invalid API token`
+#         token accepted, dry run    -> `202 Accepted, detail: Dry run completed
+#             successfully`
+#         token accepted, real       -> `200 OK`
+#     The EXIT CODE is -1 (255) in all four cases including the successes, so it
+#     proves nothing; assert on the status line instead (the publish step does).
+#     The reason the secret is still pre-checked for emptiness is ergonomics, not
+#     diagnosability: an unset secret would otherwise produce a parse error that
+#     never mentions that a secret is missing.
 #   * `moon publish` takes the version from moon.mod, NOT from the tag. If they
 #     disagree the module is published under a version the tag does not name,
 #     and the tag then points at a release that does not exist. Asserted below.
@@ -23,8 +32,12 @@
 # TO ENABLE: set the secret under
 #     Settings -> Secrets and variables -> Actions
 # as MOONCAKES_RIANTR_TOKEN. The publish step fails fast and loudly when it is
-# absent, by design — a silent skip would look like a successful release, and
-# this module is currently N releases behind on the registry.
+# absent, by design — a silent skip would look like a successful release.
+#
+# To VERIFY the secret before cutting any release: Actions -> publish -> Run
+# workflow, leaving `dry run` at its default. That runs the whole gate for real,
+# writes the secret, and has the registry accept-or-reject the token — then stops.
+# It publishes nothing and creates no GitHub Release.
 #
 # To cut a release:
 #   1. set version in moon.mod
@@ -45,6 +58,17 @@ on:
   push:
     tags:
       - "v*"
+  # Manual runs exist so the secret can be verified without cutting a tag and
+  # without publishing anything: `moon publish --dry-run` really contacts the
+  # registry and really rejects a bad token with 401 (measured — see the header),
+  # so a dry run is a genuine end-to-end rehearsal that stops short of a release.
+  # Default is dry run, because the safe thing should be what a stray click does.
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "dry run: exercise everything and validate the token, publish nothing"
+        type: boolean
+        default: true
 
 permissions:
   contents: write
@@ -60,6 +84,8 @@ jobs:
     env:
       FORCE_COLOR: 1
       SECRET: ${{ secrets.MOONCAKES_RIANTR_TOKEN }}
+      # Empty on a tag push, so `!= true` there — a real release always publishes.
+      DRY_RUN: ${{ inputs.dry_run }}
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -82,6 +108,12 @@ jobs:
       - name: moon.mod must agree with the tag
         run: |
           set -euo pipefail
+          if [ "${GITHUB_REF_TYPE:-}" != "tag" ]; then
+            echo "::notice::manual run on '${GITHUB_REF_NAME}', not a tag."
+            echo "The tag/version assertion only means something on a real release,"
+            echo "so it is skipped here; everything else below still runs for real."
+            exit 0
+          fi
           want="${GITHUB_REF_NAME#v}"
           got=$(sed -n 's/^version = "\(.*\)"$/\1/p' moon.mod)
           if [ "$got" != "$want" ]; then
@@ -127,6 +159,7 @@ jobs:
 
       - name: Publish to Mooncakes
         run: |
+          set -euo pipefail
           if [ -z "$SECRET" ]; then
             echo "::error::MOONCAKES_RIANTR_TOKEN is not set on this repository."
             echo "moon publish cannot authenticate. Nothing was published."
@@ -135,9 +168,31 @@ jobs:
           mkdir -p "$HOME/.moon"
           printf '%s' "$SECRET" > "$HOME/.moon/credentials.json"
           trap 'rm -f "$HOME/.moon/credentials.json"' EXIT
+          if [ "$DRY_RUN" = "true" ]; then
+            echo "::notice::dry run — the gate above really ran and the token below is"
+            echo "really validated against the registry, but nothing is published."
+            # Do NOT trust the exit code: a dry run returns -1 even when the server
+            # answers 202 Accepted. Assert on the status line, which is the only
+            # thing that separates 'the token worked' from '401 Invalid API token'.
+            out=$(moon publish --dry-run 2>&1) || true
+            printf '%s\n' "$out"
+            if printf '%s' "$out" | grep -qE 'Server status: (200|202)'; then
+              echo "ok  the registry accepted this token (202 Accepted); nothing was published"
+            else
+              echo "::error::the dry run did not reach an accepted status. Read the last"
+              echo "status line above: 401 means the secret is wrong or unset, a parse"
+              echo "error means the secret is not a whole credentials.json."
+              exit 1
+            fi
+            exit 0
+          fi
           moon publish
 
       - name: Create GitHub Release
+        # Tag pushes only: a manual dry run has no tag to release, and creating
+        # one from a run that published nothing would put a hollow release on the
+        # repository.
+        if: github.ref_type == 'tag'
         run: |
           gh release create "${GITHUB_REF_NAME}" \
             --title "pyroduct ${GITHUB_REF_NAME#v}" \

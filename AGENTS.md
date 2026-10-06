@@ -118,8 +118,13 @@ python tools/mutate_review.py          # review harness: mutation table for all 
 - Publishing needs the `MOONCAKES_RIANTR_TOKEN` secret, whose value is the **entire**
   contents of `~/.moon/credentials.json` (a JSON object, not the bare token), because
   `moon publish` reads that file rather than an environment variable. Only the repo owner
-  can set it (Settings → Secrets and variables → Actions). Until it exists, the publish
-  step fails loudly on purpose — a silent skip would look like a successful release.
+  can set it (Settings → Secrets and variables → Actions). Verify it without cutting a
+  release: Actions → publish → **Run workflow** with `dry run` left at its default — that
+  runs the gate for real and has the registry accept or reject the token, then stops.
+  Every publish failure mode was measured rather than assumed: a malformed credentials file
+  names the file and the parse position, a bad token answers `401 Unauthorized, detail:
+  Invalid API token`, and **the exit code is 255 in all cases including the successes** —
+  so assert on the `Server status:` line, never on the exit code.
 - `moon publish` takes the version from `moon.mod`, not from the tag; the workflow asserts
   they agree and that the repository holds exactly one module.
 

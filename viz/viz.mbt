@@ -9,13 +9,13 @@ pub fn subject() -> String {
 }
 
 ///|
-/// 群体机（20 状态 · 42 迁移 · 9 阶段）的 Mermaid `stateDiagram-v2` 源文本。
+/// 群体机（20 状态 · 44 迁移 · 9 阶段）的 Mermaid `stateDiagram-v2` 源文本。
 pub fn group() -> String {
   @group.render_mermaid()
 }
 
 ///|
-/// 社会机（13 状态 · 26 迁移 · 8 阶段）的 Mermaid `stateDiagram-v2` 源文本。
+/// 社会机（13 状态 · 28 迁移 · 8 阶段）的 Mermaid `stateDiagram-v2` 源文本。
 pub fn society() -> String {
   @society.render_mermaid()
 }
@@ -58,11 +58,11 @@ pub fn page() -> String {
   ]
   lines.push(subject())
   lines.push("</pre>")
-  lines.push("<h2>群体（20 状态 · 42 迁移 · 9 阶段）</h2>")
+  lines.push("<h2>群体（20 状态 · 44 迁移 · 9 阶段）</h2>")
   lines.push("<pre class=\"mermaid\">")
   lines.push(group())
   lines.push("</pre>")
-  lines.push("<h2>社会（13 状态 · 26 迁移 · 8 阶段）</h2>")
+  lines.push("<h2>社会（13 状态 · 28 迁移 · 8 阶段）</h2>")
   lines.push("<pre class=\"mermaid\">")
   lines.push(society())
   lines.push("</pre>")

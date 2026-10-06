@@ -270,7 +270,7 @@ fn repr(s : GroupState) -> String {
 }
 
 ///|
-/// Mermaid `stateDiagram-v2` 源文本：群体机（20 状态 · 42 迁移 · 9 阶段）。
+/// Mermaid `stateDiagram-v2` 源文本：群体机（20 状态 · 44 迁移 · 9 阶段）。
 /// 初始态 `[*] --> 散在`；宁定是静定极而非终点（R11 不可闭合）。
 pub fn render_mermaid() -> String {
   let lines : Array[String] = ["stateDiagram-v2"]

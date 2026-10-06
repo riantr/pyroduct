@@ -1,0 +1,126 @@
+# CI gate for riantr/pyroduct.
+#
+# Modelled on riantr/moonbit_static_analysis's gate.yml, which is the sibling
+# repo whose workflow actually runs green. Three things in it are load-bearing
+# and were learned the hard way there; they are reproduced here rather than
+# reinvented:
+#
+#   1. Install from the official script, NOT a setup action. The action this
+#      used to reference (moonbitlang/setup-moonbit) is 404, and the near-miss
+#      moonbit-community/setup-moonbit has zero tags, so any @vN ref fails too.
+#      A workflow's `uses:` refs are resolved during job SETUP, before any step
+#      is named in the log — which is why a typo there produced 30/30 runs
+#      failing at "Set up job" and never once reached a step.
+#   2. The path is install/unix.sh, not install.sh: the latter answers 403 even
+#      from a GitHub runner (the first fixed run died with curl exit 22).
+#   3. `moon update` is mandatory. A fresh runner's registry index is empty and
+#      this module imports four packages from mooncakes.io, so every build
+#      command below would fail with "Failed to resolve registry dependency".
+#      A warm local index hides this completely.
+#
+# What is different from the sibling's gate: this module has five `+native`
+# packages that the wasm target SKIPS (cmd/coord, cmd/ifacescan, snnref,
+# examples/sediment, tools/ifacescan). A gate that only ran the wasm target
+# would silently never execute them — the same failure shape as "0 findings"
+# meaning "cannot see". They are gated explicitly below.
+name: gate
+
+on:
+  push:
+    branches: [master, main]
+    tags: ["v*"]
+  pull_request:
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install moon
+        # The trailing version check is not decoration: without it a silently
+        # failed install surfaces three steps later as a confusing
+        # "moon: command not found" inside `moon check`.
+        run: |
+          set -euo pipefail
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
+          echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/.moon/bin:$PATH"
+          command -v moon >/dev/null || {
+            echo "::error::moon is still not on PATH after the install script"
+            exit 1
+          }
+          moon version --all
+
+      - name: Resolve the registry index
+        run: moon update
+
+      # --deny-warn per the official package-configuration guidance: without it
+      # this gate passes on a warning regression while the docs claim zero.
+      - name: moon check
+        run: moon check --deny-warn
+
+      - name: moon fmt --check
+        run: moon fmt --check
+
+      - name: moon test (wasm)
+        run: moon test --deny-warn
+
+      # Both targets the published artifacts are built from. `--target js` is
+      # the agent bridge (cmd/jsoncli -> _build/js/.../jsoncli.js), which the
+      # plugin pins by sha256; `--target wasm` is what the registry compiles
+      # server-side into the artifact skills.mooncakes.io links and moonx
+      # downloads. A regression visible only on either one would otherwise ship.
+      - name: The bridge target (js) must build
+        run: moon build --target js
+
+      - name: The wasm target must build
+        run: moon build --target wasm
+
+      # ---- the native packages the wasm target skips ----
+      #
+      # Deliberately NOT run: `moon check --target native`. It is red today, and
+      # for a reason that is not a defect — tools/ifacescan/moon.pkg imports
+      # moonbitlang/async purely so its test file can hold `async test`, and
+      # moon's unused-package scan does not see test files, so that one package
+      # reports an unused import under --deny-warn. The default wasm-target
+      # `moon check` above never sees it, because the package is +native. Adding
+      # the native check here would turn the gate red over a retained,
+      # documented import rather than over any real regression. The tests below
+      # are what actually hold this package down.
+      #
+      # There are exactly five +native packages, and this block must keep naming
+      # all five: one that nobody runs here is one whose only execution is
+      # somebody's terminal — the same failure shape as a gate that reports zero
+      # findings because it cannot see.
+      #   assertions : snnref, tools/ifacescan   (run with `moon test --target native`)
+      #   entrypoints: cmd/ifacescan, cmd/coord, examples/sediment (run directly)
+      #
+      # Listed by package rather than by a blanket "moon test --target native",
+      # which would also try to build the executable packages as test targets.
+
+      - name: native · snnref (spike-sediment experiment)
+        run: moon test --target native snnref
+
+      - name: native · tools/ifacescan (.mbti drift tripwire)
+        # The drift tripwire is the whole point of the embedded .mbti snapshot:
+        # if `moon info` regenerated an interface file and the snapshot was not
+        # refreshed, this goes red rather than the mbti face quietly reporting
+        # stale numbers.
+        run: moon test --target native tools/ifacescan
+
+      - name: native · cmd/ifacescan (scan every tracked .mbti)
+        # Exit code is 0 regardless of findings today, so this asserts it runs,
+        # not that it is clean — the assertions above are the teeth.
+        run: moon run --target native cmd/ifacescan
+
+      - name: native · cmd/coord (checkpoint must round-trip)
+        # Writes .openseek/coordinator-state.txt (gitignored); a non-zero exit
+        # here means the replayable runtime failed to restore its own checkpoint.
+        run: moon run --target native cmd/coord
+
+      - name: native · examples/sediment (the snnref experiment, end to end)
+        # The example is snnref's shipped entrypoint and is deterministic (fixed
+        # seed), so it is a legitimate gate: it asserts the experiment still
+        # recovers the 8-slot structure rather than merely exiting 0.
+        run: moon run --target native examples/sediment

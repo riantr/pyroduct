@@ -28,7 +28,7 @@ const BRIDGE_RELATIVE = path.join('_build', 'js', 'debug', 'build', 'cmd', 'json
 const PROVENANCE_FILE = path.join(PLUGIN_ROOT, 'vendor', 'BUILD.json')
 
 const SERVER_NAME = 'pyroduct-model'
-const SERVER_VERSION = '0.2.0'
+const SERVER_VERSION = '0.3.0'
 const DEFAULT_TIMEOUT_MS = 120_000
 const GATE_TIMEOUT_MS = 900_000
 
@@ -221,7 +221,7 @@ const TOOLS = [
   {
     name: 'pyroduct_faces',
     description:
-      'Catalog of the pyroduct analysis faces: the 28 runnable views of the philosophy state-machine family, each with one reading line, plus which bridge answered (bundled snapshot or a local checkout) and the module version it was built from. Call this first when you need to know which face answers a question — it is the index, not the content.',
+      'Catalog of the pyroduct analysis faces: the 31 runnable views of the philosophy state-machine family, each with one reading line, plus which bridge answered (bundled snapshot or a local checkout) and the module version it was built from. Call this first when you need to know which face answers a question — it is the index, not the content.',
     inputSchema: { type: 'object', properties: {}, additionalProperties: false },
     readOnly: true,
   },

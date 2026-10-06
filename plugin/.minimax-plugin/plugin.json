@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "name": "pyroduct-model",
   "displayName": "pyroduct 模型",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "把两篇中文哲学文本建模成的可运行状态机族：主体道德发生（34 状态 · 53 迁移 · 11 阶段）、多主体遭遇、群体／社会涌现、Agent 过闸进化、科研协调器。28 个分析面按需取事实，外加一张读法纪律表——未定不是失败、无路是数据、原文直述与模型整理分层。",
   "author": "riantr",
   "icon": "icon.png",

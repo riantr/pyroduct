@@ -105,8 +105,10 @@ function textOf(msg) {
 }
 
 const problems = []
+let checkCount = 0
 function check(label, condition, detail = '') {
   const ok = Boolean(condition)
+  checkCount += 1
   console.log(`${ok ? 'PASS' : 'FAIL'}  ${label}${detail ? ` — ${detail}` : ''}`)
   if (!ok) problems.push(label)
 }
@@ -159,6 +161,16 @@ const onlyHere = FACES.filter((f) => !catalogFaces.includes(f))
 check('catalog face list === FACES (no face escapes validation)',
   onlyInCatalog.length === 0 && onlyHere.length === 0,
   `catalog-only: ${onlyInCatalog.join(',') || '—'} | harness-only: ${onlyHere.join(',') || '—'}`)
+// The count written into the pyroduct_faces DESCRIPTION is prose that no other
+// check reads: it said 28 while the catalog rendered 31, and every one of the
+// 26 checks stayed green — including the one that counts the faces. A live agent
+// reading that description was simply told the wrong number. Held to FACES here,
+// so a face added later cannot leave the description behind again.
+const facesDesc = tools.find((t) => t.name === 'pyroduct_faces')?.description ?? ''
+const descCount = Number((facesDesc.match(/the (\d+) runnable views/) || [])[1])
+check('faces description states the real face count',
+  descCount === FACES.length,
+  `description says ${Number.isNaN(descCount) ? '(no count found)' : descCount}, catalog has ${FACES.length}`)
 // Version-agnostic on purpose: the number moves with every release, so pinning a
 // literal here would turn each version bump into a harness edit. What must hold is
 // that the catalog reports the version the pin file records — that pair drifting
@@ -349,5 +361,11 @@ check('gates degrades cleanly without a checkout',
 
 console.log(`\nstderr: ${stderrText.trim() || '(empty)'}`)
 child.stdin.end()
-console.log(problems.length === 0 ? '\nALL CHECKS PASSED' : `\nFAILURES: ${problems.join(' | ')}`)
+// The count is printed by the harness rather than transcribed into prose: a
+// hand-maintained number in a document was already one behind the truth here,
+// exactly like the "28 faces" this file also had to catch. Read it from here.
+console.log(`\n${checkCount} checks run`)
+console.log(problems.length === 0
+  ? `ALL CHECKS PASSED (${checkCount})`
+  : `FAILURES (${checkCount - problems.length}/${checkCount} passed): ${problems.join(' | ')}`)
 process.exit(problems.length === 0 ? 0 : 1)

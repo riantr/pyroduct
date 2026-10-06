@@ -149,10 +149,15 @@ node plugin\tools\sync-install.mjs push <checkout> # install, then rebuild + re-
   `node <installed>\tools\update-bundle.mjs <checkout>`, which also rewrites the pin from
   `moon.mod` and re-runs `tools/validate-plugin.mjs`.
 - After any plugin change run the package's own net: `node <installed>\tools\validate-plugin.mjs`
-  (26 checks: the pin, a real MCP handshake, all 31 faces, the model-count invariants including
-  `audit`'s 「未预期 0 条」 tripwire, a page-citation anti-drift rule, and a positive control that
-  fires the checkout guard). The plugin's SemVer in `.minimax-plugin/plugin.json` is independent
-  of the module's `moon.mod` version — bump it by hand.
+  (the harness prints its own count — 27 at the time of writing, and **do not transcribe it
+  into prose**: the number moves with every check added, which is exactly how the face count in
+  the tool description went stale unnoticed). What it covers: the pin, a real MCP handshake, all
+  31 faces, the model-count invariants including `audit`'s 「未预期 0 条」 tripwire, a face-count
+  anti-drift rule over the tool *description* (it once read 28 while the catalog rendered 31,
+  with everything green), a page-citation anti-drift rule, and a positive control that fires the
+  checkout guard. The plugin's SemVer in `.minimax-plugin/plugin.json` is independent of the
+  module's `moon.mod` version — bump it by hand, **and bump `SERVER_VERSION` in
+  `plugin/server.mjs` with it**: a check asserts the two agree.
 - The plugin holds **no model facts**: every fact comes from the module through
   `cmd/jsoncli`. If you add a fact to the plugin, it belongs in the module instead.
 - A live MCP server keeps the old code until it restarts, so a description fix shows up in the

@@ -390,7 +390,7 @@ LOOP5 = [
     (
         "L3 三鉴发现不分层（全部塞进已知设计）",
         "audit/fleet.mbt",
-        "    if is_known_fleet(f) {\n      known.push(f)",
+        "    if is_known_fleet(machine, f) {\n      known.push(f)",
         "    if true {\n      known.push(f)",
     ),
     (
@@ -593,12 +593,21 @@ def main():
                 restore_all()
                 continue
             src = originals[rel]
-            hits = src.count(old.encode("utf-8"))
+            # 两侧都归一到 LF 再匹配。本仓是混的：多数文件 LF，少数
+            # （society/state.mbt、group/machine.mbt、group/report.mbt）是 CRLF，
+            # 表里的锚点因而两写都有——有的是照着 CRLF 手写 `\r\n` 的，有的是 `\n`。
+            # core.autocrlf=true 时一次 `git checkout` 就能把整包翻过来；只归一
+            # 被搜索侧会把另一种写法的锚点打断（这个坑本轮真踩过，两次）。
+            # 还原走的仍是 originals 里的原始字节，不受此处归一影响。
+            hay = src.replace(b"\r\n", b"\n")
+            needle = old.encode("utf-8").replace(b"\r\n", b"\n")
+            repl = new.encode("utf-8").replace(b"\r\n", b"\n")
+            hits = hay.count(needle)
             if hits != 1:
                 report.append((name, "ANCHOR-ERROR", "%s occurs %d times" % (rel, hits)))
                 continue
             with open(os.path.join(ROOT, rel), "wb") as fh:
-                fh.write(src.replace(old.encode("utf-8"), new.encode("utf-8"), 1))
+                fh.write(hay.replace(needle, repl, 1))
             try:
                 rc, text = run_tests()
                 m = SUMMARY.search(text)

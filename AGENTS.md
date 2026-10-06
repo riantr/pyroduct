@@ -95,6 +95,34 @@ python tools/mutate_review.py          # review harness: mutation table for all 
   may need elevated file access once. Everything else (build, test, run, format) works
   inside the workspace.
 
+## CI (`.github/workflows/`)
+
+- `gate.yml` runs on every push and PR; `publish.yml` runs on a `v*` tag and publishes to
+  mooncakes. Both install the toolchain from `install/unix.sh` (NOT `install.sh`, which
+  answers 403 even from a runner; and no `setup-moonbit` action — the one this used to
+  reference is 404, which fails at *Set up job* before any step is named) and both run
+  `moon update` first, because a fresh runner's registry index is empty and a warm local
+  index hides that completely.
+- **Both remotes must be pushed**: gitee is the daily remote, github is where CI runs. A
+  tag pushed to gitee alone triggers nothing.
+- `gate.yml` names every `+native` package explicitly (assertions via
+  `moon test --target native`, entrypoints run directly), because the wasm target skips
+  all of them — a wasm-only gate would silently never execute them, which is the same
+  failure shape as "zero findings because it cannot see". **A sixth `+native` package must
+  be added there too**, or its only execution is somebody's terminal.
+- Do **not** add `moon check --target native` to either workflow: it is red by design.
+  `tools/ifacescan/moon.pkg` imports `moonbitlang/async` purely so its test file can hold
+  `async test`, and moon's unused-package scan does not read test files, so that one
+  package reports an unused import under `--deny-warn`. The default wasm-target
+  `moon check` never sees it.
+- Publishing needs the `MOONCAKES_RIANTR_TOKEN` secret, whose value is the **entire**
+  contents of `~/.moon/credentials.json` (a JSON object, not the bare token), because
+  `moon publish` reads that file rather than an environment variable. Only the repo owner
+  can set it (Settings → Secrets and variables → Actions). Until it exists, the publish
+  step fails loudly on purpose — a silent skip would look like a successful release.
+- `moon publish` takes the version from `moon.mod`, not from the tag; the workflow asserts
+  they agree and that the repository holds exactly one module.
+
 ## MiniMax Code plugin (`plugin/`)
 
 The module ships as a local MiniMax plugin. `plugin/` is the source of truth; the

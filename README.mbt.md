@@ -75,7 +75,8 @@ One society: 13 · 28 · 8. Two subjects: 14 normative rules.
 * Dependency isolation
 
   Four named third-party dependencies, each confined to its consumer:
-  `moonbitlang/async@0.22.4` → `cmd/coord` (native disk I/O);
+  `moonbitlang/async@0.22.4` → `cmd/coord` (native disk I/O) and
+  `tools/ifacescan` / `cmd/ifacescan` (the `.mbti` drift tripwire, native);
   `riantr/moonbit_doubleML@0.75.0` → `dmlref` / `causal`;
   `riantr/snn_mbt@0.84.0` → `snnref` (native); `riantr/moonbit_static_analysis@0.2.0`
   → `audit`. Every other package uses official `moonbitlang/*` only.
@@ -291,7 +292,11 @@ Claim phases: 事前 Before · 事中 During · 事后 After.
 (external cross-check) · `causal` (causal diagnostics) · `audit` (three-mirror
 static audit of the subject machine, and `fleet`/`mutants` for the group and
 society machines plus a mutation net proving the audit can see) · `snnref`
-(spike-sediment experiment).
+(spike-sediment experiment) · plus the `mbti` face: the repo's **own**
+`pkg.generated.mbti` files put through the same three mirrors (repeated
+signature / malformed line / unknown type reference). That face scans an
+embedded snapshot so it can run under wasm; a native tripwire proves the
+snapshot still equals the files on disk.
 
 ### Discipline terms
 
@@ -307,7 +312,7 @@ Add the module, then run the suite:
 
 ```
 moon add riantr/pyroduct
-moon test             # Total tests: 192, passed: 192, failed: 0.
+moon test             # Total tests: 197, passed: 197, failed: 0.
 ```
 
 From this repository, every layer prints a report:

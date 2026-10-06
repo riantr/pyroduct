@@ -17,7 +17,7 @@ description: '读取 riantr/pyroduct 的可运行哲学状态机：主体道德�
 
 | 工具 | 用途 |
 |---|---|
-| `pyroduct_faces` | 面目录：30 个面各一行读法，附模型版本与「这次答案来自内置快照还是本地 checkout」。**先调它**再选面。 |
+| `pyroduct_faces` | 面目录：31 个面各一行读法，附模型版本与「这次答案来自内置快照还是本地 checkout」。**先调它**再选面。 |
 | `pyroduct_face(kind)` | 跑一个面，返回该面报告全文。`kind` 取面目录里的名字。 |
 | `pyroduct_gates` | 门禁套件（`moon check` + `fmt --check` + `test`，190 个测试）。需要配置了 checkout；只有内置快照时它如实说「不可用」而不报错。 |
 
@@ -58,7 +58,7 @@ description: '读取 riantr/pyroduct 的可运行哲学状态机：主体道德�
 
 ## 更多参考
 
-- [参考/工具与面目录](references/tools.md)：三个工具的形状、30 面速查与选择建议。
+- [参考/工具与面目录](references/tools.md)：三个工具的形状、31 面速查与选择建议。
 - [参考/CLI 全表](references/cli.md)：全部 33 个子命令与典型输出行（有 checkout 时用）。
 - [参考/仓库总览](references/overview.md)：包布局、依赖规则、全部门禁命令。
 - [参考/术语表](references/terminology.md)：三尺度中英对照（阶段／位置／槽／触发／体制／主张／R1–R14）。

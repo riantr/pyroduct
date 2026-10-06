@@ -12,14 +12,20 @@ Long-form context lives in `README.mbt.md` (English) and `README.zh.mbt.md`
 
 ```console
 moon test                              # all tests (default target: wasm); currently
-                                       # 190/190 on wasm + 2 snnref tests on native
+                                       # 197/197 on wasm + 2 snnref on native
+                                       # + 4 ifacescan on native
 moon test --target native snnref       # spike-sediment experiment (native only)
+moon test --target native tools/ifacescan  # .mbti drift tripwire (native only)
+moon run --target native cmd/ifacescan # scan every tracked .mbti (reads the disk)
+python tools/gen_iface_data.py         # refresh audit/iface_data.mbt from the real
+                                       # .mbti files — run it after `moon info`
 moon check                             # type/warn check
 moon info                              # regenerates every pkg.generated.mbti (tracked)
 moon fmt                               # format; `moon fmt --check` must stay clean
 moon run cmd/main -- report            # CLI: report (default) | multi | group | society |
                                        # evolution | cycle | coordinator | dmlref | causal |
-                                       # audit | fleet | mutants | mermaid | dot | genesis |
+                                       # audit | fleet | mutants | mbti | mermaid | dot |
+                                       # genesis |
                                        # course |
                                        # naming | slots | loop | principle | intuition |
                                        # ml | ml-export | all | society-mermaid |
@@ -110,7 +116,7 @@ node plugin\tools\sync-install.mjs push <checkout> # install, then rebuild + re-
   `node <installed>\tools\update-bundle.mjs <checkout>`, which also rewrites the pin from
   `moon.mod` and re-runs `tools/validate-plugin.mjs`.
 - After any plugin change run the package's own net: `node <installed>\tools\validate-plugin.mjs`
-  (26 checks: the pin, a real MCP handshake, all 30 faces, the model-count invariants including
+  (26 checks: the pin, a real MCP handshake, all 31 faces, the model-count invariants including
   `audit`'s 「未预期 0 条」 tripwire, a page-citation anti-drift rule, and a positive control that
   fires the checkout guard). The plugin's SemVer in `.minimax-plugin/plugin.json` is independent
   of the module's `moon.mod` version — bump it by hand.
@@ -132,14 +138,16 @@ node plugin\tools\sync-install.mjs push <checkout> # install, then rebuild + re-
 | `coordinator` | research agents | Tasks/artifacts, planning, external evidence by confidence interval, content memory, credit, deliberation/decision split, replayable runtime |
 | `dmlref` | — | Cross-check of our DoubleML against `riantr/moonbit_doubleML@0.75.0` |
 | `causal` | one dataset | 0.75.0-deep diagnostics (read-only, data from the state machine): sensitivity (Cinelli–Hazlett `rv = \|θ̂\|/max_bias`), multiple-testing correction (BH/Bonferroni — naive OLS also passes, significance ≠ evidence), BLP heterogeneity (residualized treatment × centered covariates, HC0 se; d̃ recovers θ̂); marked 模型整理 |
-| `audit` | one machine | Three-lens static audit of the real subject machine (`riantr/moonbit_static_analysis/src/statecheck`; the library's moon.mod names pyroduct its reference consumer): real tables → plain-data `MachineSpec` → structural (states are bindings) / type (slots placed, no silent Block) / behavior (course abstractly executed) lenses; findings split 已知设计（无忆／无筹 only-exit, verified 0.2.0）vs 未预期（must stay 0 — live tripwire）; marked 模型整理 |
+| `audit` | one machine | Three-lens static audit of the real subject machine (`riantr/moonbit_static_analysis/src/statecheck`; the library's moon.mod names pyroduct its reference consumer): real tables → plain-data `MachineSpec` → structural (states are bindings) / type (slots placed, no silent Block) / behavior (course abstractly executed) lenses; findings split 已知设计（无忆／无筹 only-exit, verified 0.2.0）vs 未预期（must stay 0 — live tripwire）; marked 模型整理. 0.2.0 起另加**接口面**（`mbti.mbt`）：把本仓库**自己的** `pkg.generated.mbti` 交给库的 `src/moonfiles` 审（重复签名／畸形行／未知类型引用）。wasm／JS 读不了盘，故真扫靠 `iface_data.mbt` 这份**内嵌快照**（由 `tools/gen_iface_data.py` 逐字节生成）；正控是三段坏片段必被抓 + 干净样本必为 0 |
 | `audit` fleet + mutants | two more machines | 0.1.28: the same three lenses over the group machine (20 states · 44 transitions · 397 无路) and the society machine (13 · 28 · 206) — `fleet.mbt`. Two 口径 differ and are stated up front: **no drive slots** (the trigger *is* the driver, so lens 2's slot layer is skipped via an empty `slot_names`) and **no terminal** (`no_dead_end` holds everywhere; filling one would misreport 不封闭 as a defect). 未预期 is 0 with a known-design exemption opened on **exactly one cell** (`Converging × Attention`, key-matched on machine+state+trigger, not on the family) — measured, not assumed. `mutants.mbt` is the standing answer to "can it even see?": 3 machines × 6 breakages = 18, each must be caught **and** report the expected family; `split_fleet`/`probe_finding` exist so the layering itself is testable (three narrowness criteria cover the exemption); marked 模型整理 |
 | `snnref` | one experiment | Spike-sediment experiment (native only): 49 triggers → Poisson spike trains with slot-correlated rates → Gerstner STDP (CSR, library defaults) → does the sedimented weight structure recover the 8-slot partition? Means, hit rate vs. chance baseline, per-slot table; marked 模型整理 |
 | `viz` | — | Presentation-only: all three state machines as Mermaid `stateDiagram-v2` source plus one self-contained HTML page (`page()` embeds all three plus the subject machine's nested view — 11 phases as composite states — and the demo journey view with styling for now/gap/undecided; mermaid.js CDN loaded at view time — build/run stay offline). Delegates to the per-machine renderers; declares ASCII node ids with Chinese labels everywhere |
-| `cmd/main` | — | wasm CLI (35 named subcommands, incl. `all`, + the default report) |
+| `cmd/main` | — | wasm CLI (36 named subcommands, incl. `all`, + the default report) |
 | `cmd/coord` | — | native CLI with real disk I/O (`supported_targets = "+native"`) |
-| `cmd/jsoncli` | — | JSON bridge for both agent plugins — the DeepSeek Harness one (`riantr/dsh-plugin-pyroduct`) and the MiniMax Code one (`plugin/`) (js target: `moon build --target js` → `_build/js/debug/build/cmd/jsoncli/jsoncli.js`): one JSON request arg `{ "kind": ... }` → one-line JSON reply `{ok, kind, rendered, faces}`. Kinds mirror the model-facing subcommands (30 faces, listed in the bridge's `faces()`); viz composites and `all` stay CLI-only. The bridge is a pure spawner/formatter — all model semantics stay in the renderers it calls |
+| `cmd/ifacescan` | — | native CLI entry for the `.mbti` scan — **deliberately not** a `cmd/main` subcommand: it needs disk IO, so it cannot be a wasm face. The agent-visible `mbti` face scans the embedded snapshot instead |
+| `cmd/jsoncli` | — | JSON bridge for both agent plugins — the DeepSeek Harness one (`riantr/dsh-plugin-pyroduct`) and the MiniMax Code one (`plugin/`) (js target: `moon build --target js` → `_build/js/debug/build/cmd/jsoncli/jsoncli.js`): one JSON request arg `{ "kind": ... }` → one-line JSON reply `{ok, kind, rendered, faces}`. Kinds mirror the model-facing subcommands (31 faces, listed in the bridge's `faces()`); viz composites and `all` stay CLI-only. The bridge is a pure spawner/formatter — all model semantics stay in the renderers it calls |
 | `tools/pdfdump` | — | read-only survey records of the source PDF |
+| `tools/ifacescan` | — | **`.mbti` 漂移绊线（native 专属）**：走盘读回每个真实的 `pkg.generated.mbti`，逐行（剥 `\r`，与库的 `normalize` 同一口径）比对 `audit::iface_snapshot()` 的内嵌快照。快照过期就变红——这是内嵌快照能成立的全部理由。顺带是接口面唯一的「真读盘」实扫。marked 模型整理 |
 | `plugin/` | — | **not a MoonBit package** — the MiniMax Code local plugin (`.minimax-plugin/plugin.json` + `server.mjs` MCP server + the `pyroduct-model` skill + `tools/`). This tree is the source of truth; the installed copy lives in the Desktop data dir (`~/.minimax/plugins/pyroduct-model/`, `.mavis` is a junction to it) and is what the runtime loads. `vendor/jsoncli.js` is a build artifact, gitignored and regenerated |
 | `examples/*` | — | one runnable example per package: `plr`, `irm`, `cross_check`, `consumer`, `sediment` (native) |
 
@@ -150,7 +158,9 @@ package's purpose — those comments are package-level docs, keep them accurate.
 
 - Outside the four exceptions below, packages may only use official `moonbitlang/*`
   (mostly `moonbitlang/core`); no third-party libraries.
-- `moonbitlang/async@0.22.4` — sole consumer `cmd/coord` (native disk I/O).
+- `moonbitlang/async@0.22.4` — consumers `cmd/coord` (native disk I/O, the
+  coordinator checkpoint) and `tools/ifacescan` + `cmd/ifacescan` (the `.mbti`
+  drift tripwire and its CLI; also native disk I/O).
 - `riantr/moonbit_doubleML@0.75.0` — consumers `dmlref` (cross-check of our
   from-scratch estimator) and `causal` (0.75.0-deep diagnostics: sensitivity,
   multiple-testing correction, BLP heterogeneity — read-only, no gate).

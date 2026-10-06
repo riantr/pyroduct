@@ -1,0 +1,19 @@
+// 接口面实扫 CLI（native 专属）：
+//
+//   moon run --target native cmd/ifacescan
+//
+// 走盘本仓库全部 `.mbti`（排除构建产物），逐个交给 `audit` 的接口面透镜审，
+// 打印计数表与逐文件清单。**未预期发现非零时退出码非零**，可直接当门禁用。
+//
+// 口径与 `cmd/main` 其它面不同，须先读：这一面**不能**进 wasm，故不在
+// `cmd/main` 的面表里，也不在 JSON 桥里——插件拿不到它。逻辑与判据在
+// `tools/ifacescan`，本包只是入口。
+import {
+  "riantr/pyroduct/audit",
+  "riantr/pyroduct/tools/ifacescan" @scan,
+  "moonbitlang/async",
+}
+
+supported_targets = "+native"
+
+pkgtype(kind: "executable")

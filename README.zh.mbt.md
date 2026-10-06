@@ -55,7 +55,8 @@
 * 依赖隔离
 
   四个具名的第三方依赖，各自限于其消费者：`moonbitlang/async@0.22.4` →
-  `cmd/coord`（native 落盘）；`riantr/moonbit_doubleML@0.75.0` → `dmlref` /
+  `cmd/coord`（native 落盘）与 `tools/ifacescan`／`cmd/ifacescan`（`.mbti` 漂移
+  绊线，native）；`riantr/moonbit_doubleML@0.75.0` → `dmlref` /
   `causal`；`riantr/snn_mbt@0.84.0` → `snnref`（native）；`riantr/
   moonbit_static_analysis@0.2.0` → `audit`。其余包只用官方 `moonbitlang/*`。
 
@@ -267,7 +268,9 @@ Expand, Colonize, Distort, Hinder, Reconstruct, Circulate。
 （科研 Agent 运行时）· `dmlref`（外部互校）· `causal`（因果诊断）· `audit`
 （三鉴静态审计，0.1.28 起扩到群体机与社会机，另有 `fleet`／`mutants` 两个面
 ——变异网用 18 处故意的破坏证明「0 条发现」不是「什么都看不见」）· `snnref`
-（脉冲沉淀实验）。
+（脉冲沉淀实验）· 另有 `mbti` 面：用同一套三鉴审本仓库**自己的**
+`pkg.generated.mbti`（重复签名／畸形行／未知类型引用）。该面扫的是内嵌快照，
+好让它能在 wasm 下跑；另有一条 native 绊线证明快照仍与磁盘上的文件相等。
 
 ### 纪律用语
 
@@ -283,7 +286,7 @@ behavior)* · 往返一致 *round-trips identically*。
 
 ```
 moon add riantr/pyroduct
-moon test             # Total tests: 192, passed: 192, failed: 0.
+moon test             # Total tests: 197, passed: 197, failed: 0.
 ```
 
 在本仓库里，每一层都打印一份报告：

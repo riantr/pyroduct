@@ -8,7 +8,7 @@
 | 能力 | 名字 | 做什么 |
 |---|---|---|
 | Skill | `skills/pyroduct-model/SKILL.md` | 读法纪律（未定不是失败／无路是数据／出处两层／绊线是零）、取事实的次序、三尺度术语表参考 |
-| MCP | `pyroduct` | `pyroduct_faces`（30 面目录）、`pyroduct_face(kind)`（跑一个面取全文）、`pyroduct_gates`（模块门禁套件） |
+| MCP | `pyroduct` | `pyroduct_faces`（31 面目录）、`pyroduct_face(kind)`（跑一个面取全文）、`pyroduct_gates`（模块门禁套件） |
 
 ## 源码与安装目录
 
@@ -57,7 +57,7 @@ moon.mod」＋那个目录的顶层是什么——门禁在别处跑过等于撒
 ## 呈现层不在工具里
 
 `viz` 合成页、`journey` 行程视图、`nested-mermaid`、`all` 组合**不走桥**——它们是渲染，
-不是模型事实。工具面的 30 面清单里没有它们，这是有意的取舍（见技能里的
+不是模型事实。工具面的 31 面清单里没有它们，这是有意的取舍（见技能里的
 [参考/工具与面目录](skills/pyroduct-model/references/tools.md)）。有 checkout 时用
 `moon run cmd/main -- viz` 一类命令。
 
@@ -69,7 +69,7 @@ moon.mod」＋那个目录的顶层是什么——门禁在别处跑过等于撒
 "{\"kind\":\"petri\"}"` 能活）。所以插件带了个不用跟引号较劲的壳：
 
 ```console
-node tools\face.mjs --list          # 30 个面
+node tools\face.mjs --list          # 31 个面
 node tools\face.mjs petri            # 该面报告全文
 node tools\face.mjs --raw aho        # 完整 JSON 信封 {ok,kind,rendered,faces}
 ```
@@ -101,7 +101,7 @@ node tools\update-bundle.mjs D:\src\DeepseekHarness\Projects\pyroduct
 node tools\validate-plugin.mjs
 ```
 
-26 条：哈希钉 → 真 MCP 握手与三个工具（9 条）→ 30 个面全渲染 → 22 条内容不变量
+26 条：哈希钉 → 真 MCP 握手与三个工具（9 条）→ 31 个面全渲染 → 22 条内容不变量
 （含 `audit` 的「未预期 0 条」这条绊线与 `fleet` 的两条口径说明）→ 反漂移规则（3 条）
 → checkout 守卫的**阳性对照**（3 条）。
 

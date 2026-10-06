@@ -68,6 +68,7 @@ fn main raise {
     "audit" => println(@audit.render_report())
     "fleet" => println(@audit.render_fleet_report())
     "mutants" => println(@audit.render_mutation_report())
+    "mbti" => println(@audit.render_iface_report(@audit.scan_snapshot()))
     "spec" => println(@sm.spec_json())
     "association" => println(@evolution.render_association_report())
     "pathsum" => println(@sm.render_pathsum_report())

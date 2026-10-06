@@ -1,0 +1,20 @@
+// 接口面实扫（native 专属，模型整理）：走盘把本仓库真实的 .mbti 读进来，交给
+// audit 的接口面透镜审。CLI 入口在 cmd/ifacescan，本包只放逻辑与判据——
+// 可执行包引用不到自己，这是 MoonBit 的形状（与 cmd/coord + coordinator 同构）。
+//
+// 为什么必须 native：读盘要 IO，而 wasm 不能读。代价是这一面**进不了 cmd/main，
+// 也进不了 JSON 桥**——插件（wasm/js）拿不到它，只有 native 门禁跑得到。
+// 判据本身（正控：坏片段必被抓）在 audit 侧是纯函数，留在 wasm 门禁里。
+import {
+  "riantr/pyroduct/audit",
+  "moonbitlang/async",
+  "moonbitlang/async/fs",
+}
+
+// `moonbitlang/async` 在本包**只有测试文件**用它（`async test` 需要它才能编译）。
+// moon check 的 unused_package 只扫非测试文件，故会报一条「unused」——
+// **这是工具的盲点，不是可以顺手删掉的依赖**：删了 `scan_test.mbt` 里的
+// `async test` 就编译不过。同一形状的写法在 `moonbitlang/async` 自己的测试里
+// 也是这么用的。该包是 `+native`，不进 wasm 主门禁，故主门禁仍是零告警。
+
+supported_targets = "+native"

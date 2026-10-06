@@ -53,6 +53,7 @@ const FACES = [
   ['audit', '三鉴自审计（模型整理）：结构鉴／类型鉴／行为鉴；已知设计 4 条、未预期 0 条。'],
   ['fleet', '三鉴自审计扩到另两台机（模型整理）：群体 20 状态·44 迁移、社会 13 状态·28 迁移；两台机无驱动槽、无终点，故类型鉴的槽层整层跳过；未预期 0 条，已知设计豁免只开一格——群体机 `趋同 × 注意汇聚` 通向 共语/商谈（作者已确认，机器返回未定），按（机, 位置, 触发）三级精确匹配。'],
   ['mutants', '迁移表变异网（模型整理）：三台机×六族破坏共 18 处，逐处被抓到且家族对得上——「0 条发现」需要证据才站得住。'],
+  ['mbti', '接口面自审计（模型整理）：用同一套三鉴审本仓库**自己的** pkg.generated.mbti，抓重复签名／畸形行／未知类型引用。扫的是内嵌快照（wasm 读不了盘），native 绊线 `moon test --target native tools/ifacescan` 保证快照仍与磁盘相等；判「本仓库接口干不干净」时先说明这一点。'],
   ['mermaid', '主体机 Mermaid stateDiagram-v2 源码。'],
   ['dot', '主体机 Graphviz dot 源码。'],
   ['genesis', '主线：从开端到持住的环节序列。'],
@@ -229,7 +230,7 @@ const TOOLS = [
     description:
       '跑一个 pyroduct 分析面，返回该面报告全文。面：report（34 状态 · 53 迁移 · 11 阶段，各阶段下列位置与原文措辞，末节给出处层——默认入口，先读它）、' +
       'slots（49 触发 → 8 驱动槽）、loop（位置 × 槽契约：迁／守／未定／无路）、multi（R1–R14 下两主体遭遇的判词）、' +
-      'group、society、evolution、cycle、coordinator、dmlref、causal、audit、fleet、mutants、naming、course、genesis、principle、intuition、ml、ml-export、' +
+      'group、society、evolution、cycle、coordinator、dmlref、causal、audit、fleet、mutants、mbti、naming、course、genesis、principle、intuition、ml、ml-export、' +
       'spec、association、pathsum、algebra、petri、aho、buchi、mermaid、dot。页码出处（P.xx）只有 multi／group／society／intuition 四面印，' +
       '主体机自己的面没有页码字段。呈现层（viz/journey/嵌套视图/all）不在桥里。凡是需要机器自己的事实而不是记忆里的数字时用它。',
     inputSchema: {

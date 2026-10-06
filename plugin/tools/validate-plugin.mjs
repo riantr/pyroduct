@@ -113,7 +113,7 @@ function check(label, condition, detail = '') {
 
 const FACES = [
   'report', 'slots', 'loop', 'multi', 'group', 'society', 'evolution', 'cycle',
-  'coordinator', 'dmlref', 'causal', 'audit', 'fleet', 'mutants', 'mermaid',
+  'coordinator', 'dmlref', 'causal', 'audit', 'fleet', 'mutants', 'mbti', 'mermaid',
   'dot', 'genesis', 'course', 'naming', 'principle', 'intuition', 'ml',
   'ml-export', 'spec', 'association', 'pathsum', 'algebra', 'petri', 'aho',
   'buchi',
@@ -148,6 +148,17 @@ const cat = await request('tools/call', { name: 'pyroduct_faces', arguments: {} 
 const catText = textOf(cat)
 check('pyroduct_faces ok', cat.result?.isError !== true)
 check(`catalog lists all ${FACES.length} faces`, FACES.every((f) => catText.includes(f)))
+// The reverse direction, and the one that actually bit: a new face added to the
+// bridge but not to FACES above still made every check below pass — the catalog
+// did contain all of FACES, and FACES was simply missing the new one. That left
+// the 31st face unrendered-checked with the whole suite green. So: the catalog's
+// own face list and this list must be the SAME set, not a subset.
+const catalogFaces = [...catText.matchAll(/^ {2}([a-z][a-z-]*)\s{2,}/gm)].map((m) => m[1])
+const onlyInCatalog = catalogFaces.filter((f) => !FACES.includes(f))
+const onlyHere = FACES.filter((f) => !catalogFaces.includes(f))
+check('catalog face list === FACES (no face escapes validation)',
+  onlyInCatalog.length === 0 && onlyHere.length === 0,
+  `catalog-only: ${onlyInCatalog.join(',') || '—'} | harness-only: ${onlyHere.join(',') || '—'}`)
 // Version-agnostic on purpose: the number moves with every release, so pinning a
 // literal here would turn each version bump into a harness edit. What must hold is
 // that the catalog reports the version the pin file records — that pair drifting

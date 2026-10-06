@@ -8,17 +8,35 @@ import {
 }
 
 // Values
+pub fn audit_iface(String, String) -> Array[@report.Report]
+
+pub fn broken_duplicate() -> String
+
+pub fn broken_malformed() -> String
+
+pub fn broken_unknown_type() -> String
+
 pub fn build_group_spec() -> @statecheck.MachineSpec
 
 pub fn build_society_spec() -> @statecheck.MachineSpec
 
 pub fn build_spec() -> @statecheck.MachineSpec
 
+pub fn clean_sample() -> String
+
 pub fn families_of(@statecheck.MachineSpec) -> Array[String]
+
+pub fn families_of_iface(String, String) -> Array[String]
+
+pub fn family_name(@core.Family) -> String
+
+pub fn iface_snapshot() -> Array[(String, String)]
 
 pub fn probe_finding(@core.Family, String) -> @report.Report
 
 pub fn render_fleet_report() -> String
+
+pub fn render_iface_report(Array[(String, Array[@report.Report])]) -> String
 
 pub fn render_mutation_report() -> String
 
@@ -28,9 +46,17 @@ pub fn run_audit(@statecheck.MachineSpec) -> (Array[@report.Report], Array[@repo
 
 pub fn run_fleet_audit() -> Array[Verdict]
 
+pub fn scan_snapshot() -> Array[(String, Array[@report.Report])]
+
+pub fn snapshot_fresh_total() -> Int
+
 pub fn split_fleet(String, Array[@report.Report]) -> Verdict
 
+pub fn split_iface(Array[@report.Report]) -> (Array[@report.Report], Array[@report.Report])
+
 pub fn table_mutants() -> Array[Mutant]
+
+pub fn unreadable_finding(String) -> @report.Report
 
 // Errors
 
@@ -49,5 +75,6 @@ pub(all) struct Verdict {
 }
 
 // Type aliases
+pub type IfaceRow = (String, Array[@report.Report])
 
 // Traits

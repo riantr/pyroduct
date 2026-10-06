@@ -31,9 +31,9 @@ struct Request {
 fn faces() -> Array[String] {
   [
     "report", "slots", "loop", "multi", "group", "society", "evolution", "cycle",
-    "coordinator", "dmlref", "causal", "audit", "fleet", "mutants", "mermaid", "dot",
-    "genesis", "course", "naming", "principle", "intuition", "ml", "ml-export", "spec",
-    "association", "pathsum", "algebra", "petri", "aho", "buchi",
+    "coordinator", "dmlref", "causal", "audit", "fleet", "mutants", "mbti", "mermaid",
+    "dot", "genesis", "course", "naming", "principle", "intuition", "ml", "ml-export",
+    "spec", "association", "pathsum", "algebra", "petri", "aho", "buchi",
   ]
 }
 
@@ -64,6 +64,7 @@ fn render_kind(kind : String) -> String raise {
     "audit" => @audit.render_report()
     "fleet" => @audit.render_fleet_report()
     "mutants" => @audit.render_mutation_report()
+    "mbti" => @audit.render_iface_report(@audit.scan_snapshot())
     "mermaid" => @sm.render_mermaid()
     "dot" => @sm.render_dot()
     "genesis" => @sm.render_genesis()

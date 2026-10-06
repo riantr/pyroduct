@@ -14,6 +14,11 @@ import {
   "riantr/moonbit_static_analysis/src/statecheck" @sa,
   "riantr/moonbit_static_analysis/src/report" @sareport,
   "riantr/moonbit_static_analysis/src/core" @sacore,
+  "riantr/moonbit_static_analysis/src/moonfiles" @safiles,
 }
+
+// `iface_data.mbt` 是生成的快照：一屏一行的长字符串字面量，格式化器改它只会徒增
+// diff 噪声。真伪由 `tools/ifacescan` 的 native 判据守着（逐字节比对磁盘）。
+formatter(ignore: [ "iface_data.mbt" ])
 
 supported_targets = "native+wasm+wasm-gc+js"

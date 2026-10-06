@@ -30,8 +30,10 @@ pub(all) struct Mutant {
 
 ///|
 /// 家族名（供报告与测试比对；外部库的 enum 没有可读的 to_string，故在此登记）。
-fn family_name(f : @sacore.Family) -> String {
+/// `pub` 是因为 `mbti.mbt` 的接口面也要用它——家族表只能有一份，登记两份就会漂。
+pub fn family_name(f : @sacore.Family) -> String {
   match f {
+    @sacore.FParse => "语法"
     @sacore.FUndefinedName => "未定义名"
     @sacore.FUnusedLocal => "未用局部"
     @sacore.FUnreachable => "不可达"

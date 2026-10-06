@@ -20,15 +20,16 @@
 | `audit` | 一台机器 | 三鉴自审计：真实主体机的表 → 纯数据 MachineSpec → 结构鉴／类型鉴／行为鉴（库的 moon.mod 点名 pyroduct 为参考消费者；「鉴」兼照镜与审察）；发现分已知设计（无忆／无筹只出不进，0.2.0 已验证）与未预期（必须为零——活的绊线）；标模型整理 |
 | `audit` 的另两台 | 两台机器 | 0.1.28：同一套三鉴扩到群体机（20 状态·44 迁移）与社会机（13 状态·28 迁移）。两台机**没有驱动槽**（驱动就是触发本身）与**没有终点**（不封闭是结构事实），故类型鉴的槽层整层跳过、`terminal` 留空；真表上未预期 0 条；已知设计豁免**只开一格**（群体机 `趋同 × 注意汇聚` 通向 共语/商谈，作者已确认），按（机, 位置, 触发）三级精确匹配。另有 `mutants`：三台机×六族破坏共 18 处，逐处被抓——「0 条发现」需要证据才站得住。标模型整理 |
 | `snnref` | 一个实验 | 脉冲沉淀实验（native 专属）：49 触发 → Poisson spike trains（槽内共现高率）→ Gerstner STDP → 权重结构能否恢复驱动槽八分（比值、命中率对基线、分槽表）；标模型整理 |
-| `cmd/main` | — | wasm CLI（三十五个子命令） |
+| `cmd/main` | — | wasm CLI（三十六个子命令） |
 | `cmd/coord` | — | native CLI，真实落盘（`supported_targets = "+native"`） |
-| `tools/pdfdump` | — | 源 PDF 的只读勘察记录 |
+| `mbti` 面 | 本仓库的接口文件 | 接口面自审计：同一套三鉴审本仓库**自己的** `pkg.generated.mbti`（21 个）——重复签名／畸形行／未知类型引用，当前 0 条。扫的是内嵌快照（wasm 读不了盘），等价性由 `tools/ifacescan` 的 native 判据逐行守着 |
+| `tools/ifacescan` | — | `.mbti` 漂移绊线（native 专属）：内嵌快照必须逐行等于磁盘上的真文件 |
 | `examples/*` | — | 每包一个可运行示例（`sediment` 为 native 专属） |
 
 ## 依赖规则（按约定执行）
 
 - 官方 `moonbitlang/*` 之外只允许 `riantr/*`。
-- `moonbitlang/async@0.22.4` 唯一消费者 `cmd/coord`；`riantr/moonbit_doubleML@0.75.0`
+- `moonbitlang/async@0.22.4` 消费者 `cmd/coord`（native 落盘）与 `tools/ifacescan`／`cmd/ifacescan`（`.mbti` 漂移绊线，native）；`riantr/moonbit_doubleML@0.75.0`
   消费者 `dmlref`（互校）与 `causal`（0.75.0 深用诊断，只读）；
   `riantr/snn_mbt@0.84.0`（连带 `riantr/moonbit_image@0.3.4`）
   唯一消费者 `snnref`——`snn_mbt` 只声明 native 目标，`snnref` 与 `examples/sediment`
@@ -44,7 +45,7 @@
 
 ```console
 moon check                              # 类型/告警检查
-moon test                               # 全部测试（wasm），当前 190/190 + snnref 2（native）
+moon test                               # 全部测试（wasm），当前 197/197 + snnref 2（native）
 moon test --target native snnref        # 脉冲沉淀实验（native 专属）
 moon fmt --check                        # 格式必须干净
 moon run --target native cmd/coord      # 检查点落盘往返（往返一致 true）

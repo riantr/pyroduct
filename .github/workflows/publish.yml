@@ -179,7 +179,13 @@ jobs:
             # `set -o pipefail` a `grep -q` exits on its first match and SIGPIPEs the
             # writer, which makes the whole pipeline non-zero — so a genuine match
             # gets reported as a failure once the output outgrows the pipe buffer.
-            # Reproduced at ~1 MB; the warm-cache case is only ~820 bytes and hides it.
+            # Reproduced deterministically at 540 KB and 1 MB.
+            #
+            # Measured on this repository's runner: a real dry run produced **810
+            # bytes**, far below any pipe buffer. So that hazard did NOT cause the
+            # first red dry run (that one is unexplained — its log is behind auth and
+            # could not be read back). The pattern match stays regardless: it removes
+            # the hazard without depending on the output staying small.
             out=$(moon publish --dry-run 2>&1) || true
             printf '%s\n' "$out"
             echo "::notice::moon produced ${#out} bytes (included above in full)"

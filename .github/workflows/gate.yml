@@ -157,4 +157,18 @@ jobs:
         # (face descriptions must match actual state/transition/phase counts),
         # version consistency (plugin.json = server.mjs SERVER_VERSION), and
         # content invariants.
-        run: node plugin/tools/validate-plugin.mjs
+        #
+        # The bundled bridge is built HERE, not merely checked: `plugin/vendor/
+        # jsoncli.js` is gitignored (it is a build artifact — BUILD.json pins it
+        # by sha256 instead), so a fresh CI checkout does not contain it and the
+        # harness read it with a bare readFileSync. It died with ENOENT on the
+        # first CI run of this release. On a developer machine the file is always
+        # present, which is why every local run was green and only CI saw it.
+        run: |
+          set -euo pipefail
+          moon build --target js
+          # copy with node, not `cp`: this file has to be readable and runnable
+          # from a PowerShell shell too (the sandbox denies `cp` there), and the
+          # harness is the same either way.
+          node -e "require('fs').copyFileSync('_build/js/debug/build/cmd/jsoncli/jsoncli.js','plugin/vendor/jsoncli.js')"
+          node plugin/tools/validate-plugin.mjs

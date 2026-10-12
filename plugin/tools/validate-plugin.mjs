@@ -24,11 +24,22 @@ const SERVER = path.join(PLUGIN, 'server.mjs')
 // ---------------------------------------------------------------------------
 {
   const { createHash } = await import('node:crypto')
-  const { readFileSync, statSync } = await import('node:fs')
+  const { readFileSync, statSync, existsSync } = await import('node:fs')
   const build = JSON.parse(
     readFileSync(path.join(PLUGIN, 'vendor', 'BUILD.json'), 'utf8'),
   )
   const bundle = path.join(PLUGIN, build.artifact)
+  // `vendor/<bundle>` is a build artifact and is gitignored; BUILD.json pins it
+  // by sha256 instead. A fresh checkout therefore does not have it, and a bare
+  // readFileSync here died with ENOENT — a stack trace that says nothing about
+  // the fix, on a machine where the file always exists. Say what to do instead.
+  if (!existsSync(bundle)) {
+    console.log(`FAIL  bundled bridge missing — ${build.artifact} is a build artifact (gitignored).`)
+    console.log(`      Build it first:  moon build --target js`)
+    console.log(`      then copy it in:  cp ${build.sourcePath} plugin/${build.artifact}`)
+    console.log(`      or on Windows, run:  node plugin\\tools\\update-bundle.mjs <checkout>`)
+    process.exit(1)
+  }
   const raw = readFileSync(bundle)
   const sha = createHash('sha256').update(raw).digest('hex')
   const problems = []

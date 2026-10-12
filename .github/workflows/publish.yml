@@ -158,6 +158,9 @@ jobs:
           moon build --target wasm
           python tools/validate_dependencies.py
           python tools/validate_readme_facts.py
+          # Same reason as gate.yml: the bundled bridge is a gitignored build
+          # artifact, so this fresh checkout does not have it yet.
+          node -e "require('fs').copyFileSync('_build/js/debug/build/cmd/jsoncli/jsoncli.js','plugin/vendor/jsoncli.js')"
           node plugin/tools/validate-plugin.mjs
 
       - name: Publish to Mooncakes

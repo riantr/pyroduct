@@ -96,10 +96,22 @@ child.stderr.on('data', (c) => {
 })
 
 let nextId = 1
+// Per-call budget. `pyroduct_gates` spawns the real MoonBit gate (check +
+// fmt --check + the whole test suite), and server.mjs allows that 900 s — but
+// this harness used to wait only 180 s, so on a COLD CI runner (nothing built,
+// nothing cached) the wait expired first and the harness exited non-zero. It
+// passed locally every time because a warm build finishes the gate in seconds:
+// a shorter timeout than the thing under test is a timeout that only fires away
+// from the machine you wrote it on. Overridable so a slow machine is not a
+// false failure.
+const CALL_TIMEOUT_MS = Number(process.env.PYRODUCT_VALIDATE_TIMEOUT_MS ?? 900000)
 function request(method, params) {
   const id = nextId++
   return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error(`timeout on ${method}`)), 180000)
+    const timer = setTimeout(
+      () => reject(new Error(`timeout after ${CALL_TIMEOUT_MS}ms on ${method}`)),
+      CALL_TIMEOUT_MS,
+    )
     pending.set(id, (msg) => {
       clearTimeout(timer)
       resolve(msg)
@@ -519,7 +531,10 @@ check('gates degrades cleanly without a checkout',
     }
   })
   let aid = 1
-  const arequest = (method, params, ms = 120000) => {
+  // Same reasoning as CALL_TIMEOUT_MS: the decoy run points at a directory
+  // that is deliberately not a MoonBit module, so it must fail fast — but the
+  // floor is the same shared budget rather than a second, smaller magic number.
+  const arequest = (method, params, ms = CALL_TIMEOUT_MS) => {
     const rid = aid++
     return new Promise((resolve, reject) => {
       const t = setTimeout(() => reject(new Error(`timeout ${method}`)), ms)
@@ -566,6 +581,14 @@ child.stdin.end()
 // hand-maintained number in a document was already one behind the truth here,
 // exactly like the "28 faces" this file also had to catch. Read it from here.
 console.log(`\n${checkCount} checks run`)
+// GitHub turns `::error::` lines on stdout into annotations, and annotations are
+// readable through the REST API without the log-download endpoint (which needs
+// auth). Without this, a red CI run said only "exit code 1" — the diagnosis was
+// locked behind a credential, which is exactly how the first two red runs of this
+// release had to be diagnosed by elimination instead of by reading.
+for (const p of problems) {
+  console.log(`::error::pyroduct plugin check failed — ${p}`)
+}
 console.log(problems.length === 0
   ? `ALL CHECKS PASSED (${checkCount})`
   : `FAILURES (${checkCount - problems.length}/${checkCount} passed): ${problems.join(' | ')}`)

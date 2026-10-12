@@ -17,14 +17,21 @@
 # What is NOT asserted, and why: byte-identity with plugin/vendor/BUILD.json.
 # That bundle is a gitignored build artifact, so a fresh checkout does not
 # contain it; this step has to build one, and a build is only reproducible
-# under the exact toolchain that produced it. The installer's `latest` is a
-# moving alias and cli.moonbitlang.com prunes version-pinned tarballs (measured
-# 2026-10-12: core-latest.tar.gz answers 206 to a range request, and
-# core-0.1.20261012.tar.gz answers 403), so CI cannot freeze its toolchain.
-# The byte pin is therefore a LOCAL tripwire against an edited or stale
-# bundled copy, and the summary prints both hashes every run so the difference
-# is visible rather than silent. Do not "fix" that by pinning the installer:
-# the pinned tarball is not retained.
+# under the exact toolchain on the exact platform that produced it. Measured
+# on the Linux runner (2026-10-12): the bundle it built hashed c4a6b512… at
+# 1382480 bytes, against a pin recorded on Windows at b1bdd9b2… / 1382502.
+# `--fresh-build` therefore demotes sha/bytes to warnings while keeping the
+# version-consistency checks and the whole behavioural suite fatal.
+#
+# That is not a weakened gate. If the bundle were edited by hand, the faces it
+# renders would stop matching the source tables, and those checks go red.
+#
+# Do not "fix" this by re-pinning from CI, and do not pin the installer: the
+# version-pinned tarball is already gone (cli.moonbitlang.com answers 403 for
+# core-0.1.20261012.tar.gz and 206 for core-latest.tar.gz).
+#
+# One thing this step must never do is print a number it measured on a different
+# machine as if it were measured here — hence the table below.
 
 set -uo pipefail
 
@@ -82,7 +89,7 @@ fi
 say '```'
 say ""
 
-OUT=$(node plugin/tools/validate-plugin.mjs 2>&1)
+OUT=$(node plugin/tools/validate-plugin.mjs --fresh-build 2>&1)
 RC=$?
 printf '%s\n' "$OUT"
 if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then

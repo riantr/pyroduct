@@ -171,4 +171,10 @@ jobs:
           # from a PowerShell shell too (the sandbox denies `cp` there), and the
           # harness is the same either way.
           node -e "require('fs').copyFileSync('_build/js/debug/build/cmd/jsoncli/jsoncli.js','plugin/vendor/jsoncli.js')"
-          node plugin/tools/validate-plugin.mjs
+          # Report which half failed. `set -e` alone gives a bare exit code, and
+          # three red runs in a row had to be diagnosed by elimination because
+          # the step said nothing about where it stopped.
+          if ! node plugin/tools/validate-plugin.mjs; then
+            echo "::error::plugin anti-drift harness failed at the tag $(git rev-parse --short HEAD) — see the FAIL/::error:: lines above"
+            exit 1
+          fi

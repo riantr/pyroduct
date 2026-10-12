@@ -18,6 +18,26 @@ import { fileURLToPath } from 'node:url'
 const PLUGIN = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const SERVER = path.join(PLUGIN, 'server.mjs')
 
+// A crash used to be the least diagnosable failure this harness could have: an
+// uncaught throw prints a stack to stderr and exits 1, and CI then reports only
+// "Process completed with exit code 1". Three red runs in a row were spent
+// narrowing that down by elimination because the reason was locked behind the
+// log-download endpoint, which needs auth. Announce the crash as an error
+// workflow command so it lands in the run's annotations, where it is readable
+// without a credential. GitHub caps the message length; keep it to one line.
+process.on('uncaughtException', (err) => {
+  const first = String(err?.stack ?? err).split('\n').slice(0, 4).join(' ')
+  console.log(`FAIL  harness crashed — ${first.slice(0, 300)}`)
+  console.log(`::error::pyroduct plugin harness crashed — ${first.slice(0, 400)}`)
+  process.exit(1)
+})
+process.on('unhandledRejection', (reason) => {
+  const first = String(reason?.stack ?? reason).split('\n').slice(0, 4).join(' ')
+  console.log(`FAIL  harness aborted — ${first.slice(0, 300)}`)
+  console.log(`::error::pyroduct plugin harness aborted — ${first.slice(0, 400)}`)
+  process.exit(1)
+})
+
 // ---------------------------------------------------------------------------
 // Static pin check first: the bundled bridge carries every model fact, so an
 // edited or stale copy must fail before any report is believed.
@@ -38,6 +58,7 @@ const SERVER = path.join(PLUGIN, 'server.mjs')
     console.log(`      Build it first:  moon build --target js`)
     console.log(`      then copy it in:  cp ${build.sourcePath} plugin/${build.artifact}`)
     console.log(`      or on Windows, run:  node plugin\\tools\\update-bundle.mjs <checkout>`)
+    console.log(`::error::bundled bridge missing (${build.artifact}); build it with 'moon build --target js' and copy it into plugin/vendor/`)
     process.exit(1)
   }
   const raw = readFileSync(bundle)
@@ -66,6 +87,7 @@ const SERVER = path.join(PLUGIN, 'server.mjs')
   } else {
     console.log(`FAIL  bundled bridge pin — ${problems.join(' | ')}`)
     console.log('      (tools/update-bundle.mjs rewrites the pin; a mismatch means the artifact was edited by hand)')
+    for (const p of problems) console.log(`::error::bundled bridge pin — ${p}`)
     process.exit(1)
   }
 }

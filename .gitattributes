@@ -1,0 +1,9 @@
+# Only shell scripts are pinned here, and only because bash cannot run them
+# with CRLF: `set -uo pipefail\r` is not a valid builtin invocation.
+#
+# This is deliberately the ONLY rule. The MoonBit sources keep whatever line
+# endings the formatter produced, and forcing them to LF here would rewrite
+# files for no gain while making `moon fmt --check` diffs unreadable. When a
+# .mbt file ever needs a fixed ending, add that rule here explicitly rather
+# than adding a blanket `* text=auto`.
+*.sh text eol=lf

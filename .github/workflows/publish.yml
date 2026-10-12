@@ -139,9 +139,8 @@ jobs:
           echo "ok  exactly one module at the repository root"
 
       - name: Gate
-        # The wasm commands plus BOTH native test packages. `moon build --target
-        # js` matters here: the plugin pins that bundle by sha256, so a bridge
-        # that builds but no longer matches the pin is a release hazard.
+        # The wasm commands plus BOTH native test packages, then the shared
+        # plugin gate script.
         #
         # The three native entrypoints (cmd/ifacescan, cmd/coord,
         # examples/sediment) are deliberately NOT repeated here — gate.yml runs
@@ -154,14 +153,10 @@ jobs:
           moon test --deny-warn
           moon test --target native snnref
           moon test --target native tools/ifacescan
-          moon build --target js
           moon build --target wasm
           python tools/validate_dependencies.py
           python tools/validate_readme_facts.py
-          # Same reason as gate.yml: the bundled bridge is a gitignored build
-          # artifact, so this fresh checkout does not have it yet.
-          node -e "require('fs').copyFileSync('_build/js/debug/build/cmd/jsoncli/jsoncli.js','plugin/vendor/jsoncli.js')"
-          node plugin/tools/validate-plugin.mjs
+          bash tools/ci_plugin_gate.sh
 
       - name: Publish to Mooncakes
         run: |

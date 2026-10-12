@@ -79,7 +79,10 @@ python tools/validate_dependencies.py  # architecture drift detector: parses eve
                                        # diagrams in architecture/. Exit 0 if edges
                                        # match, 1 if drift (false or missing edges).
                                        # Examples and tools/ excluded by design.
-node plugin/tools/validate-plugin.mjs  # plugin anti-drift (28 checks): pin SHA-256,
+node plugin/tools/validate-plugin.mjs  # plugin anti-drift (the harness prints
+                                       # its own count — do not transcribe it:
+                                       # one check is skipped when run outside a
+                                       # checkout): pin SHA-256,
                                        # MCP handshake, 31 faces, face-count anti-drift,
                                        # test-count anti-drift (gates description must
                                        # state real wasm test count), version consistency

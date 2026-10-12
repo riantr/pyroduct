@@ -65,7 +65,7 @@
 
 **Validator**: `node plugin/tools/validate-plugin.mjs`
 **CI**: `gate.yml` step "plugin · anti-drift (faces, versions, test count, model facts, invariants)"
-**What it checks** (36 checks total):
+**What it checks** (the harness prints its own count — one check is skipped when it cannot see a MoonBit module, which is not the same as that check passing):
 
 | Check | What it catches |
 |-------|-----------------|
@@ -200,7 +200,7 @@ python tools/validate_dependencies.py --verbose
 python tools/validate_readme_facts.py
 python tools/validate_readme_facts.py --verbose
 
-# Check plugin consistency (36 checks)
+# Check plugin consistency (the harness prints its own count)
 node plugin/tools/validate-plugin.mjs
 
 # Full health check (manual, not in CI)

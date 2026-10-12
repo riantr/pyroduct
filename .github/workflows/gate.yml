@@ -151,7 +151,8 @@ jobs:
         run: python tools/validate_readme_facts.py
 
       - name: plugin · anti-drift (faces, versions, test count, model facts, invariants)
-        # 36 checks: pin SHA-256, MCP handshake, all 31 faces render, face-count
+        # The harness prints its own check count; do not transcribe it here.
+        # What it covers: pin SHA-256, MCP handshake, all 31 faces render, face-count
         # anti-drift, page-citation anti-drift, test-count anti-drift (the gates
         # description must state the real wasm test count), model fact anti-drift
         # (face descriptions must match actual state/transition/phase counts),

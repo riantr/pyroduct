@@ -363,7 +363,16 @@ check('naming row no longer claims a provenance layer',
 {
   const { readFileSync: rf, existsSync: es } = await import('node:fs')
   const { readdirSync: rd, statSync: st } = await import('node:fs')
-  const projectRoot = path.dirname(PLUGIN)
+  // Prefer an explicit checkout. `path.dirname(PLUGIN)` is only a fallback: run
+  // from the installed plugin copy, that is ~/.minimax/plugins/, which holds no
+  // MoonBit module at all — walkTests returns nothing, totalTests stays 0, and
+  // the check below compares the description's 197 against 0 and reports a
+  // mismatch that says nothing true about anything. Measured 2026-10-12: the
+  // command AGENTS.md tells you to run after every plugin change could never
+  // pass when run the way AGENTS.md tells you to run it.
+  const candidate = process.env.PYRODUCT_PROJECT_DIR
+  const projectRoot =
+    candidate && es(path.join(candidate, 'moon.mod')) ? candidate : path.dirname(PLUGIN)
 
   function walkTests(dir, out) {
     for (const entry of rd(dir, { withFileTypes: true })) {
@@ -375,6 +384,14 @@ check('naming row no longer claims a provenance layer',
   }
   const testFiles = []
   walkTests(projectRoot, testFiles)
+
+  // A check that cannot see its subject must say so, not report a finding.
+  if (testFiles.length === 0) {
+    console.log(`SKIP  wasm test count — no *_test.mbt under ${projectRoot}.`)
+    console.log('      Unmeasurable here, which is not the same as zero tests.')
+    console.log('      Run from a checkout, or set PYRODUCT_PROJECT_DIR to one.')
+    console.log('::warning::wasm test count not measurable from ' + projectRoot)
+  } else {
 
   let totalTests = 0
   const fileCounts = new Map()
@@ -409,6 +426,7 @@ check('naming row no longer claims a provenance layer',
   check('gates description states the real wasm test count',
     descCount === wasmTests,
     `description says ${descCount}, code has ${wasmTests} (${totalTests} total - ${nativeTests} native-only)`)
+  }
 }
 
 // --- model fact anti-drift ---------------------------------------------------

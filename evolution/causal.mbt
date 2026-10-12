@@ -15,7 +15,7 @@ pub struct Episodes {
   t : Array[Double]
   x : Array[Array[Double]]
   theta_true : Double
-  n : Int
+  n : Int32
 }
 
 ///|
@@ -63,7 +63,7 @@ pub fn make_episodes(
   parent : Genome,
   candidate : Genome,
   world : Array[Opponent],
-  n : Int,
+  n : Int32,
   seed : UInt64,
 ) -> Episodes {
   let q0 = quality(parent, world)
@@ -96,7 +96,7 @@ pub struct CausalVerdict {
   ci_high : Double
   naive : Double // 朴素差（含选择偏误）
   truth : Double // 本例真值（由设计给出，供对照）
-  n : Int
+  n : Int32
 }
 
 ///|
@@ -107,7 +107,7 @@ pub fn causal_effect(
   parent : Genome,
   candidate : Genome,
   world : Array[Opponent],
-  episodes : Int,
+  episodes : Int32,
   config : @ml.DmlConfig,
 ) -> CausalVerdict {
   let data = make_episodes(parent, candidate, world, episodes, 20260930)
@@ -126,21 +126,21 @@ pub fn causal_effect(
 
 ///|
 /// 千分位取整（持久化与比较用整数，避开浮点的往返差异）。
-pub fn permille(x : Double) -> Int {
+pub fn permille(x : Double) -> Int32 {
   let scaled = x * 1000.0
   (if scaled < 0.0 { scaled - 0.5 } else { scaled + 0.5 }).to_int()
 }
 
 ///|
 /// 千分位数 → 文本（如 `-200` → `-0.200`）。
-pub fn show_pm(pm : Int) -> String {
+pub fn show_pm(pm : Int32) -> String {
   let sign = if pm < 0 { "-" } else { "" }
   let a = if pm < 0 { -pm } else { pm }
   "\{sign}\{a / 1000}.\{pad3(a % 1000)}"
 }
 
 ///|
-fn pad3(v : Int) -> String {
+fn pad3(v : Int32) -> String {
   "\{v / 100}\{(v % 100) / 10}\{v % 10}"
 }
 
@@ -156,7 +156,7 @@ pub fn causal_verdict(
 
 ///|
 /// 因果判据（默认 DML 配置；`objective` 仅用于报表里的四分量对照）。
-pub fn causal_criterion(episodes : Int) -> Criterion {
+pub fn causal_criterion(episodes : Int32) -> Criterion {
   Causal({
     objective: truth_objective(),
     episodes,

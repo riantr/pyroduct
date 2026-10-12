@@ -28,11 +28,11 @@
 ///|
 /// 最短步数（tropical 路径和）：从 `from` 到 `to` 最少几步；不可达返回 None。
 /// 广度优先即 tropical 的实现（每边权重 0̄+1̄=1，⊕=min）。
-pub fn min_steps(from : SubjectState, to : SubjectState) -> Int? {
+pub fn min_steps(from : SubjectState, to : SubjectState) -> Int32? {
   if from == to {
     return Some(0)
   }
-  let dist : Map[String, Int] = Map([])
+  let dist : Map[String, Int32] = Map([])
   dist[from.designation()] = 0
   let queue : Array[String] = [from.designation()]
   let mut head = 0
@@ -60,7 +60,7 @@ pub fn min_steps(from : SubjectState, to : SubjectState) -> Int? {
 /// 反向最短距离（参照库 shortest_distance 的 reversed 变体）：从 `to` 出发
 /// 沿反边一次广度优先，给出**每个**位置到 `to` 的最短步数（照 `all_states`
 /// 顺序；不可达为 None）。通往宁静之路，对每个位置各差几步。
-pub fn distance_to(to : SubjectState) -> Array[(SubjectState, Int?)] {
+pub fn distance_to(to : SubjectState) -> Array[(SubjectState, Int32?)] {
   let rev : Map[String, Array[String]] = Map([])
   for t in transitions() {
     let key = t.to.designation()
@@ -74,7 +74,7 @@ pub fn distance_to(to : SubjectState) -> Array[(SubjectState, Int?)] {
     }
     arr.push(t.from.designation())
   }
-  let dist : Map[String, Int] = Map([])
+  let dist : Map[String, Int32] = Map([])
   dist[to.designation()] = 0
   let queue : Array[String] = [to.designation()]
   let mut head = 0
@@ -96,7 +96,7 @@ pub fn distance_to(to : SubjectState) -> Array[(SubjectState, Int?)] {
       None => ()
     }
   }
-  let out : Array[(SubjectState, Int?)] = []
+  let out : Array[(SubjectState, Int32?)] = []
   for s in all_states() {
     out.push((s, dist.get(s.designation())))
   }
@@ -130,7 +130,7 @@ pub fn is_acyclic() -> Bool {
     }
     arr.push(t.to.designation())
   }
-  let color : Map[String, Int] = Map([])
+  let color : Map[String, Int32] = Map([])
   fn has_cycle(u : String) -> Bool {
     color[u] = 1
     let mut found = false

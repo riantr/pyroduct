@@ -4,23 +4,23 @@
 ///|
 /// 一位可承担任务的研究者（agent）。
 pub struct Worker {
-  id : Int
+  id : Int32
   name : String
   regime : @multi.TruthRegime
-  reason : Int // 共同理性（纵向）
-  cheng : Int // 两诚（这里简化为他之诚与己之诚的均值）
-  budget : Int // 可用预算
+  reason : Int32 // 共同理性（纵向）
+  cheng : Int32 // 两诚（这里简化为他之诚与己之诚的均值）
+  budget : Int32 // 可用预算
 }
 
 ///|
 /// 构造一位研究者。
 pub fn worker(
-  id : Int,
+  id : Int32,
   name : String,
   regime : @multi.TruthRegime,
-  reason : Int,
-  cheng : Int,
-  budget : Int,
+  reason : Int32,
+  cheng : Int32,
+  budget : Int32,
 ) -> Worker {
   { id, name, regime, reason, cheng, budget, }
 }
@@ -28,18 +28,18 @@ pub fn worker(
 ///|
 /// 一份计划。
 pub struct Plan {
-  order : Array[Int]
-  assigned : Array[(Int, Int)] // (task, agent)
+  order : Array[Int32]
+  assigned : Array[(Int32, Int32)] // (task, agent)
   feasible : Bool
   notes : Array[String]
 }
 
 ///|
 /// 拓扑序（Kahn）。约定 `Task.id` 即数组下标。返回 (顺序, 是否无环)。
-pub fn topological(tasks : Array[Task]) -> (Array[Int], Bool) {
+pub fn topological(tasks : Array[Task]) -> (Array[Int32], Bool) {
   let n = tasks.length()
-  let indeg : Array[Int] = []
-  let adj : Array[Array[Int]] = []
+  let indeg : Array[Int32] = []
+  let adj : Array[Array[Int32]] = []
   for i = 0; i < n; i = i + 1 {
     indeg.push(0)
     adj.push([])
@@ -50,8 +50,8 @@ pub fn topological(tasks : Array[Task]) -> (Array[Int], Bool) {
       adj[d].push(t.id)
     }
   }
-  let order : Array[Int] = []
-  let queue : Array[Int] = []
+  let order : Array[Int32] = []
+  let queue : Array[Int32] = []
   for i = 0; i < n; i = i + 1 {
     if indeg[i] == 0 {
       queue.push(i)
@@ -74,8 +74,8 @@ pub fn topological(tasks : Array[Task]) -> (Array[Int], Bool) {
 
 ///|
 /// 依赖已满足的任务（未完成，且其 deps 都已完成）。
-pub fn ready(tasks : Array[Task], done : Array[Int]) -> Array[Int] {
-  let out : Array[Int] = []
+pub fn ready(tasks : Array[Task], done : Array[Int32]) -> Array[Int32] {
+  let out : Array[Int32] = []
   for t in tasks {
     if done.contains(t.id) {
       continue
@@ -95,7 +95,7 @@ pub fn ready(tasks : Array[Task], done : Array[Int]) -> Array[Int] {
 
 ///|
 /// 一位研究者对某类商谈的适配度。
-fn fit(q : Question, w : Worker) -> Int {
+fn fit(q : Question, w : Worker) -> Int32 {
   match q.discourse {
     @multi.Theoretical => w.reason
     @multi.Practical => w.cheng
@@ -106,7 +106,7 @@ fn fit(q : Question, w : Worker) -> Int {
 
 ///|
 /// 指派：按商谈类型挑适配度最高、且还有预算的研究者。
-pub fn assign(q : Question, agents : Array[Worker]) -> Int? {
+pub fn assign(q : Question, agents : Array[Worker]) -> Int32? {
   let mut best : Worker? = None
   for w in agents {
     if w.budget <= 0 {
@@ -129,14 +129,14 @@ pub fn schedule(
   tasks : Array[Task],
   questions : Array[Question],
   agents : Array[Worker],
-  now : Int,
+  now : Int32,
 ) -> Plan {
   let (order, acyclic) = topological(tasks)
   let notes : Array[String] = []
   if !acyclic {
     notes.push("依赖图有环：拓扑序不完整")
   }
-  let assigned : Array[(Int, Int)] = []
+  let assigned : Array[(Int32, Int32)] = []
   let mut spent = 0
   let mut overdue = false
   for id in order {
@@ -159,7 +159,7 @@ pub fn schedule(
 
 ///|
 /// 某任务被派给了谁（未派返回 -1）。
-pub fn agent_of(plan : Plan, id : Int) -> Int {
+pub fn agent_of(plan : Plan, id : Int32) -> Int32 {
   for pair in plan.assigned {
     if pair.0 == id {
       return pair.1

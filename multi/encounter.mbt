@@ -13,23 +13,23 @@
 /// 横向（各有效性主张之间的相互检讨）与纵向（共同理性）织成那张网，才构成达成
 /// 无强制共识的基础；因此它是一个可被检验的成员属性，而不是背景假设。
 pub struct Subject {
-  id : Int
+  id : Int32
   state : @sm.SubjectState
   regime : TruthRegime
   cheng : Cheng
-  reason : Int // 共同理性，0..100（纵向的主体间性）
-  residue : Int // 谬误的残余，恒 > 0
+  reason : Int32 // 共同理性，0..100（纵向的主体间性）
+  residue : Int32 // 谬误的残余，恒 > 0
 }
 
 ///|
 /// 构造一个主体。共同理性取 70 作为缺省；需要时用 `with_reason` 显式设定。
 pub fn subject(
-  id : Int,
+  id : Int32,
   state : @sm.SubjectState,
   regime : TruthRegime,
-  toward_other : Int,
-  toward_self : Int,
-  residue : Int,
+  toward_other : Int32,
+  toward_self : Int32,
+  residue : Int32,
 ) -> Subject {
   {
     id,
@@ -43,7 +43,7 @@ pub fn subject(
 
 ///|
 /// 设定一个主体的「共同理性」（纵向的主体间性）。
-pub fn with_reason(s : Subject, reason : Int) -> Subject {
+pub fn with_reason(s : Subject, reason : Int32) -> Subject {
   {
     id: s.id,
     state: s.state,
@@ -107,7 +107,7 @@ pub struct EncounterOutcome {
 
 ///|
 /// 双方"诚"的差距。
-pub fn cheng_gap(a : Subject, b : Subject) -> Int {
+pub fn cheng_gap(a : Subject, b : Subject) -> Int32 {
   let d1 = (a.cheng.toward_other - b.cheng.toward_other).abs()
   let d2 = (a.cheng.toward_self - b.cheng.toward_self).abs()
   if d1 > d2 {
@@ -295,12 +295,12 @@ pub fn encounter(
 ///|
 /// 主体间网络：横边＝同体制主体之间的对称关联；纵边＝主体与共同规范轴（理性）的关联。
 pub struct NetworkReport {
-  peer_edges : Int
-  norm_edges : Int
-  clashing_pairs : Int
+  peer_edges : Int32
+  norm_edges : Int32
+  clashing_pairs : Int32
   consensus_possible : Bool
   vertical_ok : Bool
-  min_reason : Int
+  min_reason : Int32
 }
 
 ///|

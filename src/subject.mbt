@@ -147,7 +147,7 @@ pub struct StateInfo {
   state : SubjectState
   label : String
   phase : Phase
-  freedom : Int
+  freedom : Int32
   gloss : String
 }
 
@@ -452,7 +452,7 @@ pub fn SubjectState::phase(self : SubjectState) -> Phase {
 
 ///|
 /// 阐述性的自由刻度；负数表示受缚。
-pub fn SubjectState::freedom(self : SubjectState) -> Int {
+pub fn SubjectState::freedom(self : SubjectState) -> Int32 {
   self.info().freedom
 }
 

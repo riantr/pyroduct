@@ -283,6 +283,196 @@ const namedWrong = [...catText.matchAll(/^ {2}(\S+)\s+.*(?:页码|出处层)/gm)
 check('naming row no longer claims a provenance layer',
   !catText.includes('定名对照表：两字定名 ＋ 原文措辞 ＋ 出处层'), namedWrong.join(',') || 'clean')
 
+// --- test count anti-drift ---------------------------------------------------
+// The pyroduct_gates description states a test count ("197 tests"). That number
+// drifted from 190 to 197 without anyone noticing — the same shape as the
+// "28 faces" drift that commit 7b95863 fixed. Count test functions in *_test.mbt
+// files, subtract native-only packages, and compare against the description.
+{
+  const { readFileSync: rf, existsSync: es } = await import('node:fs')
+  const { readdirSync: rd, statSync: st } = await import('node:fs')
+  const projectRoot = path.dirname(PLUGIN)
+
+  function walkTests(dir, out) {
+    for (const entry of rd(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name)
+      if (entry.name === '_build' || entry.name === '.mooncakes' || entry.name === 'node_modules') continue
+      if (entry.isDirectory()) walkTests(full, out)
+      else if (entry.name.endsWith('_test.mbt')) out.push(full)
+    }
+  }
+  const testFiles = []
+  walkTests(projectRoot, testFiles)
+
+  let totalTests = 0
+  const fileCounts = new Map()
+  for (const f of testFiles) {
+    const content = rf(f, 'utf8')
+    const matches = content.match(/^\s*(async\s+)?test\s+"/gm)
+    const count = matches ? matches.length : 0
+    fileCounts.set(f, count)
+    totalTests += count
+  }
+
+  // Identify +native packages: their moon.pkg has supported_targets = "+native"
+  function isNativeOnly(testFile) {
+    const pkgDir = path.dirname(testFile)
+    const moonPkg = path.join(pkgDir, 'moon.pkg')
+    if (!es(moonPkg)) return false
+    const content = rf(moonPkg, 'utf8')
+    return /^\s*supported_targets\s*=\s*"\+native"\s*$/m.test(content)
+  }
+
+  let nativeTests = 0
+  for (const [f, count] of fileCounts) {
+    if (isNativeOnly(f)) nativeTests += count
+  }
+  const wasmTests = totalTests - nativeTests
+
+  // Extract the test count from the pyroduct_gates tool description
+  const gatesDesc = tools.find((t) => t.name === 'pyroduct_gates')?.description ?? ''
+  const descMatch = gatesDesc.match(/(\d+)\s+tests/)
+  const descCount = descMatch ? Number(descMatch[1]) : NaN
+
+  check('gates description states the real wasm test count',
+    descCount === wasmTests,
+    `description says ${descCount}, code has ${wasmTests} (${totalTests} total - ${nativeTests} native-only)`)
+}
+
+// --- model fact anti-drift ---------------------------------------------------
+// Face descriptions in server.mjs contain hardcoded model facts (34 states,
+// 53 transitions, etc.). If the enums change but the descriptions don't, the
+// plugin lies to agents. Cross-check the descriptions against known facts.
+{
+  // Expected facts (must match tools/extract_model_facts.py)
+  const facts = {
+    subject: { states: 34, transitions: 53, phases: 11, triggers: 49, slots: 8 },
+    group: { states: 20, transitions: 44, phases: 9, triggers: 22 },
+    society: { states: 13, transitions: 28, phases: 8, triggers: 18 },
+    combinations: { total: 272, no_way: 228 },
+  }
+
+  // Build a map from face kind to description
+  const faceDescMap = new Map()
+  for (const t of tools) {
+    if (t.name === 'pyroduct_face') {
+      // The tool description doesn't have per-face descriptions; they're in the catalog
+      continue
+    }
+  }
+  // Extract from catalog text instead
+  const faceDescs = [...catText.matchAll(/^ {2}(\S+)\s+(.*)$/gm)]
+    .map((m) => [m[1], m[2]])
+    .filter(([kind]) => FACES.includes(kind))
+  for (const [kind, desc] of faceDescs) {
+    faceDescMap.set(kind, desc)
+  }
+
+  // Check report: "34 位置 · 53 迁移 · 11 阶段"
+  const reportDesc = faceDescMap.get('report') || ''
+  const reportMatch = reportDesc.match(/(\d+)\s*位置.*?(\d+)\s*迁移.*?(\d+)\s*阶段/)
+  if (reportMatch) {
+    const actual = [Number(reportMatch[1]), Number(reportMatch[2]), Number(reportMatch[3])]
+    const expected = [facts.subject.states, facts.subject.transitions, facts.subject.phases]
+    check('report description model facts match code',
+      JSON.stringify(actual) === JSON.stringify(expected),
+      `expected ${expected}, got ${actual}`)
+  } else {
+    check('report description contains model facts', false, 'pattern not found')
+  }
+
+  // Check slots: "49 条触发句 → 8 个驱动槽"
+  const slotsDesc = faceDescMap.get('slots') || ''
+  const slotsMatch = slotsDesc.match(/(\d+)\s*条触发句.*?(\d+)\s*个驱动槽/)
+  if (slotsMatch) {
+    const actual = [Number(slotsMatch[1]), Number(slotsMatch[2])]
+    const expected = [facts.subject.triggers, facts.subject.slots]
+    check('slots description model facts match code',
+      JSON.stringify(actual) === JSON.stringify(expected),
+      `expected ${expected}, got ${actual}`)
+  } else {
+    check('slots description contains model facts', false, 'pattern not found')
+  }
+
+  // Check loop: "272 组合中 228 个无路"
+  const loopDesc = faceDescMap.get('loop') || ''
+  const loopMatch = loopDesc.match(/(\d+)\s*组合中\s*(\d+)\s*个无路/)
+  if (loopMatch) {
+    const actual = [Number(loopMatch[1]), Number(loopMatch[2])]
+    const expected = [facts.combinations.total, facts.combinations.no_way]
+    check('loop description model facts match code',
+      JSON.stringify(actual) === JSON.stringify(expected),
+      `expected ${expected}, got ${actual}`)
+  } else {
+    check('loop description contains model facts', false, 'pattern not found')
+  }
+
+  // Check group: "20 状态"
+  const groupDesc = faceDescMap.get('group') || ''
+  const groupMatch = groupDesc.match(/(\d+)\s*状态/)
+  if (groupMatch) {
+    const actual = Number(groupMatch[1])
+    const expected = facts.group.states
+    check('group description model facts match code',
+      actual === expected,
+      `expected ${expected}, got ${actual}`)
+  } else {
+    check('group description contains model facts', false, 'pattern not found')
+  }
+
+  // Check society: "13 状态"
+  const societyDesc = faceDescMap.get('society') || ''
+  const societyMatch = societyDesc.match(/(\d+)\s*状态/)
+  if (societyMatch) {
+    const actual = Number(societyMatch[1])
+    const expected = facts.society.states
+    check('society description model facts match code',
+      actual === expected,
+      `expected ${expected}, got ${actual}`)
+  } else {
+    check('society description contains model facts', false, 'pattern not found')
+  }
+
+  // Check fleet: "群体 20 状态·44 迁移、社会 13 状态·28 迁移"
+  const fleetDesc = faceDescMap.get('fleet') || ''
+  const fleetMatch = fleetDesc.match(/群体\s*(\d+)\s*状态.*?(\d+)\s*迁移.*?社会\s*(\d+)\s*状态.*?(\d+)\s*迁移/)
+  if (fleetMatch) {
+    const actual = [Number(fleetMatch[1]), Number(fleetMatch[2]), Number(fleetMatch[3]), Number(fleetMatch[4])]
+    const expected = [facts.group.states, facts.group.transitions, facts.society.states, facts.society.transitions]
+    check('fleet description model facts match code',
+      JSON.stringify(actual) === JSON.stringify(expected),
+      `expected ${expected}, got ${actual}`)
+  } else {
+    check('fleet description contains model facts', false, 'pattern not found')
+  }
+
+  // Check algebra: "最小商（31 块）"
+  const algebraDesc = faceDescMap.get('algebra') || ''
+  const algebraMatch = algebraDesc.match(/最小商.*?(\d+)\s*块/)
+  if (algebraMatch) {
+    const actual = Number(algebraMatch[1])
+    const expected = 31  // minimal_quotient block count (from src/algebra.mbt)
+    check('algebra description model facts match code',
+      actual === expected,
+      `expected ${expected}, got ${actual}`)
+  } else {
+    check('algebra description contains model facts', false, 'pattern not found')
+  }
+
+  // Check petri: "库所 34／变迁 53"
+  const petriDesc = faceDescMap.get('petri') || ''
+  const petriMatch = petriDesc.match(/库所\s*(\d+).*?变迁\s*(\d+)/)
+  if (petriMatch) {
+    const actual = [Number(petriMatch[1]), Number(petriMatch[2])]
+    const expected = [facts.subject.states, facts.subject.transitions]
+    check('petri description model facts match code',
+      JSON.stringify(actual) === JSON.stringify(expected),
+      `expected ${expected}, got ${actual}`)
+  } else {
+    check('petri description contains model facts', false, 'pattern not found')
+  }
+}
+
 const gates = await request('tools/call', { name: 'pyroduct_gates', arguments: {} })
 const gateText = textOf(gates)
 check('gates degrades cleanly without a checkout',

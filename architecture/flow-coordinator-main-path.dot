@@ -1,0 +1,85 @@
+// Coordinator Runtime - Main Path (Simplified)
+// Skill: flow-visualizer + graphviz
+// Date: 2026-10-11
+// Focus: One step of runtime.step(), from ready task to StepReport
+
+// model-version: 0.1.30
+digraph coordinator_main_path {
+    rankdir=TB;
+    node [shape=box, style=filled, fontname="Arial", fontsize=10];
+    edge [fontname="Arial", fontsize=9, penwidth=2];
+
+    // === Main Path ===
+    start [label="runtime.step() 调用\nRuntime { clock, log, done, notebook, results, artifacts }", fillcolor="#64B5F6", penwidth=3];
+
+    ready [label="ready(tasks, done)\n找就绪任务: 未完成 && deps 都已完成\n取 ready[0] 作为当前任务", fillcolor="#FFE0B2"];
+
+    assign [label="assign(question, agents)\n指派工人: 按商谈类型适配度\n理论→reason; 实践/表达→cheng\n预算 > 0", fillcolor="#FFE0B2"];
+
+    claim [label="确定主张类型\n商谈类型 → ClaimKind:\n理论→真实性; 实践→正当性\n表达→己之诚; 信仰→他之诚", fillcolor="#FFE0B2"];
+
+    route {label="路由:\n商谈类型?", fillcolor="#FFCC80", shape=diamond};
+
+    theoretical [label="理论商谈:\nexperiment() → Binding\nreplicate() → 复现\n真跑 DoubleML\n效应 + 95% 区间", fillcolor="#CE93D8"];
+
+    other [label="实践/表达/信仰:\nbinding = None\n停在商谈段\n仅对话", fillcolor="#CE93D8"];
+
+    verdict [label="判定\n有 binding → evidence_verdict()\n无 binding → \"仅对话\"", fillcolor="#FFE0B2"];
+
+    produce [label="产出:\nResult (效应/区间/复现)\nFinding (加入 Notebook)\nArtifact (Note 类型)\nMessage (广播)", fillcolor="#FFE0B2"];
+
+    update [label="更新状态:\ndone.push(task_id)\nclock += 1", fillcolor="#FFE0B2"];
+
+    done [label="返回 StepReport\n{ at, task, agent, discourse,\n  verdict, result, finding }", fillcolor="#64B5F6", penwidth=3];
+
+    // === Main Flow ===
+    start -> ready [color="#1565C0"];
+    ready -> assign [color="#E65100"];
+    assign -> claim [color="#E65100"];
+    claim -> route [color="#E65100"];
+
+    route -> theoretical [label="理论", color="#6A1B9A"];
+    route -> other [label="其他", color="#2E7D32"];
+
+    theoretical -> verdict [color="#6A1B9A"];
+    other -> verdict [color="#2E7D32"];
+
+    verdict -> produce [color="#E65100"];
+    produce -> update [color="#E65100"];
+    update -> done [color="#1565C0"];
+
+    // === Key Invariants ===
+    subgraph cluster_invariants {
+        label="关键不变量 (Key Invariants)";
+        style=filled;
+        color="#E8F5E9";
+        fontcolor="#2E7D32";
+
+        inv1 [label="依赖图驱动\n拓扑序 (Kahn)\n就绪 = deps 都已完成", shape=note, fillcolor="#C8E6C9"];
+
+        inv2 [label="商谈类型路由\n理论→证据 (DoubleML)\n其他→商谈段 (仅对话)", shape=note, fillcolor="#C8E6C9"];
+
+        inv3 [label="证据绑定\n主张钉在数据集上\n效应 + 95% 区间 + 复现", shape=note, fillcolor="#C8E6C9"];
+
+        inv4 [label="只追加台账\nlog, done, results, artifacts\nnotebook 只追加", shape=note, fillcolor="#C8E6C9"];
+
+        inv5 [label="落盘往返一致\ncheckpoint() ↔ restore()\n文本相同 + 状态相同", shape=note, fillcolor="#C8E6C9"];
+    }
+
+    // === Deliberation / Decision ===
+    subgraph cluster_delib {
+        label="商谈段 / 决策段 (Deliberation / Decision)";
+        style=filled;
+        color="#F3E5F5";
+        fontcolor="#6A1B9A";
+
+        delib [label="商谈段 (Deliberation)\n开放: 多方案并存\n主张只是建议 (R14)\nopen_remainder 恒非空", fillcolor="#E1BEE7"];
+
+        dec [label="决策段 (Decision)\n交付物恒带:\n• 可修订标记 (revisable=true)\n• 残余归属 (residual_owner)\n• 重开条件 (reopen_when)", fillcolor="#E1BEE7"];
+
+        reopen [label="重开 (reopen)\n交付降为草稿\n新方案并进来\n缺口可达 (society.no_final_closure)", fillcolor="#E1BEE7"];
+    }
+
+    delib -> dec [label="decide()", color="#6A1B9A", style=dashed];
+    dec -> reopen [label="reopen()", color="#6A1B9A", style=dashed];
+}

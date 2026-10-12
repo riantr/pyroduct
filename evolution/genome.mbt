@@ -63,10 +63,10 @@ pub fn Voice::label(self : Voice) -> String {
 pub struct Genome {
   voice : Voice // 提示层：发言框架
   regime : @multi.TruthRegime // 策略层：如何对待主体性
-  toward_other : Int // 策略层：他之诚（向对方敞开），0..100
-  toward_self : Int // 策略层：己之诚（意向—行为之契合），0..100
-  carry : Int // 记忆层：携带的谬误残余（R10）
-  reason : Int // 代码层：共同理性（R13 纵向），0..100
+  toward_other : Int32 // 策略层：他之诚（向对方敞开），0..100
+  toward_self : Int32 // 策略层：己之诚（意向—行为之契合），0..100
+  carry : Int32 // 记忆层：携带的谬误残余（R10）
+  reason : Int32 // 代码层：共同理性（R13 纵向），0..100
 } derive(Eq)
 
 ///|
@@ -172,10 +172,10 @@ pub fn all_regimes() -> Array[@multi.TruthRegime] {
 pub struct Opponent {
   name : String
   regime : @multi.TruthRegime
-  toward_other : Int
-  toward_self : Int
-  reason : Int
-  residue : Int
+  toward_other : Int32
+  toward_self : Int32
+  reason : Int32
+  residue : Int32
 }
 
 ///|
@@ -229,10 +229,10 @@ pub fn default_world() -> Array[Opponent] {
 /// **适应度**：四个分量。分数只由 `Objective` 把它们压成一个数——分量本身永远
 /// 一起打印，免得一个标量把取舍藏起来。
 pub struct Fitness {
-  consensus : Int // 共识度 0..100，越高越好
-  stability : Int // 稳定度 0..100，越高越好（无病理决断）
-  residue : Int // 残余，越低越好
-  cost : Int // 代价，越低越好
+  consensus : Int32 // 共识度 0..100，越高越好
+  stability : Int32 // 稳定度 0..100，越高越好（无病理决断）
+  residue : Int32 // 残余，越低越好
+  cost : Int32 // 代价，越低越好
 } derive(Eq)
 
 ///|
@@ -242,10 +242,10 @@ pub extend Fitness with Eq::{not_equal, equal}
 /// **适应度目标**：把「更好」写成数据，而不是假设。
 pub struct Objective {
   name : String
-  w_consensus : Int
-  w_stability : Int
-  w_residue : Int
-  w_cost : Int
+  w_consensus : Int32
+  w_stability : Int32
+  w_residue : Int32
+  w_cost : Int32
 }
 
 ///|
@@ -262,7 +262,7 @@ pub fn thrifty_objective() -> Objective {
 
 ///|
 /// 打分：越高越好。残余与代价以减号显式出现在这里——这就是「更好」的定义处。
-pub fn score(f : Fitness, o : Objective) -> Int {
+pub fn score(f : Fitness, o : Objective) -> Int32 {
   o.w_consensus * f.consensus +
   o.w_stability * f.stability -
   o.w_residue * f.residue -
@@ -341,10 +341,10 @@ pub fn evaluate(g : Genome, world : Array[Opponent]) -> Fitness {
 pub fn genome(
   voice : Voice,
   regime : @multi.TruthRegime,
-  toward_other : Int,
-  toward_self : Int,
-  carry : Int,
-  reason : Int,
+  toward_other : Int32,
+  toward_self : Int32,
+  carry : Int32,
+  reason : Int32,
 ) -> Genome {
   { voice, regime, toward_other, toward_self, carry, reason, }
 }
@@ -354,17 +354,17 @@ pub fn genome(
 pub fn opponent(
   name : String,
   regime : @multi.TruthRegime,
-  toward_other : Int,
-  toward_self : Int,
-  reason : Int,
-  residue : Int,
+  toward_other : Int32,
+  toward_self : Int32,
+  reason : Int32,
+  residue : Int32,
 ) -> Opponent {
   { name, regime, toward_other, toward_self, reason, residue, }
 }
 
 ///|
 /// 两个基因组有几处不同（变异应当是「单步」的，即恰一处）。
-pub fn diff_count(a : Genome, b : Genome) -> Int {
+pub fn diff_count(a : Genome, b : Genome) -> Int32 {
   let mut d = 0
   if a.voice != b.voice {
     d += 1
@@ -389,7 +389,7 @@ pub fn diff_count(a : Genome, b : Genome) -> Int {
 
 ///|
 /// 把值夹进 0..100（两诚与共同理性的取值域）。
-fn clamp100(x : Int) -> Int {
+fn clamp100(x : Int32) -> Int32 {
   if x < 0 {
     0
   } else if x > 100 {

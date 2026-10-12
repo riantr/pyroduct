@@ -31,27 +31,27 @@ pub fn Role::label(self : Role) -> String {
 ///|
 /// 一条贡献记录。
 pub struct Contribution {
-  agent : Int
-  task : Int
+  agent : Int32
+  task : Int32
   role : Role
-  weight : Int
+  weight : Int32
 }
 
 ///|
 /// 构造一条贡献。
 pub fn contribution(
-  agent : Int,
-  task : Int,
+  agent : Int32,
+  task : Int32,
   role : Role,
-  weight : Int,
+  weight : Int32,
 ) -> Contribution {
   { agent, task, role, weight, }
 }
 
 ///|
 /// 每位参与者的贡献总额。
-pub fn totals(cs : Array[Contribution]) -> Array[(Int, Int)] {
-  let out : Array[(Int, Int)] = []
+pub fn totals(cs : Array[Contribution]) -> Array[(Int32, Int32)] {
+  let out : Array[(Int32, Int32)] = []
   for c in cs {
     let mut found = false
     for i = 0; i < out.length(); i = i + 1 {
@@ -69,7 +69,7 @@ pub fn totals(cs : Array[Contribution]) -> Array[(Int, Int)] {
 
 ///|
 /// 作者顺序：贡献总额降序，同分按 id 升序。
-pub fn author_order(cs : Array[Contribution]) -> Array[Int] {
+pub fn author_order(cs : Array[Contribution]) -> Array[Int32] {
   let t = totals(cs)
   t.sort_by((a, b) => {
     if a.1 == b.1 {
@@ -83,7 +83,7 @@ pub fn author_order(cs : Array[Contribution]) -> Array[Int] {
 
 ///|
 /// 某任务应归功于谁（按该任务上的权重降序）——IP 溯源。
-pub fn credit_of_task(cs : Array[Contribution], task : Int) -> Array[Int] {
+pub fn credit_of_task(cs : Array[Contribution], task : Int32) -> Array[Int32] {
   let mine : Array[Contribution] = []
   for c in cs {
     if c.task == task {
@@ -104,7 +104,7 @@ pub fn render_statement(cs : Array[Contribution]) -> String {
   }
   lines.push("")
   lines.push("分任务溯源：")
-  let seen : Array[Int] = []
+  let seen : Array[Int32] = []
   for c in cs {
     if !seen.contains(c.task) {
       seen.push(c.task)

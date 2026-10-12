@@ -40,7 +40,7 @@ fn any_wounded(members : Array[@multi.Subject]) -> Bool {
 
 ///|
 /// 两两体制相左的对数（只有都进入商谈的体制才计入，内在秩序者不算）。
-pub fn clashing_pairs(members : Array[@multi.Subject]) -> Int {
+pub fn clashing_pairs(members : Array[@multi.Subject]) -> Int32 {
   let n = members.length()
   let mut clash = 0
   for i = 0; i < n; i = i + 1 {

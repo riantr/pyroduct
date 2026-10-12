@@ -4,10 +4,10 @@
 ///|
 /// 场景演示用的成员构造（借 multi 层）。
 fn person(
-  id : Int,
+  id : Int32,
   regime : @multi.TruthRegime,
-  other : Int,
-  inward : Int,
+  other : Int32,
+  inward : Int32,
   state : @sm.SubjectState,
 ) -> @multi.Subject {
   @multi.subject(id, state, regime, other, inward, 9)

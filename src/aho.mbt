@@ -27,10 +27,10 @@
 ///|
 /// 自动机：每节点的子边 / 失败链 / 终点句表 / 深度 / 根到节点的路径 / 词典。
 pub(all) struct AhoAutomaton {
-  children : Array[Map[Char, Int]]
-  fail : Array[Int]
-  output : Array[Array[Int]]
-  depth : Array[Int]
+  children : Array[Map[Char, Int32]]
+  fail : Array[Int32]
+  output : Array[Array[Int32]]
+  depth : Array[Int32]
   path : Array[String]
   words : Array[String]
 }
@@ -38,9 +38,9 @@ pub(all) struct AhoAutomaton {
 ///|
 /// 词典阶段 + 自动机阶段：插入全部句子，广度优先补失败链与输出合并。
 pub fn aho_build(words : Array[String]) -> AhoAutomaton {
-  let children : Array[Map[Char, Int]] = [Map([])]
-  let output : Array[Array[Int]] = [[]]
-  let depth : Array[Int] = [0]
+  let children : Array[Map[Char, Int32]] = [Map([])]
+  let output : Array[Array[Int32]] = [[]]
+  let depth : Array[Int32] = [0]
   let path : Array[String] = [""]
   // 词典：逐句插入前缀树（冗余前缀只存一份）
   for wi = 0; wi < words.length(); wi = wi + 1 {
@@ -62,8 +62,8 @@ pub fn aho_build(words : Array[String]) -> AhoAutomaton {
     output[node].push(wi)
   }
   // 自动机：广度优先补失败链；输出沿失败链合并（失败链更浅，BFS 序保证完备）
-  let fail : Array[Int] = Array::make(children.length(), 0)
-  let queue : Array[Int] = []
+  let fail : Array[Int32] = Array::make(children.length(), 0)
+  let queue : Array[Int32] = []
   for entry in children[0] {
     let (ch, v) = entry
     let _ = ch
@@ -98,8 +98,8 @@ pub fn aho_build(words : Array[String]) -> AhoAutomaton {
 pub fn AhoAutomaton::scan(
   self : AhoAutomaton,
   text : String,
-) -> Array[(Int, Int)] {
-  let out : Array[(Int, Int)] = []
+) -> Array[(Int32, Int32)] {
+  let out : Array[(Int32, Int32)] = []
   let mut node = 0
   for entry in text.iter2() {
     let (i, ch) = entry
@@ -121,14 +121,14 @@ pub fn AhoAutomaton::scan(
 /// 自动机的统计：节点 / 边 / 最长句 / 非平凡失败链 / 最深失败链（最长的
 /// 共享已往）与最深分叉（最长的共享前缀）。
 pub(all) struct AhoStats {
-  nodes : Int
-  links : Int
-  longest_word : Int
-  fail_links : Int
-  deepest_fail : Int
+  nodes : Int32
+  links : Int32
+  longest_word : Int32
+  fail_links : Int32
+  deepest_fail : Int32
   deepest_fail_path : String
   deepest_fail_target : String
-  deepest_branch : Int
+  deepest_branch : Int32
   deepest_branch_path : String
 }
 

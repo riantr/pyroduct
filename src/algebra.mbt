@@ -28,9 +28,9 @@
 ///|
 /// 分区细化的共用核（Ragel 的最小化）：返回（块数, >1 成员的等价类列表，
 /// 按码点序）。
-fn refine() -> (Int, Array[String]) {
+fn refine() -> (Int32, Array[String]) {
   let states = all_states()
-  let mut block : Map[String, Int] = Map([])
+  let mut block : Map[String, Int32] = Map([])
   for s in states {
     block[s.designation()] = 0
   }
@@ -39,7 +39,7 @@ fn refine() -> (Int, Array[String]) {
   while !stable {
     // 每个位置的未来轮廓：出边集（触发 → 目标块），照 all_triggers 典范序
     let keys : Map[String, String] = Map([]) // 轮廓 -> 代表位置
-    let newid : Map[String, Int] = Map([]) // 位置 -> 新块号
+    let newid : Map[String, Int32] = Map([]) // 位置 -> 新块号
     let mut next = 0
     for s in states {
       let tgts : Map[String, String] = Map([])
@@ -74,7 +74,7 @@ fn refine() -> (Int, Array[String]) {
       block = newid
     }
   }
-  let groups : Map[Int, Array[String]] = Map([])
+  let groups : Map[Int32, Array[String]] = Map([])
   for s in states {
     match block.get(s.designation()) {
       Some(b) => {
@@ -124,7 +124,7 @@ pub fn is_minimal() -> Bool {
 /// 本机为（31, 三对孪生）：31 恰是 `course()` 的长度——主线就是最小商
 /// （差一步：退化起点对不在主线上；疏离并入紧迫、畏怖并入受赏，各与其
 /// 主线孪兄同块）。
-pub fn minimal_quotient() -> (Int, Array[String]) {
+pub fn minimal_quotient() -> (Int32, Array[String]) {
   refine()
 }
 

@@ -1,0 +1,74 @@
+// Model Fact Registry Evolution — Current vs Target State
+// Generated: 2026-10-11
+
+// model-version: 0.1.30
+digraph EvolutionV2 {
+  rankdir=LR;
+  fontname="Arial";
+  node [fontname="Arial", style=filled, fillcolor="#E3F2FD", shape=box];
+  edge [fontname="Arial"];
+  
+  subgraph cluster_current {
+    label="Current State (After First Evolution)";
+    style=dashed;
+    color="#90A4AE";
+    fontname="Arial";
+    
+    node [fillcolor="#FFEB3B"];
+    
+    current_source [label="Source Code\n(enums, transitions)\n34 states, 53 trans, 11 phases\n..."];
+    current_plugin [label="Plugin\nvalidate-plugin.mjs\n28 checks\n(face count, test count)"];
+    current_deps [label="Dependencies\nvalidate_dependencies.py\n(43 edges checked)"];
+    current_readme [label="README files\n(hardcoded numbers)\n34, 53, 11, 20, 44, 9...\nNO CHECK"];
+    current_desc [label="Plugin descriptions\n(hardcoded numbers)\n34 位置, 53 迁移...\nPARTIAL CHECK"];
+    current_diagrams [label="Architecture diagrams\n(NO version pin)\nNO CHECK"];
+    
+    current_source -> current_plugin [label="test count\n(1 check)", style=dashed];
+    current_source -> current_deps [label="imports\n(43 edges)", style=dashed];
+    current_source -> current_readme [label="facts drift\nundetected", style=dotted, color=red];
+    current_source -> current_desc [label="facts drift\npartially caught", style=dotted, color=orange];
+    current_source -> current_diagrams [label="version drift\nundetected", style=dotted, color=red];
+  }
+  
+  subgraph cluster_target {
+    label="Target State (After Second Evolution)";
+    style=dashed;
+    color="#4CAF50";
+    fontname="Arial";
+    
+    node [fillcolor="#C8E6C9"];
+    
+    target_source [label="Source Code\n(enums, transitions)\n34 states, 53 trans, 11 phases\n..."];
+    target_extractor [label="extract_model_facts.py\nNEW\n15 facts extracted\n(states, trans, phases...)"];
+    target_readme_check [label="validate_readme_facts.py\nNEW\nchecks README files\nagainst extractor"];
+    target_plugin_check [label="validate-plugin.mjs\nEXTENDED\nchecks descriptions\nagainst extractor"];
+    target_version_check [label="validate_version_pins.py\nNEW\nchecks DOT pins\nagainst moon.mod"];
+    target_readme [label="README files\n(checked by CI)\nDRIFT CAUGHT"];
+    target_desc [label="Plugin descriptions\n(checked by CI)\nDRIFT CAUGHT"];
+    target_diagrams [label="Architecture diagrams\n// model-version: 0.1.30\nVERSION PINNED"];
+    
+    target_source -> target_extractor [label="parse\n(15 facts)", style=bold];
+    target_extractor -> target_readme_check [label="JSON\nfacts", style=bold];
+    target_extractor -> target_plugin_check [label="hardcoded\nfacts", style=bold];
+    target_readme_check -> target_readme [label="CI check\nexits 1 on drift", style=bold];
+    target_plugin_check -> target_desc [label="CI check\nexits 1 on drift", style=bold];
+    target_version_check -> target_diagrams [label="CI check\nexits 1 on drift", style=bold];
+  }
+  
+  // Evolution arrows
+  current_readme -> target_readme [label="Slice 2\nREADME check", style=bold, color="#2196F3"];
+  current_desc -> target_desc [label="Slice 3\ndescription check", style=bold, color="#2196F3"];
+  current_diagrams -> target_diagrams [label="Slice 4\nversion pins", style=bold, color="#2196F3"];
+  current_source -> target_extractor [label="Slice 1\nextractor", style=bold, color="#2196F3"];
+  
+  // Legend
+  subgraph cluster_legend {
+    label="Legend";
+    style=solid;
+    color="#607D8B";
+    fontname="Arial";
+    node [shape=plaintext, fillcolor=white];
+    
+    legend_new [label="NEW = New artifact\nEXTENDED = Extended artifact\nCI check = Enforced by CI"];
+  }
+}

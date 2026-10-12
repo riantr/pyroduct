@@ -192,8 +192,8 @@ pub fn in_phase(claim : ValidityClaim) -> Bool {
 /// 意向—行为契合；并把这种「诚」与哈贝马斯的「真诚性」相会通，以开出「诚然的
 /// 诠释学」而别于西方文化的「澄然的诠释学」（第五章余论，P.55）。
 pub struct Cheng {
-  toward_other : Int // 他之诚，0..100
-  toward_self : Int // 己之诚，0..100
+  toward_other : Int32 // 他之诚，0..100
+  toward_self : Int32 // 己之诚，0..100
 }
 
 ///|

@@ -156,6 +156,9 @@ jobs:
           moon test --target native tools/ifacescan
           moon build --target js
           moon build --target wasm
+          python tools/validate_dependencies.py
+          python tools/validate_readme_facts.py
+          node plugin/tools/validate-plugin.mjs
 
       - name: Publish to Mooncakes
         run: |

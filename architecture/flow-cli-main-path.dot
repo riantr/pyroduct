@@ -1,0 +1,96 @@
+// CLI Request Processing - Main Path (Simplified)
+// Skill: flow-visualizer + graphviz
+// Date: 2026-10-11
+// Focus: From command line to output
+
+// model-version: 0.1.30
+digraph cli_main_path {
+    rankdir=TB;
+    node [shape=box, style=filled, fontname="Arial", fontsize=10];
+    edge [fontname="Arial", fontsize=9, penwidth=2];
+
+    // === Main Path ===
+    start [label="moon run cmd/main -- <subcommand>", fillcolor="#64B5F6", penwidth=3];
+
+    args [label="@env.args()\n获取命令行参数", fillcolor="#FFE0B2"];
+
+    format [label="format = args[1] || \"report\"\n提取子命令（默认 report）", fillcolor="#FFE0B2"];
+
+    route {label="match format\n路由到对应渲染函数", fillcolor="#E1BEE7", shape=diamond};
+
+    // Subcommand categories
+    subject [label="主体机 (11个)\nreport, mermaid, dot, genesis, course,\nnaming, slots, loop, principle,\nnested-mermaid, spec", fillcolor="#BBDEFB"];
+
+    faces [label="分析面 (5个)\npathsum, algebra, petri, aho, buchi", fillcolor="#FFE0B2"];
+
+    multi_agent [label="多主体 (5个)\nmulti, group, group-mermaid,\nsociety, society-mermaid", fillcolor="#E1BEE7"];
+
+    evolution_cmd [label="演化层 (4个)\nevolution, cycle, intuition, association", fillcolor="#C8E6C9"];
+
+    ml_cmd [label="ML/因果 (4个)\nml, ml-export, dmlref, causal", fillcolor="#FFF59D"];
+
+    audit_cmd [label="审计 (4个)\naudit, fleet, mutants, mbti", fillcolor="#FFCDD2"];
+
+    other_cmd [label="其他 (3个)\ncoordinator, journey, viz", fillcolor="#B2DFDB"];
+
+    all_cmd [label="all\n组合报告:\nreport + course + genesis + mermaid", fillcolor="#E1BEE7"];
+
+    default_cmd [label="_ (默认)\n未知子命令 → report", fillcolor="#EF9A9A"];
+
+    render [label="调用渲染函数\n@pkg.render_xxx()\n返回 String", fillcolor="#FFE0B2"];
+
+    output [label="println(result)\n输出到 stdout", fillcolor="#64B5F6", penwidth=3];
+
+    // === Main Flow ===
+    start -> args [color="#1565C0"];
+    args -> format [color="#E65100"];
+    format -> route [color="#E65100"];
+
+    route -> subject [label="主体机子命令", color="#1565C0"];
+    route -> faces [label="分析面子命令", color="#E65100"];
+    route -> multi_agent [label="多主体子命令", color="#6A1B9A"];
+    route -> evolution_cmd [label="演化层子命令", color="#2E7D32"];
+    route -> ml_cmd [label="ML/因果子命令", color="#F57F17"];
+    route -> audit_cmd [label="审计子命令", color="#C62828"];
+    route -> other_cmd [label="其他子命令", color="#00695C"];
+    route -> all_cmd [label="\"all\"", color="#6A1B9A"];
+    route -> default_cmd [label="其他", color="#C62828"];
+
+    subject -> render [color="#1565C0"];
+    faces -> render [color="#E65100"];
+    multi_agent -> render [color="#6A1B9A"];
+    evolution_cmd -> render [color="#2E7D32"];
+    ml_cmd -> render [color="#F57F17"];
+    audit_cmd -> render [color="#C62828"];
+    other_cmd -> render [color="#00695C"];
+    all_cmd -> render [color="#6A1B9A"];
+    default_cmd -> render [color="#C62828"];
+
+    render -> output [color="#1565C0"];
+
+    // === Statistics ===
+    subgraph cluster_stats {
+        label="统计 (Statistics)";
+        style=filled;
+        color="#FAFAFA";
+        fontcolor="#666666";
+
+        stats [label="总计: 36 个命名子命令\n+ 1 个默认分支\n= 37 个路由分支\n\n主体机: 11\n分析面: 5\n多主体: 5\n演化层: 4\nML/因果: 4\n审计: 4\n其他: 3\n组合: 1", shape=note, fillcolor="#EEEEEE"];
+    }
+
+    // === Key Characteristics ===
+    subgraph cluster_chars {
+        label="关键特征 (Key Characteristics)";
+        style=filled;
+        color="#E8F5E9";
+        fontcolor="#2E7D32";
+
+        char1 [label="纯路由\n无业务逻辑\n只做参数解析和函数调用", shape=note, fillcolor="#C8E6C9"];
+
+        char2 [label="单参数\n只取 args[1]\n忽略后续参数", shape=note, fillcolor="#C8E6C9"];
+
+        char3 [label="同步输出\nprintln 直接打印\n无异步/流式", shape=note, fillcolor="#C8E6C9"];
+
+        char4 [label="无状态\n每次运行独立\n无持久化", shape=note, fillcolor="#C8E6C9"];
+    }
+}

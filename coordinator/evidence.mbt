@@ -29,12 +29,12 @@ pub fn Warrant::label(self : Warrant) -> String {
 /// 证据绑定。
 pub struct Binding {
   claim_text : String
-  dataset : Int
+  dataset : Int32
   digest : String
-  effect : Int // 千分位
-  ci_low : Int
-  ci_high : Int
-  replicas : Int
+  effect : Int32 // 千分位
+  ci_low : Int32
+  ci_high : Int32
+  replicas : Int32
   warrant : Warrant
 }
 
@@ -133,9 +133,9 @@ fn measure(
   parent : @evolution.Genome,
   candidate : @evolution.Genome,
   world : Array[@evolution.Opponent],
-  rows : Int,
+  rows : Int32,
   seed : UInt64,
-) -> (Int, Int, Int) {
+) -> (Int32, Int32, Int32) {
   let data = @evolution.make_episodes(parent, candidate, world, rows, seed)
   let r = @ml.dml_plr(data.y, data.t, data.x, @ml.default_dml_config())
   (
@@ -148,7 +148,7 @@ fn measure(
 ///|
 /// 把一次复现记成一条 `Replication`（供台账与报告）。
 pub fn replication_of(
-  result_id : Int,
+  result_id : Int32,
   ds : Dataset,
   b : Binding,
   agrees : Bool,

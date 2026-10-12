@@ -1,0 +1,187 @@
+// Coordinator Runtime Flow
+// Skill: flow-visualizer + graphviz
+// Date: 2026-10-11
+// Trigger: runtime.step(tasks, questions, agents, datasets, world, parent, candidate)
+// Outcome: StepReport (task, agent, discourse, verdict, result, finding)
+
+// model-version: 0.1.30
+digraph coordinator_runtime_flow {
+    rankdir=TB;
+    node [shape=box, style=filled, fontname="Arial", fontsize=10];
+    edge [fontname="Arial", fontsize=9];
+
+    // === Entry Point ===
+    subgraph cluster_entry {
+        label="入口 (Entry)";
+        style=filled;
+        color="#E3F2FD";
+        fontcolor="#1565C0";
+
+        entry [label="runtime.step(tasks, questions, agents, datasets,\nworld, parent, candidate)\n运行时状态: clock, log, done, notebook, results, artifacts", fillcolor="#90CAF9", penwidth=3];
+    }
+
+    // === Step Execution ===
+    subgraph cluster_step {
+        label="单步执行 (Step Execution)";
+        style=filled;
+        color="#FFF3E0";
+        fontcolor="#E65100";
+
+        // Step 1: Find Ready Task
+        ready [label="1. 找就绪任务\nready(tasks, done)\n过滤: 未完成 && deps 都已完成\n返回: Array[task_id]", fillcolor="#FFE0B2"];
+
+        check_ready {label="有就绪任务?", fillcolor="#FFCC80", shape=diamond};
+
+        return_none [label="返回 None\n无就绪任务或无人可派", fillcolor="#EF9A9A"];
+
+        // Step 2: Assign Worker
+        assign [label="2. 指派工人\nassign(question, agents)\n按商谈类型挑适配度最高:\n理论→reason; 实践/表达→cheng\n预算 > 0", fillcolor="#FFE0B2"];
+
+        check_assign {label="有人可派?", fillcolor="#FFCC80", shape=diamond};
+
+        // Step 3: Determine Claim
+        claim [label="3. 确定主张类型\n商谈类型 → ClaimKind:\n理论→真实性; 实践→正当性\n表达→己之诚; 信仰→他之诚", fillcolor="#FFE0B2"];
+
+        // Step 4: Route by Discourse
+        route {label="4. 路由\n商谈类型?", fillcolor="#FFCC80", shape=diamond};
+
+        // Theoretical: Run Experiment
+        experiment [label="5a. 理论商谈: 跑实验\nexperiment(claim, dataset, parent, candidate, world)\n→ Binding(effect, ci_low, ci_high, digest)\n真跑 DoubleML", fillcolor="#CE93D8"];
+
+        replicate [label="5b. 复现\nreplicate(binding, dataset, parent, candidate, world)\n→ Binding(replicas, ...)\n在不同种子上重跑", fillcolor="#CE93D8"];
+
+        // Other: Stop at Deliberation
+        dialogue [label="5c. 实践/表达/信仰商谈\n停在商谈段\nbinding = None\n仅对话", fillcolor="#CE93D8"];
+
+        // Step 5: Determine Verdict
+        verdict [label="6. 判定\n有 binding → evidence_verdict(binding)\n支持/反驳/不确定/复现成立\n无 binding → \"仅对话\"", fillcolor="#FFE0B2"];
+
+        // Step 6: Produce Result
+        result [label="7. 产出结果\nResult {\n  id, task, question, claim, phase,\n  summary, dataset, effect, ci_low, ci_high, replicas\n}\nresults.push(result)", fillcolor="#FFE0B2"];
+
+        // Step 7: Produce Finding
+        finding [label="8. 产出发现\nFinding {\n  id, question, text, claim, phase,\n  result, residual, status, author, at\n}\nnotebook.add(finding)", fillcolor="#FFE0B2"];
+
+        // Step 8: Produce Artifact
+        artifact [label="9. 产出制品\nArtifact {\n  id, kind: Note,\n  name: \"任务N的结论\",\n  task, digest: result_id\n}\nartifacts.push(artifact)", fillcolor="#FFE0B2"];
+
+        // Step 9: Log Message
+        log [label="10. 记录消息\nMessage {\n  at, from: agent, to: -1(广播),\n  discourse, claim, body: summary\n}\nlog.push(message)", fillcolor="#FFE0B2"];
+
+        // Step 10: Mark Done
+        done [label="11. 标记完成\ndone.push(task_id)\nclock += 1", fillcolor="#FFE0B2"];
+
+        // Step 11: Return Report
+        report [label="12. 返回报告\nStepReport {\n  at, task, agent, discourse,\n  verdict, result, finding\n}", fillcolor="#A5D6A7", penwidth=3];
+    }
+
+    // === Routing Details ===
+    subgraph cluster_routing {
+        label="路由详情 (Routing Details)";
+        style=filled;
+        color="#F3E5F5";
+        fontcolor="#6A1B9A";
+
+        theoretical [label="理论商谈 (Theoretical)\n主张: 真实性 (Truthfulness)\n路径: 跑 DoubleML + 复现\n证据: 效应与 95% 区间", fillcolor="#E1BEE7"];
+
+        practical [label="实践商谈 (Practical)\n主张: 正当性 (Legitimacy)\n路径: 停在商谈段\n证据: 仅对话", fillcolor="#E1BEE7"];
+
+        aesthetic [label="表达性商谈 (Aesthetic)\n主张: 己之诚 (Sincerity)\n路径: 停在商谈段\n证据: 仅对话", fillcolor="#E1BEE7"];
+
+        faith [label="信仰商谈 (Faith)\n主张: 他之诚 (Authenticity)\n路径: 停在商谈段\n证据: 仅对话", fillcolor="#E1BEE7"];
+    }
+
+    // === Evidence Verdict ===
+    subgraph cluster_verdict {
+        label="证据判词 (Evidence Verdict)";
+        style=filled;
+        color="#E8F5E9";
+        fontcolor="#2E7D32";
+
+        v_replicated [label="Replicated\n复现成立\nreplicas ≥ 2 且 ci_low > 0", fillcolor="#C8E6C9"];
+
+        v_supported [label="Supported\n支持\nci_low > 0", fillcolor="#C8E6C9"];
+
+        v_refuted [label="Refuted\n反驳\nci_high < 0", fillcolor="#EF9A9A"];
+
+        v_inconclusive [label="Inconclusive\n不确定\n区间含 0", fillcolor="#FFCC80"];
+    }
+
+    // === Checkpoint Mechanism ===
+    subgraph cluster_checkpoint {
+        label="落盘机制 (Checkpoint Mechanism)";
+        style=filled;
+        color="#E3F2FD";
+        fontcolor="#1565C0";
+
+        checkpoint [label="checkpoint()\nRuntime → String\n序列化: clock, done, log, results, artifacts, notebook", fillcolor="#90CAF9"];
+
+        restore [label="restore(text)\nString → Runtime\n反序列化: 逐行解析 tag\tfields", fillcolor="#90CAF9"];
+
+        roundtrip [label="round_trips()\ncheckpoint() → restore() → checkpoint()\n往返一致: 文本相同 + 状态相同", fillcolor="#90CAF9"];
+    }
+
+    // === Edges (Flow) ===
+    // Entry to step
+    entry -> ready [color="#1565C0", penwidth=2];
+
+    // Step flow
+    ready -> check_ready [color="#E65100", penwidth=2];
+
+    check_ready -> return_none [label="否\n|ready| == 0", color="#C62828", penwidth=2];
+    check_ready -> assign [label="是\n取 ready[0]", color="#2E7D32", penwidth=2];
+
+    assign -> check_assign [color="#E65100", penwidth=2];
+
+    check_assign -> return_none [label="否\n无人可派", color="#C62828", penwidth=2];
+    check_assign -> claim [label="是\n取最佳工人", color="#2E7D32", penwidth=2];
+
+    claim -> route [color="#E65100", penwidth=2];
+
+    route -> experiment [label="理论商谈", color="#6A1B9A", penwidth=2];
+    route -> dialogue [label="其他商谈", color="#2E7D32", penwidth=2];
+
+    experiment -> replicate [color="#6A1B9A", penwidth=2];
+    replicate -> verdict [color="#6A1B9A", penwidth=2];
+    dialogue -> verdict [color="#2E7D32", penwidth=2];
+
+    verdict -> result [color="#E65100", penwidth=2];
+    result -> finding [color="#E65100", penwidth=2];
+    finding -> artifact [color="#E65100", penwidth=2];
+    artifact -> log [color="#E65100", penwidth=2];
+    log -> done [color="#E65100", penwidth=2];
+    done -> report [color="#1565C0", penwidth=2];
+
+    // Routing details
+    experiment -> theoretical [style=dashed, color="#6A1B9A"];
+    dialogue -> practical [style=dashed, color="#2E7D32"];
+    dialogue -> aesthetic [style=dashed, color="#2E7D32"];
+    dialogue -> faith [style=dashed, color="#2E7D32"];
+
+    // Verdict details
+    verdict -> v_replicated [style=dashed, color="#2E7D32"];
+    verdict -> v_supported [style=dashed, color="#2E7D32"];
+    verdict -> v_refuted [style=dashed, color="#C62828"];
+    verdict -> v_inconclusive [style=dashed, color="#E65100"];
+
+    // Checkpoint
+    report -> checkpoint [style=dashed, color="#1565C0", label="可落盘"];
+    checkpoint -> restore [style=dashed, color="#1565C0", label="序列化"];
+    restore -> roundtrip [style=dashed, color="#1565C0", label="反序列化"];
+
+    // === Legend ===
+    subgraph cluster_legend {
+        label="图例";
+        style=filled;
+        color="#FAFAFA";
+
+        legend_entry [label="入口/出口", fillcolor="#90CAF9", shape=box];
+        legend_step [label="执行步骤", fillcolor="#FFE0B2", shape=box];
+        legend_decision [label="判定", fillcolor="#FFCC80", shape=diamond];
+        legend_route [label="路由分支", fillcolor="#CE93D8", shape=box];
+        legend_routing [label="路由详情", fillcolor="#E1BEE7", shape=box];
+        legend_verdict [label="证据判词", fillcolor="#C8E6C9", shape=box];
+        legend_checkpoint [label="落盘机制", fillcolor="#90CAF9", shape=box];
+        legend_none [label="无操作", fillcolor="#EF9A9A", shape=box];
+    }
+}

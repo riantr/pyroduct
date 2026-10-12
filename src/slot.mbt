@@ -225,8 +225,8 @@ pub fn Trigger::slot(self : Trigger) -> Slot {
 
 ///|
 /// 每个槽收到多少触发（表内实际出现者）。
-pub fn slot_tally() -> Array[(Slot, Int)] {
-  let out : Array[(Slot, Int)] = []
+pub fn slot_tally() -> Array[(Slot, Int32)] {
+  let out : Array[(Slot, Int32)] = []
   for s in all_slots() {
     let mut n = 0
     for t in all_triggers() {

@@ -1,0 +1,130 @@
+// Subject State Machine Execution Flow
+// Skill: flow-visualizer + graphviz
+// Date: 2026-10-11
+// Trigger: step(position, slot) or step_by_trigger(position, trigger)
+// Outcome: Moved / Held / Open / Same / Block
+
+// model-version: 0.1.30
+digraph subject_execution_flow {
+    rankdir=TB;
+    node [shape=box, style=filled, fontname="Arial", fontsize=10];
+    edge [fontname="Arial", fontsize=9];
+
+    // === Entry Points ===
+    subgraph cluster_entry {
+        label="入口 (Entry Points)";
+        style=filled;
+        color="#E3F2FD";
+        fontcolor="#1565C0";
+
+        entry_slot [label="step(state, slot)\n槽粒度执行", fillcolor="#90CAF9", shape=box];
+        entry_trigger [label="step_by_trigger(state, trigger)\n触发粒度执行", fillcolor="#90CAF9", shape=box];
+    }
+
+    // === Core Execution ===
+    subgraph cluster_core {
+        label="核心执行 (Core Execution)";
+        style=filled;
+        color="#FFF3E0";
+        fontcolor="#E65100";
+
+        candidates [label="candidates(state, slot)\n收集候选边\n从 transitions() 过滤\nfrom==state && trigger.slot()==slot", fillcolor="#FFE0B2"];
+
+        count_check {label="候选数?\n|candidates|", fillcolor="#FFCC80", shape=diamond};
+
+        zero_block [label="Block(msg)\n无路：此槽在此位置无出边\n不许编造下一步", fillcolor="#EF9A9A"];
+
+        single_check {label="目标数?\n|targets|", fillcolor="#FFCC80", shape=diamond};
+
+        self_loop_check {label="目标==当前?\nto == state", fillcolor="#FFCC80", shape=diamond};
+
+        moved [label="Moved(trigger, to)\n迁：唯一出路\n由该触发迁到该位置", fillcolor="#A5D6A7"];
+
+        held [label="Held(trigger, state)\n守：出路回到自身\n17条自环之一", fillcolor="#A5D6A7"];
+
+        same [label="Same(slot, triggers[], to)\n同归：多条触发归到同一目标\n去处确定，来处不名", fillcolor="#CE93D8"];
+
+        open [label="Open(candidates[])\n未定：多条去处并存\n不替主体决断", fillcolor="#CE93D8"];
+    }
+
+    // === Outcome Usage ===
+    subgraph cluster_usage {
+        label="回执使用 (Outcome Usage)";
+        style=filled;
+        color="#E8F5E9";
+        fontcolor="#2E7D32";
+
+        landing [label="Outcome::landing()\n读回落点\nMoved/Held/Same → Some(state)\nOpen/Block → None", fillcolor="#C8E6C9"];
+
+        forks [label="Outcome::forks_from(at)\n展开为确定走法\nOpen → 每条候选\nSame → 每条触发\nBlock → 空", fillcolor="#C8E6C9"];
+
+        walk [label="walk(start, slots[])\n按槽序列走一段\n遇 Open 停在原处\n返回 Trace", fillcolor="#C8E6C9"];
+
+        expand [label="expand(start, slots[], limit)\n展开所有可能\n遇 Open 按候选分叉\n返回 Expansion", fillcolor="#C8E6C9"];
+    }
+
+    // === Data Sources ===
+    subgraph cluster_data {
+        label="数据源 (Data Sources)";
+        style=filled;
+        color="#F3E5F5";
+        fontcolor="#6A1B9A";
+
+        transitions [label="transitions()\n迁移表\n53条边\nfrom --trigger--> to", fillcolor="#E1BEE7", shape=cylinder];
+
+        trigger_slot [label="Trigger::slot()\n触发→槽映射\n49触发→8槽\n穷尽匹配", fillcolor="#E1BEE7"];
+    }
+
+    // === Edges (Flow) ===
+    // Entry to core
+    entry_slot -> candidates [label="调用", color="#1565C0", penwidth=2];
+    entry_trigger -> candidates [label="过滤后调用", style=dashed, color="#1565C0"];
+
+    // Core execution flow
+    candidates -> count_check [label="返回候选列表", color="#E65100", penwidth=2];
+
+    count_check -> zero_block [label="|candidates| == 0", color="#C62828", penwidth=2];
+    count_check -> single_check [label="|candidates| >= 1", color="#2E7D32", penwidth=2];
+
+    single_check -> self_loop_check [label="|targets| == 1", color="#2E7D32", penwidth=2];
+    single_check -> same [label="|targets| == 1\n且 |candidates| > 1", color="#6A1B9A", penwidth=2];
+    single_check -> open [label="|targets| > 1", color="#6A1B9A", penwidth=2];
+
+    self_loop_check -> held [label="to == state\n(自环)", color="#2E7D32", penwidth=2];
+    self_loop_check -> moved [label="to != state", color="#2E7D32", penwidth=2];
+
+    // Outcome usage
+    moved -> landing [color="#2E7D32"];
+    held -> landing [color="#2E7D32"];
+    open -> landing [color="#2E7D32"];
+    same -> landing [color="#2E7D32"];
+    zero_block -> landing [color="#C62828"];
+
+    moved -> forks [style=dashed, color="#666666"];
+    held -> forks [style=dashed, color="#666666"];
+    open -> forks [label="分叉", color="#6A1B9A", penwidth=2];
+    same -> forks [label="逐条点名", color="#6A1B9A", penwidth=2];
+
+    walk -> candidates [label="每步调用", style=dashed, color="#1565C0"];
+    expand -> candidates [label="递归调用", style=dashed, color="#1565C0"];
+    expand -> forks [label="Open处分叉", color="#6A1B9A", penwidth=2];
+
+    // Data sources
+    transitions -> candidates [label="提供迁移数据", style=dashed, color="#6A1B9A"];
+    trigger_slot -> candidates [label="过滤条件", style=dashed, color="#6A1B9A"];
+
+    // === Legend ===
+    subgraph cluster_legend {
+        label="图例";
+        style=filled;
+        color="#FAFAFA";
+
+        legend_entry [label="入口", fillcolor="#90CAF9", shape=box];
+        legend_core [label="核心执行", fillcolor="#FFE0B2", shape=box];
+        legend_decision [label="判定", fillcolor="#FFCC80", shape=diamond];
+        legend_outcome [label="回执", fillcolor="#A5D6A7", shape=box];
+        legend_undecided [label="未定回执", fillcolor="#CE93D8", shape=box];
+        legend_block [label="缺口回执", fillcolor="#EF9A9A", shape=box];
+        legend_data [label="数据源", fillcolor="#E1BEE7", shape=cylinder];
+    }
+}

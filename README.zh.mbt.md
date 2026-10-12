@@ -133,9 +133,12 @@
 | CoBeing | 共在 | 3 | MeetOther, GoodFaith, OpenArms |
 | Unveil | 揭蔽 | 5 | AttributeSelf, FillEmptiness, CoolDown, DoubtOneself, ReopenByHorizon |
 
-### 执行契约（四种结果）
+### 执行契约（五种结果）
 
-迁 Moved · 守 Held · 未定 Undecided · 无路 No-way
+迁 Moved · 守 Held · 未定 Undecided · 同归 Same · 无路 No-way
+
+槽粒度下，多条触发句从同一位置通向同一目标时，机器回「同归」：去处已定，
+但**不点名是哪一句**——因为认不出来，所以不编。要知道是哪一句，用 `step_by_trigger`。
 
 ### 群体——阶段（9）
 
@@ -335,13 +338,31 @@ let restored = @coordinator.restore(rt.checkpoint())
 let same : Bool = restored.round_trips()
 ```
 
+## 门禁与漂移检测
+
+基线是 `moon check`、`moon fmt --check`、`moon test`（wasm 197 个测试），
+外加两个只跑 native 的包（`snnref`、`tools/ifacescan`）。其上还有三个检测器——
+因为**测试全绿并不说明写在文档里的那句话还对**：
+
+| 检测器 | 抓什么 |
+|---|---|
+| `python tools/validate_dependencies.py` | `architecture/*.dot` 里画了、代码里没有的依赖边；以及代码有、图里漏的边；顺带查每个 DOT 的 `model-version` 头是否与 `moon.mod` 一致 |
+| `python tools/validate_readme_facts.py` | 两份 README 里关于状态／迁移／阶段／触发／槽的数字，与源码表对不上 |
+| `node plugin/tools/validate-plugin.mjs` | 插件漂移：面数、测试数、模型事实、页码出处，与面向 agent 的描述对不上 |
+
+每一个都是因为某次具体漂移没被发现才写的——图里的一条假边、工具描述里一个过期的
+测试数。它们跑在 `gate.yml`（每次 push 与 PR），发版前在 `publish.yml` 再跑一遍。
+
 ## 被谁使用
 
-- `cmd/main` — 上面每一层的报告入口：`report` / `slots` / `multi` / `group` /
-  `society` / `evolution` / `cycle` / `coordinator`，外加 `mermaid` / `dot` /
-  `genesis` / `course` / `naming` / `principle` / `all`。
+- `cmd/main` — 上面每一层的报告入口：`report` / `slots` / `loop` / `multi` /
+  `group` / `society` / `evolution` / `cycle` / `coordinator`，
+  `dmlref` / `causal` / `audit` / `fleet` / `mutants` / `mbti`，外加
+  `mermaid` / `dot` / `genesis` / `course` / `naming` / `principle` / `intuition`，
+  五条分析面 `pathsum` / `algebra` / `petri` / `aho` / `buchi`，以及呈现层的 `all`。
 - `cmd/coord` — 一个 native 二进制，运行协调器并把其检查点经真实磁盘 I/O
   往返（`.openseek/`，gitignored）。
+- `cmd/jsoncli` — 两个 agent 插件 spawn 的 JSON 桥（31 个面）。
 
 ## 出处
 

@@ -1,0 +1,149 @@
+// Pyroduct Change Impact Analysis
+// Skill: dependency-impact-analyzer + graphviz
+// Date: 2026-10-11
+// Scenario: If src (主体机) changes, what is affected?
+
+// model-version: 0.1.30
+digraph pyroduct_impact_src {
+    rankdir=TB;
+    node [shape=box, style=filled, fontname="Arial", fontsize=10];
+    edge [fontname="Arial", fontsize=9];
+
+    // === Impact Levels ===
+    // Direct impact: immediate dependents
+    // Indirect impact: transitive dependents
+    // No impact: independent packages
+
+    // === Changed Node ===
+    src [label="src\n(主体机)\n⚠️ CHANGED", fillcolor="#EF5350", penwidth=3, color="#B71C1C"];
+
+    // === Direct Impact (Level 1) ===
+    subgraph cluster_direct {
+        label="直接影响 (Direct Impact) - Level 1";
+        style=filled;
+        color="#FFEBEE";
+        fontcolor="#C62828";
+
+        multi [label="multi\n(多主体规范)\n⚡ Direct", fillcolor="#EF9A9A"];
+        group [label="group\n(群体机)\n⚡ Direct", fillcolor="#EF9A9A"];
+        ml [label="ml\n(自研DoubleML)\n⚡ Direct", fillcolor="#EF9A9A"];
+        audit [label="audit\n(三鉴审计)\n⚡ Direct", fillcolor="#EF9A9A"];
+        snnref [label="snnref\n(脉冲沉淀)\n⚡ Direct", fillcolor="#EF9A9A"];
+        viz [label="viz\n(可视化)\n⚡ Direct", fillcolor="#EF9A9A"];
+        evolution [label="evolution\n(演化层)\n⚡ Direct", fillcolor="#EF9A9A"];
+    }
+
+    // === Indirect Impact (Level 2) ===
+    subgraph cluster_indirect {
+        label="间接影响 (Indirect Impact) - Level 2";
+        style=filled;
+        color="#FFF3E0";
+        fontcolor="#E65100";
+
+        coordinator [label="coordinator\n(协调器)\n🔄 Indirect", fillcolor="#FFCC80"];
+        dmlref [label="dmlref\n(外部交叉验证)\n🔄 Indirect", fillcolor="#FFCC80"];
+        causal [label="causal\n(因果诊断)\n🔄 Indirect", fillcolor="#FFCC80"];
+    }
+
+    // === Indirect Impact (Level 3) ===
+    subgraph cluster_indirect3 {
+        label="间接影响 (Indirect Impact) - Level 3";
+        style=filled;
+        color="#E8F5E9";
+        fontcolor="#2E7D32";
+
+        cmd_coord [label="cmd/coord\n(Native CLI)\n🔄 Indirect L3", fillcolor="#A5D6A7"];
+    }
+
+    // === CLI Entry Points (All Affected) ===
+    subgraph cluster_cli {
+        label="CLI 入口 (All Affected)";
+        style=filled;
+        color="#E3F2FD";
+        fontcolor="#1565C0";
+
+        cmd_main [label="cmd/main\n(WASM CLI)\n⚠️ All packages", fillcolor="#90CAF9"];
+        cmd_jsoncli [label="cmd/jsoncli\n(JSON桥接)\n⚠️ 8 packages", fillcolor="#90CAF9"];
+        cmd_ifacescan [label="cmd/ifacescan\n(Native CLI)\n🔄 Indirect L2", fillcolor="#BBDEFB"];
+    }
+
+    // === No Impact ===
+    subgraph cluster_noimpact {
+        label="无影响 (No Impact)";
+        style=filled;
+        color="#FAFAFA";
+        fontcolor="#999999";
+
+        society [label="society\n(社会机)\n✓ Independent", fillcolor="#E0E0E0"];
+        plugin [label="plugin/\n(MiniMax插件)\n🔄 Indirect L3", fillcolor="#EEEEEE", shape=component];
+    }
+
+    // === Edges (Impact Propagation) ===
+    // Level 1: Direct
+    src -> multi [label="import", color="#C62828", penwidth=3];
+    src -> group [label="import", color="#C62828", penwidth=3];
+    src -> ml [label="import", color="#C62828", penwidth=3];
+    src -> audit [label="import", color="#C62828", penwidth=3];
+    src -> snnref [label="import", color="#C62828", penwidth=3];
+    src -> viz [label="import", color="#C62828", penwidth=3];
+    src -> evolution [label="import", color="#C62828", penwidth=3];
+
+    // Level 2: Indirect
+    multi -> evolution [label="import", color="#E65100", penwidth=2];
+    group -> evolution [label="import", color="#E65100", penwidth=2];
+    ml -> evolution [label="import", color="#E65100", penwidth=2];
+
+    multi -> coordinator [label="import", color="#E65100", penwidth=2];
+    ml -> coordinator [label="import", color="#E65100", penwidth=2];
+    evolution -> coordinator [label="import", color="#E65100", penwidth=2];
+
+    ml -> dmlref [label="import", color="#E65100", penwidth=2];
+    ml -> causal [label="import", color="#E65100", penwidth=2];
+
+    group -> audit [label="import", color="#E65100", penwidth=2];
+    society -> audit [label="import", color="#E65100", penwidth=2];
+
+    group -> viz [label="import", color="#E65100", penwidth=2];
+    society -> viz [label="import", color="#E65100", penwidth=2];
+
+    // Level 3: Indirect
+    coordinator -> cmd_coord [label="import", color="#2E7D32", penwidth=2];
+
+    // CLI: All affected
+    cmd_main -> src [style=dashed, color="#1565C0"];
+    cmd_main -> multi [style=dashed, color="#1565C0"];
+    cmd_main -> group [style=dashed, color="#1565C0"];
+    cmd_main -> society [style=dashed, color="#1565C0"];
+    cmd_main -> evolution [style=dashed, color="#1565C0"];
+    cmd_main -> coordinator [style=dashed, color="#1565C0"];
+    cmd_main -> ml [style=dashed, color="#1565C0"];
+    cmd_main -> dmlref [style=dashed, color="#1565C0"];
+    cmd_main -> causal [style=dashed, color="#1565C0"];
+    cmd_main -> audit [style=dashed, color="#1565C0"];
+    cmd_main -> viz [style=dashed, color="#1565C0"];
+
+    cmd_jsoncli -> src [style=dashed, color="#1565C0"];
+    cmd_jsoncli -> multi [style=dashed, color="#1565C0"];
+    cmd_jsoncli -> group [style=dashed, color="#1565C0"];
+    cmd_jsoncli -> society [style=dashed, color="#1565C0"];
+    cmd_jsoncli -> evolution [style=dashed, color="#1565C0"];
+    cmd_jsoncli -> coordinator [style=dashed, color="#1565C0"];
+    cmd_jsoncli -> audit [style=dashed, color="#1565C0"];
+    cmd_jsoncli -> viz [style=dashed, color="#1565C0"];
+
+    cmd_ifacescan -> audit [style=dashed, color="#1565C0"];
+
+    plugin -> cmd_jsoncli [style=dashed, color="#F57F17"];
+
+    // === Legend ===
+    subgraph cluster_legend {
+        label="图例";
+        style=filled;
+        color="#FAFAFA";
+
+        legend_changed [label="⚠️ Changed", fillcolor="#EF5350", shape=box];
+        legend_direct [label="⚡ Direct Impact", fillcolor="#EF9A9A", shape=box];
+        legend_indirect [label="🔄 Indirect Impact", fillcolor="#FFCC80", shape=box];
+        legend_noimpact [label="✓ No Impact", fillcolor="#E0E0E0", shape=box];
+    }
+}

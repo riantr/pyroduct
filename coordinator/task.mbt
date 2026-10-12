@@ -9,7 +9,7 @@
 ///|
 /// 研究问题。
 pub struct Question {
-  id : Int
+  id : Int32
   text : String
   discourse : @multi.DiscourseType
 }
@@ -17,9 +17,9 @@ pub struct Question {
 ///|
 /// 数据集：外部证据的载体。行数与种子保证可复现，`digest` 把后续结果钉在**这一版**上。
 pub struct Dataset {
-  id : Int
+  id : Int32
   name : String
-  rows : Int
+  rows : Int32
   seed : UInt64
   digest : String
 }
@@ -52,27 +52,27 @@ pub fn ArtifactKind::label(self : ArtifactKind) -> String {
 ///|
 /// 产物：一次科研产出的构件。
 pub struct Artifact {
-  id : Int
+  id : Int32
   kind : ArtifactKind
   name : String
-  task : Int
+  task : Int32
   digest : String
 }
 
 ///|
 /// 结果：一条**可交付**的产出（不再是对话判词）。效应与区间以千分位整数存放。
 pub struct Result {
-  id : Int
-  task : Int
-  question : Int
+  id : Int32
+  task : Int32
+  question : Int32
   claim : @multi.ClaimKind
   phase : @multi.ClaimPhase
   summary : String
-  dataset : Int
-  effect : Int
-  ci_low : Int
-  ci_high : Int
-  replicas : Int
+  dataset : Int32
+  effect : Int32
+  ci_low : Int32
+  ci_high : Int32
+  replicas : Int32
 }
 
 ///|
@@ -86,12 +86,12 @@ pub struct Citation {
 ///|
 /// 复现：在**另一个**数据集（不同种子）上重跑同一结果。
 pub struct Replication {
-  id : Int
-  result : Int
-  dataset : Int
-  effect : Int
-  ci_low : Int
-  ci_high : Int
+  id : Int32
+  result : Int32
+  dataset : Int32
+  effect : Int32
+  ci_low : Int32
+  ci_high : Int32
   agrees : Bool
 }
 
@@ -99,19 +99,19 @@ pub struct Replication {
 /// 任务：问题的执行单元，带依赖、所需制品、预算与期限。
 /// 约定：`id` 即数组下标（`deps` 也按下标引用）。
 pub struct Task {
-  id : Int
-  question : Int
+  id : Int32
+  question : Int32
   title : String
-  deps : Array[Int]
-  needs : Array[Int]
-  budget : Int
-  deadline : Int
+  deps : Array[Int32]
+  needs : Array[Int32]
+  budget : Int32
+  deadline : Int32
 }
 
 ///|
 /// 构造一个问题。
 pub fn question(
-  id : Int,
+  id : Int32,
   text : String,
   discourse : @multi.DiscourseType,
 ) -> Question {
@@ -121,9 +121,9 @@ pub fn question(
 ///|
 /// 构造一个数据集。
 pub fn dataset(
-  id : Int,
+  id : Int32,
   name : String,
-  rows : Int,
+  rows : Int32,
   seed : UInt64,
   digest : String,
 ) -> Dataset {
@@ -133,13 +133,13 @@ pub fn dataset(
 ///|
 /// 构造一个任务。
 pub fn task(
-  id : Int,
-  question : Int,
+  id : Int32,
+  question : Int32,
   title : String,
-  deps : Array[Int],
-  needs : Array[Int],
-  budget : Int,
-  deadline : Int,
+  deps : Array[Int32],
+  needs : Array[Int32],
+  budget : Int32,
+  deadline : Int32,
 ) -> Task {
   { id, question, title, deps, needs, budget, deadline, }
 }
@@ -147,17 +147,17 @@ pub fn task(
 ///|
 /// 构造一条结果。
 pub fn result(
-  id : Int,
-  task : Int,
-  question : Int,
+  id : Int32,
+  task : Int32,
+  question : Int32,
   claim : @multi.ClaimKind,
   phase : @multi.ClaimPhase,
   summary : String,
-  dataset : Int,
-  effect : Int,
-  ci_low : Int,
-  ci_high : Int,
-  replicas : Int,
+  dataset : Int32,
+  effect : Int32,
+  ci_low : Int32,
+  ci_high : Int32,
+  replicas : Int32,
 ) -> Result {
   {
     id,

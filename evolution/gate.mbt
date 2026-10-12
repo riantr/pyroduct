@@ -75,7 +75,7 @@ pub fn Judgement::label(self : Judgement) -> String {
 /// 因果判据的计划：回合数 + DML 配置（`objective` 仅用于报表里的四分量对照）。
 pub struct CausalPlan {
   objective : Objective
-  episodes : Int
+  episodes : Int32
   config : @ml.DmlConfig
 }
 
@@ -92,9 +92,9 @@ pub struct Decision {
   verdict : Judgement
   reason : String
   fitness : Fitness
-  score : Int // 加权得分（始终计算，供报表对照）
-  effect : Int // θ̂ 的千分位；因果判据时用它做决定（否则 0）
-  effect_lo : Int // 95% 置信下界的千分位
+  score : Int32 // 加权得分（始终计算，供报表对照）
+  effect : Int32 // θ̂ 的千分位；因果判据时用它做决定（否则 0）
+  effect_lo : Int32 // 95% 置信下界的千分位
 }
 
 ///|
@@ -104,7 +104,7 @@ pub struct Decision {
 /// - `Causal`：估计「采纳该改动」的因果效应，只有 θ̂>0 且置信下界>0 才接收。
 pub fn judge(
   parent : Genome,
-  parent_score : Int,
+  parent_score : Int32,
   c : Candidate,
   world : Array[Opponent],
   criterion : Criterion,

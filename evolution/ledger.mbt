@@ -8,16 +8,16 @@
 ///|
 /// 一条记录：哪一代、第几个候选、父代是谁、改了哪里、判了什么、得分多少、基因组是什么。
 pub struct Trail {
-  generation : Int
-  step : Int
-  parent : Int? // 上一代最佳在账本中的下标；None = 种子
+  generation : Int32
+  step : Int32
+  parent : Int32? // 上一代最佳在账本中的下标；None = 种子
   locus : Locus
   what : String
   why : String // 裁决理由（接收／拒收／回滚）
   verdict : Judgement
-  score : Int
-  effect : Int // θ̂ 的千分位（因果判据时）
-  effect_lo : Int // 置信下界千分位
+  score : Int32
+  effect : Int32 // θ̂ 的千分位（因果判据时）
+  effect_lo : Int32 // 置信下界千分位
   fitness : Fitness
   genome : Genome
 }
@@ -32,7 +32,7 @@ pub struct Ledger {
 
 ///|
 /// 接收了多少条。
-pub fn Ledger::accepted_count(self : Ledger) -> Int {
+pub fn Ledger::accepted_count(self : Ledger) -> Int32 {
   let mut c = 0
   for t in self.trails {
     if t.verdict == Accepted {
@@ -44,7 +44,7 @@ pub fn Ledger::accepted_count(self : Ledger) -> Int {
 
 ///|
 /// 被宪法拒收了多少条（即：变异想改、宪法不许的改动）。
-pub fn Ledger::rejected_count(self : Ledger) -> Int {
+pub fn Ledger::rejected_count(self : Ledger) -> Int32 {
   let mut c = 0
   for t in self.trails {
     if t.verdict == RejectedConstitutional {
@@ -206,15 +206,15 @@ pub fn Genome::decode(text : String) -> Genome {
 }
 
 ///|
-fn int_of(c : StringView) -> Int {
+fn int_of(c : StringView) -> Int32 {
   @string.from_str(c.to_owned()) catch {
     _ => 0
   }
 }
 
 ///|
-fn ints_of(c : StringView) -> Array[Int] {
-  let out : Array[Int] = []
+fn ints_of(c : StringView) -> Array[Int32] {
+  let out : Array[Int32] = []
   for x in c.split(",") {
     out.push(int_of(x))
   }

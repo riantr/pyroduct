@@ -12,8 +12,8 @@
 /// （`response` 同样入此备忘录），键才决定一切；不跨循环、不跨运行共享，
 /// 也没有全局可变状态（`evolve`／`breed` 的逐候选裁决不经过它）。
 priv struct DecisionMemo {
-  judgements : Array[(Genome, Genome, Int, Decision)] // 父代、候选、首裁回合、判词
-  responses : Array[(Genome, Int, Fitness)] // 基因组、首评回合、世界回应
+  judgements : Array[(Genome, Genome, Int32, Decision)] // 父代、候选、首裁回合、判词
+  responses : Array[(Genome, Int32, Fitness)] // 基因组、首评回合、世界回应
 }
 
 ///|
@@ -26,7 +26,7 @@ fn DecisionMemo::new() -> DecisionMemo {
 fn DecisionMemo::response(
   self : DecisionMemo,
   g : Genome,
-  round : Int,
+  round : Int32,
   compute : () -> Fitness,
 ) -> Fitness {
   for entry in self.responses {
@@ -46,7 +46,7 @@ fn DecisionMemo::judgement(
   self : DecisionMemo,
   parent : Genome,
   c : Candidate,
-  round : Int,
+  round : Int32,
   compute : () -> Decision,
 ) -> Decision {
   for entry in self.judgements {

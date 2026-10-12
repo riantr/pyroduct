@@ -6,7 +6,7 @@
 
 ///|
 /// 把一串 id 印成 `a,b,c`。
-fn fmt_ids(xs : Array[Int]) -> String {
+fn fmt_ids(xs : Array[Int32]) -> String {
   if xs.length() == 0 {
     "无"
   } else {
@@ -157,7 +157,7 @@ pub fn render_report() -> String {
   )
   lines.push("")
   // ── 商谈段 / 决策段
-  let opts : Array[Int] = []
+  let opts : Array[Int32] = []
   for f in rt.notebook.findings {
     if f.question == 0 {
       opts.push(f.id)

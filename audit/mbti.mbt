@@ -40,7 +40,7 @@ pub fn scan_snapshot() -> Array[IfaceRow] {
 
 ///|
 /// 未预期发现总数（已知设计豁免是空的，故未预期即全部）。
-pub fn snapshot_fresh_total() -> Int {
+pub fn snapshot_fresh_total() -> Int32 {
   let mut n = 0
   for row in scan_snapshot() {
     let (_, fresh) = split_iface(row.1)

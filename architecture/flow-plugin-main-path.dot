@@ -1,0 +1,68 @@
+// model-version: 0.1.30
+digraph plugin_bridge_main_path {
+  rankdir=TB
+  node [shape=record, style=filled, fillcolor="#E8E8E8", fontname="Arial"]
+  edge [fontname="Arial", fontsize=10]
+
+  // Simplified single-request happy path
+  user [label="用户", shape=ellipse, fillcolor="#FFE4B5"]
+  mcp [label="MiniMax Desktop\nMCP 客户端"]
+  server [label="plugin/server.mjs\nMCP Server"]
+  resolve [label="resolveBridge()\n选择桥路径"]
+  bridge [label="jsoncli.js\n(JS bundle)"]
+  jsoncli [label="cmd/jsoncli\nparse + route"]
+  model [label="@pkg.render_xxx()\n模型包"]
+  response [label="用户看到报告", shape=ellipse, fillcolor="#FFE4B5"]
+
+  // Main path
+  user -> mcp [label="1. 调用 pyroduct_face{kind}"]
+  mcp -> server [label="2. JSON-RPC tools/call"]
+  server -> resolve [label="3. 解析桥路径"]
+  resolve -> bridge [label="4. checkout 或 bundled"]
+  bridge -> jsoncli [label="5. node jsoncli.js '{json}'"]
+  jsoncli -> model [label="6. render_kind(kind)"]
+  model -> jsoncli [label="7. 报告全文"]
+  jsoncli -> bridge [label="8. stdout: JSON 回信"]
+  bridge -> server [label="9. 解析 reply"]
+  server -> mcp [label="10. textResult(body)"]
+  mcp -> response [label="11. 显示报告"]
+
+  // Bridge resolution detail
+  subgraph cluster_resolution {
+    label="桥解析"
+    style=dashed
+    color="#999999"
+
+    env_check [label="PYRODUCT_PROJECT_DIR\n已设置?", shape=diamond, fillcolor="#FFFACD"]
+    checkout [label="checkout/\n_build/js/.../jsoncli.js\nsource='checkout'"]
+    bundled [label="plugin/vendor/\njsoncli.js\nsource='bundled'"]
+  }
+
+  resolve -> env_check
+  env_check -> checkout [label="是"]
+  env_check -> bundled [label="否"]
+  checkout -> bridge
+  bundled -> bridge
+
+  // Error handling
+  error [label="错误处理", shape=note, fillcolor="#FFB6C1"]
+  jsoncli -> error [label="kind ∉ faces()\n或 JSON 解析失败", style=dotted]
+  server -> error [label="reply.ok === false\n或 spawn 失败", style=dotted]
+  error -> mcp [label="toolResult(error, true)", style=dotted]
+
+  // Key metrics
+  subgraph cluster_metrics {
+    label="关键指标"
+    style=filled
+    color="#E0FFFF"
+    fontname="Courier"
+
+    metrics [label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+      <TR><TD ALIGN="LEFT">面数: 31</TD></TR>
+      <TR><TD ALIGN="LEFT">MCP 工具: 3 (faces/face/gates)</TD></TR>
+      <TR><TD ALIGN="LEFT">桥路径: 2 (checkout/bundled)</TD></TR>
+      <TR><TD ALIGN="LEFT">超时: DEFAULT_TIMEOUT_MS</TD></TR>
+      <TR><TD ALIGN="LEFT">门禁超时: GATE_TIMEOUT_MS</TD></TR>
+    </TABLE>>]
+  }
+}

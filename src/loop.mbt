@@ -294,8 +294,8 @@ pub fn same_target_pairs() -> Array[
 ///
 /// 与 `same_target_pairs` 是一对：那一个列「来处多而去处一」，这一个列「去处
 /// 多」，两者互斥且并集恰是全部多候选组合。报告与测试都从这里取料。
-pub fn open_points() -> Array[(SubjectState, Slot, Int)] {
-  let out : Array[(SubjectState, Slot, Int)] = []
+pub fn open_points() -> Array[(SubjectState, Slot, Int32)] {
+  let out : Array[(SubjectState, Slot, Int32)] = []
   for s in all_states() {
     for k in all_slots() {
       match step(s, k) {
@@ -432,7 +432,7 @@ pub extend Expansion with Debug::{to_repr}
 pub fn expand(
   start : SubjectState,
   slots : Array[Slot],
-  limit : Int,
+  limit : Int32,
 ) -> Expansion {
   let (leaves, truncated) = expand_from(start, start, [], slots, 0, limit)
   { leaves, truncated, }
@@ -445,8 +445,8 @@ fn expand_from(
   at : SubjectState,
   steps : Array[(Slot, Outcome)],
   slots : Array[Slot],
-  i : Int,
-  budget : Int,
+  i : Int32,
+  budget : Int32,
 ) -> (Array[Trace], Bool) {
   if budget <= 0 {
     return ([], true)
@@ -529,9 +529,9 @@ fn push_step(
 pub fn after_open(
   state : SubjectState,
   slot : Slot,
-  depth : Int,
-) -> Array[(SubjectState, Int)] {
-  let dist : Map[String, Int] = Map([])
+  depth : Int32,
+) -> Array[(SubjectState, Int32)] {
+  let dist : Map[String, Int32] = Map([])
   let queue : Array[SubjectState] = []
   for c in candidates(state, slot) {
     if !dist.contains(c.1.designation()) {
@@ -557,7 +557,7 @@ pub fn after_open(
       }
     }
   }
-  let out : Array[(SubjectState, Int)] = []
+  let out : Array[(SubjectState, Int32)] = []
   for s in all_states() {
     match dist.get(s.designation()) {
       Some(d) => out.push((s, d))

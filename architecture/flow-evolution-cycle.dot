@@ -1,0 +1,176 @@
+// Evolution Layer Cycle Flow
+// Skill: flow-visualizer + graphviz
+// Date: 2026-10-11
+// Trigger: run_cycle(seed, world, criterion, rounds)
+// Outcome: SubjectCycle (events + ledger)
+
+// model-version: 0.1.30
+digraph evolution_cycle_flow {
+    rankdir=TB;
+    node [shape=box, style=filled, fontname="Arial", fontsize=10];
+    edge [fontname="Arial", fontsize=9];
+
+    // === Entry Point ===
+    subgraph cluster_entry {
+        label="入口 (Entry)";
+        style=filled;
+        color="#E3F2FD";
+        fontcolor="#1565C0";
+
+        entry [label="run_cycle(seed, world, criterion, rounds)\n种子: CycleState(state, genome)\n世界: Array[Opponent]\n判据: Weighted | Causal\n回合: Int", fillcolor="#90CAF9", penwidth=3];
+    }
+
+    // === Per-Round Loop ===
+    subgraph cluster_round {
+        label="每回合循环 (Per-Round Loop)";
+        style=filled;
+        color="#FFF3E0";
+        fontcolor="#E65100";
+
+        // Step 1: World Response
+        response [label="1. 世界回应\nevaluate(genome, world)\n→ Fitness(consensus, stability, residue, cost)\n复用备忘录: memo.response()", fillcolor="#FFE0B2"];
+
+        // Step 2: Select Slot
+        select_slot [label="2. 选择驱动槽\ncycle_slot(fitness, state)\n按优先序找可走的槽:\n病理→揭蔽/共在; 共识→反馈; 否则→行动", fillcolor="#FFE0B2"];
+
+        // Step 3: Step State Machine
+        step_sm [label="3. 状态机执行\n@sm.step(state, slot)\n→ raw Outcome (迁/守/未定/同归/无路)", fillcolor="#FFE0B2"];
+
+        // Step 4: Resolve Open
+        resolve [label="4. 裁决未定\nresolve_open(raw, genome, state)\nOpen → 按双诚之比挑一条\ntoward_other > toward_self → 空间侧(后一条)\n否则 → 时间侧(前一条)", fillcolor="#FFE0B2"];
+
+        // Step 5: Update Position
+        update_pos [label="5. 更新位置\noutcome.landing()\nSome(next) → moved_to = next\nNone → moved_to = state (未定/无路不推进)", fillcolor="#FFE0B2"];
+
+        // Step 6: Generate Candidates
+        gen_practice [label="6a. 修习候选\nlocus: Memory\nwhat: 残余 carry -4 (降到1为止)\ngenome: { ..g, carry: shed }", fillcolor="#CE93D8"];
+
+        gen_opening [label="6b. 开放候选\nlocus: Strategy\nwhat: 己之诚 toward_self -25 (降到1为止)\ngenome: { ..g, toward_self: loosen }", fillcolor="#CE93D8"];
+
+        // Step 7: Gate Judgement
+        gate_practice [label="7a. 修习闸门\noffer(parent, candidate, world, score, criterion, memo, round)\n→ Offer(candidate, decision)", fillcolor="#FFCC80"];
+
+        gate_opening [label="7b. 开放闸门\noffer(parent, candidate, world, score, criterion, memo, round)\n→ Offer(candidate, decision)", fillcolor="#FFCC80"];
+
+        // Step 8: Apply Decisions
+        apply [label="8. 应用裁决\nnext_genome = genome\nif practice.verdict == Accepted → apply practice\nif opening.verdict == Accepted → apply opening", fillcolor="#FFE0B2"];
+
+        // Step 9: Record Event
+        record [label="9. 记录事件\nCycleEvent {\n  round, state_before, slot, outcome,\n  state_after, genome_after, response,\n  practice, opening, remainder\n}", fillcolor="#FFE0B2"];
+
+        // Step 10: Update State
+        update [label="10. 更新状态\ncur = { state: moved_to, genome: next_genome }", fillcolor="#FFE0B2"];
+    }
+
+    // === Gate Details ===
+    subgraph cluster_gate {
+        label="闸门详情 (Gate Details)";
+        style=filled;
+        color="#F3E5F5";
+        fontcolor="#6A1B9A";
+
+        judge [label="judge(parent, score, candidate, world, criterion)\n裁决候选改动", fillcolor="#E1BEE7"];
+
+        check_const [label="宪法检查\nconstitution_violations(candidate.genome)\nR10: 残余 ≥1\nR2/R14: 不得宣告终局\nR3: 他之诚 > 0", fillcolor="#E1BEE7"];
+
+        check_criterion {label="判据类型?", fillcolor="#E1BEE7", shape=diamond};
+
+        weighted [label="加权判据\nscore(fitness, objective)\n与 parent_score 比较\n退步 → 回滚", fillcolor="#E1BEE7"];
+
+        causal [label="因果判据\nDoubleML 估计 θ̂\nθ̂>0 且 95%下界>0 → 接收\n否则 → 拒收", fillcolor="#E1BEE7"];
+
+        verdict_accepted [label="Accepted\n接收", fillcolor="#A5D6A7"];
+        verdict_rejected [label="RejectedConstitutional\n拒收(违宪)", fillcolor="#EF9A9A"];
+        verdict_reverted [label="RevertedRegression\n回滚(退步)", fillcolor="#EF9A9A"];
+        verdict_tie [label="Tie\n持平(零改动)", fillcolor="#FFCC80"];
+    }
+
+    // === Memo Mechanism ===
+    subgraph cluster_memo {
+        label="备忘录机制 (Memo Mechanism)";
+        style=filled;
+        color="#E8F5E9";
+        fontcolor="#2E7D32";
+
+        memo_response [label="memo.response(genome, round, thunk)\n同基因组同回合 → 不重算回应", fillcolor="#C8E6C9"];
+
+        memo_judgement [label="memo.judgement(parent, candidate, round, thunk)\n同判不重裁: 首裁结果写入备忘录\n后续回合输入相同 → 直接读回\n判词标注「[与回合 N 同判·不重裁]」", fillcolor="#C8E6C9"];
+    }
+
+    // === Output ===
+    subgraph cluster_output {
+        label="输出 (Output)";
+        style=filled;
+        color="#E3F2FD";
+        fontcolor="#1565C0";
+
+        output [label="SubjectCycle {\n  seed: CycleState,\n  objective: String,\n  events: Array[CycleEvent]\n}\n.ledger() → Ledger (只追加账本)\n.finished() → CycleState (最终状态)", fillcolor="#90CAF9", penwidth=3];
+    }
+
+    // === Edges (Flow) ===
+    // Entry to loop
+    entry -> response [label="开始循环", color="#1565C0", penwidth=2];
+
+    // Per-round flow
+    response -> select_slot [color="#E65100", penwidth=2];
+    select_slot -> step_sm [color="#E65100", penwidth=2];
+    step_sm -> resolve [color="#E65100", penwidth=2];
+    resolve -> update_pos [color="#E65100", penwidth=2];
+
+    update_pos -> gen_practice [color="#E65100", penwidth=2];
+    update_pos -> gen_opening [color="#E65100", penwidth=2];
+
+    gen_practice -> gate_practice [color="#6A1B9A", penwidth=2];
+    gen_opening -> gate_opening [color="#6A1B9A", penwidth=2];
+
+    gate_practice -> apply [color="#E65100", penwidth=2];
+    gate_opening -> apply [color="#E65100", penwidth=2];
+
+    apply -> record [color="#E65100", penwidth=2];
+    record -> update [color="#E65100", penwidth=2];
+
+    // Loop back
+    update -> response [label="下一回合\n(round < rounds)", style=dashed, color="#1565C0", penwidth=2];
+
+    // Exit
+    update -> output [label="循环结束\n(round >= rounds)", color="#1565C0", penwidth=2];
+
+    // Gate details
+    gate_practice -> judge [style=dashed, color="#6A1B9A"];
+    gate_opening -> judge [style=dashed, color="#6A1B9A"];
+
+    judge -> check_const [color="#6A1B9A", penwidth=2];
+    check_const -> check_criterion [label="合宪", color="#2E7D32", penwidth=2];
+    check_const -> verdict_rejected [label="违宪", color="#C62828", penwidth=2];
+
+    check_criterion -> weighted [label="Weighted", color="#2E7D32", penwidth=2];
+    check_criterion -> causal [label="Causal", color="#6A1B9A", penwidth=2];
+
+    weighted -> verdict_accepted [label="进步", color="#2E7D32"];
+    weighted -> verdict_reverted [label="退步", color="#C62828"];
+    weighted -> verdict_tie [label="持平", color="#E65100"];
+
+    causal -> verdict_accepted [label="θ̂>0 且 下界>0", color="#2E7D32"];
+    causal -> verdict_rejected [label="否则", color="#C62828"];
+
+    // Memo usage
+    response -> memo_response [style=dashed, color="#2E7D32"];
+    gate_practice -> memo_judgement [style=dashed, color="#2E7D32"];
+    gate_opening -> memo_judgement [style=dashed, color="#2E7D32"];
+
+    // === Legend ===
+    subgraph cluster_legend {
+        label="图例";
+        style=filled;
+        color="#FAFAFA";
+
+        legend_entry [label="入口/出口", fillcolor="#90CAF9", shape=box];
+        legend_step [label="循环步骤", fillcolor="#FFE0B2", shape=box];
+        legend_candidate [label="候选生成", fillcolor="#CE93D8", shape=box];
+        legend_gate [label="闸门判定", fillcolor="#FFCC80", shape=box];
+        legend_gate_detail [label="闸门详情", fillcolor="#E1BEE7", shape=box];
+        legend_memo [label="备忘录", fillcolor="#C8E6C9", shape=box];
+        legend_accept [label="接收", fillcolor="#A5D6A7", shape=box];
+        legend_reject [label="拒收/回滚", fillcolor="#EF9A9A", shape=box];
+    }
+}

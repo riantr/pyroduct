@@ -80,7 +80,7 @@ pub async fn scan(root : String) -> Array[@audit.IfaceRow] {
 
 ///|
 /// 未预期发现总数（已知设计豁免是空的，故未预期即全部）。
-pub fn fresh_total(rows : Array[@audit.IfaceRow]) -> Int {
+pub fn fresh_total(rows : Array[@audit.IfaceRow]) -> Int32 {
   let mut n = 0
   for row in rows {
     let (_, fresh) = @audit.split_iface(row.1)

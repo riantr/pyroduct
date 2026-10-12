@@ -1,0 +1,80 @@
+// model-version: 0.1.30
+digraph living_architecture_evolution {
+  rankdir=TB
+  node [shape=record, style=filled, fillcolor="#E8E8E8", fontname="Arial"]
+  edge [fontname="Arial", fontsize=10]
+
+  // ===== Current State =====
+  subgraph cluster_current {
+    label="当前状态（手工维护）"
+    style=filled
+    color="#FFE4E1"
+
+    code [label="源代码\n(moon.pkg, *.mbt)", fillcolor="#B0C4DE"]
+    arch_files [label="architecture/\n(29 个制品\n全部未入库)", fillcolor="#FFB6C1"]
+    plugin_desc [label="plugin 描述\n(server.mjs, SKILL.md\n测试数 190→实际 197)", fillcolor="#FFB6C1"]
+
+    validate_plugin [label="validate-plugin.mjs\n(27+ 检查\n面数/版本/不变量/反漂移)", fillcolor="#90EE90"]
+    mutate_review [label="mutate_review.py\n(48 变异\n标准判据)", fillcolor="#90EE90"]
+    gen_iface [label="gen_iface_data.py\n(内嵌快照生成)", fillcolor="#90EE90"]
+
+    ci_gate [label="gate.yml\n(check + fmt + test\n+ build + native)", fillcolor="#FFFACD"]
+
+    code -> validate_plugin [label="验证"]
+    code -> mutate_review [label="验证"]
+    code -> gen_iface [label="生成"]
+    validate_plugin -> ci_gate [label="未被 CI 调用", style=dashed, color="#C62828"]
+    ci_gate -> arch_files [label="不检查", style=dashed, color="#C62828"]
+    ci_gate -> plugin_desc [label="不检查", style=dashed, color="#C62828"]
+  }
+
+  // ===== Target State =====
+  subgraph cluster_target {
+    label="目标状态（活架构）"
+    style=filled
+    color="#E8F5E9"
+
+    code_t [label="源代码\n(moon.pkg, *.mbt)", fillcolor="#B0C4DE"]
+    arch_files_t [label="architecture/\n(已入库\n版本化)", fillcolor="#90EE90"]
+    plugin_desc_t [label="plugin 描述\n(测试数与代码一致)", fillcolor="#90EE90"]
+
+    validate_arch [label="validate-architecture.py\n(新\n依赖边/数量/版本)", fillcolor="#FFD54F"]
+    validate_plugin_t [label="validate-plugin.mjs\n(+ 测试数检查)", fillcolor="#90EE90"]
+    validate_plugin_t2 [label="+ 测试数反漂移", fillcolor="#FFD54F"]
+
+    ci_gate_t [label="gate.yml\n(+ validate-architecture\n+ validate-plugin)", fillcolor="#90EE90"]
+    living_contract [label="LIVING_ARCHITECTURE.md\n(活架构契约\n声明哪些不变量)", fillcolor="#FFD54F"]
+
+    code_t -> validate_arch [label="提取事实"]
+    code_t -> validate_plugin_t [label="验证"]
+    validate_arch -> ci_gate_t [label="CI 门禁"]
+    validate_plugin_t -> ci_gate_t [label="CI 门禁"]
+    living_contract -> validate_arch [label="定义不变量"]
+    living_contract -> validate_plugin_t [label="定义不变量"]
+    ci_gate_t -> arch_files_t [label="保护"]
+    ci_gate_t -> plugin_desc_t [label="保护"]
+  }
+
+  // ===== Migration Slices =====
+  subgraph cluster_slices {
+    label="迁移切片"
+    style=dashed
+    color="#999999"
+
+    slice1 [label="Slice 1\n创建 validate-architecture.py\n提取 moon.pkg 依赖边\n比对 DOT 文件", shape=box, fillcolor="#FFF9C4"]
+    slice2 [label="Slice 2\n扩展 validate-plugin.mjs\n加测试数反漂移\n(从 moon test --list 提取)", shape=box, fillcolor="#FFF9C4"]
+    slice3 [label="Slice 3\ngate.yml 加两步\nvalidate-architecture + validate-plugin", shape=box, fillcolor="#FFF9C4"]
+    slice4 [label="Slice 4\n写 LIVING_ARCHITECTURE.md\n声明不变量契约\n+ 入库 architecture/", shape=box, fillcolor="#FFF9C4"]
+
+    slice1 -> slice2 [style=dashed]
+    slice2 -> slice3 [style=dashed]
+    slice3 -> slice4 [style=dashed]
+  }
+
+  // ===== Mapping =====
+  slice1 -> validate_arch [label="实现", style=dotted]
+  slice2 -> validate_plugin_t2 [label="实现", style=dotted]
+  slice3 -> ci_gate_t [label="实现", style=dotted]
+  slice4 -> living_contract [label="实现", style=dotted]
+  slice4 -> arch_files_t [label="git add", style=dotted]
+}

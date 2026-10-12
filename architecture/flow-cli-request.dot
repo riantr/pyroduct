@@ -1,0 +1,273 @@
+// CLI Request Processing Flow (cmd/main)
+// Skill: flow-visualizer + graphviz
+// Date: 2026-10-11
+// Trigger: moon run cmd/main -- <subcommand>
+// Outcome: Printed report to stdout
+
+// model-version: 0.1.30
+digraph cli_request_flow {
+    rankdir=TB;
+    node [shape=box, style=filled, fontname="Arial", fontsize=10];
+    edge [fontname="Arial", fontsize=9];
+
+    // === Entry Point ===
+    subgraph cluster_entry {
+        label="入口 (Entry)";
+        style=filled;
+        color="#E3F2FD";
+        fontcolor="#1565C0";
+
+        entry [label="moon run cmd/main -- <subcommand>\n命令行参数: args[]\n默认: \"report\"", fillcolor="#90CAF9", penwidth=3];
+    }
+
+    // === Argument Parsing ===
+    subgraph cluster_parse {
+        label="参数解析 (Argument Parsing)";
+        style=filled;
+        color="#FFF3E0";
+        fontcolor="#E65100";
+
+        get_args [label="@env.args()\n获取命令行参数数组", fillcolor="#FFE0B2"];
+
+        extract [label="format = args[1] || \"report\"\n取第一个参数作为子命令\n无参数则默认 \"report\"", fillcolor="#FFE0B2"];
+    }
+
+    // === Routing ===
+    subgraph cluster_routing {
+        label="路由分发 (Routing)";
+        style=filled;
+        color="#F3E5F5";
+        fontcolor="#6A1B9A";
+
+        match {label="match format\n子命令路由", fillcolor="#E1BEE7", shape=diamond};
+    }
+
+    // === Subject Machine Reports ===
+    subgraph cluster_subject {
+        label="主体机报告 (Subject Machine)";
+        style=filled;
+        color="#E3F2FD";
+        fontcolor="#1565C0";
+
+        mermaid [label="mermaid\n@sm.render_mermaid()\nMermaid 状态图", fillcolor="#BBDEFB"];
+        dot_cmd [label="dot\n@sm.render_dot()\nGraphviz DOT", fillcolor="#BBDEFB"];
+        genesis [label="genesis\n@sm.render_genesis()\n主线（原文顺序）", fillcolor="#BBDEFB"];
+        course [label="course\n@sm.render_course()\n历程（环节序列）", fillcolor="#BBDEFB"];
+        naming [label="naming\n@sm.render_naming_table()\n定名对照表", fillcolor="#BBDEFB"];
+        slots [label="slots\n@sm.render_slots()\n驱动槽对照表", fillcolor="#BBDEFB"];
+        loop_cmd [label="loop\n@sm.render_loop_report()\n执行契约报告", fillcolor="#BBDEFB"];
+        principle [label="principle\n@sm.revision_principle()\n修订原则", fillcolor="#BBDEFB"];
+        nested [label="nested-mermaid\n@sm.render_mermaid_nested()\n嵌套视图", fillcolor="#BBDEFB"];
+        spec [label="spec\n@sm.spec_json()\n规格导出 (JSON)", fillcolor="#BBDEFB"];
+    }
+
+    // === Analysis Faces ===
+    subgraph cluster_faces {
+        label="分析面 (Analysis Faces)";
+        style=filled;
+        color="#FFF3E0";
+        fontcolor="#E65100";
+
+        pathsum [label="pathsum\n@sm.render_pathsum_report()\n泛半环路径和", fillcolor="#FFE0B2"];
+        algebra [label="algebra\n@sm.render_algebra_report()\n机器代数 (Ragel)", fillcolor="#FFE0B2"];
+        petri [label="petri\n@sm.render_petri_report()\nPetri 网 (CarlAdam)", fillcolor="#FFE0B2"];
+        aho [label="aho\n@sm.render_aho_report()\nAho-Corasick 面", fillcolor="#FFE0B2"];
+        buchi [label="buchi\n@sm.render_buchi_report()\nBüchi ω-视角", fillcolor="#FFE0B2"];
+    }
+
+    // === Multi-Agent Reports ===
+    subgraph cluster_multi {
+        label="多主体报告 (Multi-Agent)";
+        style=filled;
+        color="#F3E5F5";
+        fontcolor="#6A1B9A";
+
+        multi [label="multi\n@multi.render_multi_report()\n规范规则 R1-R14", fillcolor="#E1BEE7"];
+        group [label="group\n@group.render_group_report()\n群体状态机", fillcolor="#E1BEE7"];
+        group_mermaid [label="group-mermaid\n@group.render_mermaid()\n群体机 Mermaid", fillcolor="#E1BEE7"];
+        society [label="society\n@society.render_report()\n社会交往模型", fillcolor="#E1BEE7"];
+        society_mermaid [label="society-mermaid\n@society.render_mermaid()\n社会机 Mermaid", fillcolor="#E1BEE7"];
+    }
+
+    // === Evolution Reports ===
+    subgraph cluster_evolution {
+        label="演化层报告 (Evolution)";
+        style=filled;
+        color="#E8F5E9";
+        fontcolor="#2E7D32";
+
+        evolution [label="evolution\n@evolution.render_report()\n变异/闸门/账本", fillcolor="#C8E6C9"];
+        cycle [label="cycle\n@evolution.render_cycle_report()\n主体循环", fillcolor="#C8E6C9"];
+        intuition [label="intuition\n@evolution.intuition_principle()\n直觉读法", fillcolor="#C8E6C9"];
+        association [label="association\n@evolution.render_association_report()\n未定软关联", fillcolor="#C8E6C9"];
+    }
+
+    // === ML & Causal Reports ===
+    subgraph cluster_ml {
+        label="机器学习报告 (ML & Causal)";
+        style=filled;
+        color="#FFF9C4";
+        fontcolor="#F57F17";
+
+        ml [label="ml\n@ml.render_ml_report()\nDoubleML 接口", fillcolor="#FFF59D"];
+        ml_export [label="ml-export\n@ml.csv_preview()\n导出数据集 (CSV)", fillcolor="#FFF59D"];
+        dmlref [label="dmlref\n@dmlref.render_report()\n外部参考对照", fillcolor="#FFF59D"];
+        causal [label="causal\n@causal.render_report()\n因果诊断", fillcolor="#FFF59D"];
+    }
+
+    // === Audit Reports ===
+    subgraph cluster_audit {
+        label="审计报告 (Audit)";
+        style=filled;
+        color="#FFEBEE";
+        fontcolor="#C62828";
+
+        audit [label="audit\n@audit.render_report()\n三鉴自审计", fillcolor="#FFCDD2"];
+        fleet [label="fleet\n@audit.render_fleet_report()\n群体机+社会机审计", fillcolor="#FFCDD2"];
+        mutants [label="mutants\n@audit.render_mutation_report()\n变异网压力测试", fillcolor="#FFCDD2"];
+        mbti [label="mbti\n@audit.render_iface_report()\n接口面扫描", fillcolor="#FFCDD2"];
+    }
+
+    // === Coordinator & Viz ===
+    subgraph cluster_other {
+        label="协调器与可视化 (Coordinator & Viz)";
+        style=filled;
+        color="#E0F2F1";
+        fontcolor="#00695C";
+
+        coordinator [label="coordinator\n@coordinator.render_report()\n科研协调器", fillcolor="#B2DFDB"];
+        journey [label="journey\n@viz.journey()\n行程视图", fillcolor="#B2DFDB"];
+        viz [label="viz\n@viz.page()\n三台机 HTML", fillcolor="#B2DFDB"];
+    }
+
+    // === Composite ===
+    all [label="all\n组合报告:\nreport + course + genesis + mermaid", fillcolor="#E1BEE7", penwidth=2];
+
+    // === Default ===
+    default [label="_ (默认)\n@sm.render_report()\n\"report\" 与未知子命令\n均走此分支", fillcolor="#EF9A9A"];
+
+    // === Output ===
+    output [label="println(result)\n输出到 stdout", fillcolor="#90CAF9", penwidth=3];
+
+    // === Edges (Flow) ===
+    entry -> get_args [color="#1565C0", penwidth=2];
+    get_args -> extract [color="#E65100", penwidth=2];
+    extract -> match [color="#E65100", penwidth=2];
+
+    // Routing to subject
+    match -> mermaid [label="\"mermaid\"", color="#1565C0"];
+    match -> dot_cmd [label="\"dot\"", color="#1565C0"];
+    match -> genesis [label="\"genesis\"", color="#1565C0"];
+    match -> course [label="\"course\"", color="#1565C0"];
+    match -> naming [label="\"naming\"", color="#1565C0"];
+    match -> slots [label="\"slots\"", color="#1565C0"];
+    match -> loop_cmd [label="\"loop\"", color="#1565C0"];
+    match -> principle [label="\"principle\"", color="#1565C0"];
+    match -> nested [label="\"nested-mermaid\"", color="#1565C0"];
+    match -> spec [label="\"spec\"", color="#1565C0"];
+
+    // Routing to faces
+    match -> pathsum [label="\"pathsum\"", color="#E65100"];
+    match -> algebra [label="\"algebra\"", color="#E65100"];
+    match -> petri [label="\"petri\"", color="#E65100"];
+    match -> aho [label="\"aho\"", color="#E65100"];
+    match -> buchi [label="\"buchi\"", color="#E65100"];
+
+    // Routing to multi
+    match -> multi [label="\"multi\"", color="#6A1B9A"];
+    match -> group [label="\"group\"", color="#6A1B9A"];
+    match -> group_mermaid [label="\"group-mermaid\"", color="#6A1B9A"];
+    match -> society [label="\"society\"", color="#6A1B9A"];
+    match -> society_mermaid [label="\"society-mermaid\"", color="#6A1B9A"];
+
+    // Routing to evolution
+    match -> evolution [label="\"evolution\"", color="#2E7D32"];
+    match -> cycle [label="\"cycle\"", color="#2E7D32"];
+    match -> intuition [label="\"intuition\"", color="#2E7D32"];
+    match -> association [label="\"association\"", color="#2E7D32"];
+
+    // Routing to ml
+    match -> ml [label="\"ml\"", color="#F57F17"];
+    match -> ml_export [label="\"ml-export\"", color="#F57F17"];
+    match -> dmlref [label="\"dmlref\"", color="#F57F17"];
+    match -> causal [label="\"causal\"", color="#F57F17"];
+
+    // Routing to audit
+    match -> audit [label="\"audit\"", color="#C62828"];
+    match -> fleet [label="\"fleet\"", color="#C62828"];
+    match -> mutants [label="\"mutants\"", color="#C62828"];
+    match -> mbti [label="\"mbti\"", color="#C62828"];
+
+    // Routing to other
+    match -> coordinator [label="\"coordinator\"", color="#00695C"];
+    match -> journey [label="\"journey\"", color="#00695C"];
+    match -> viz [label="\"viz\"", color="#00695C"];
+
+    // Composite and default
+    match -> all [label="\"all\"", color="#6A1B9A", penwidth=2];
+    match -> default [label="_ (其他)", color="#C62828"];
+
+    // All to output
+    mermaid -> output [color="#1565C0"];
+    dot_cmd -> output [color="#1565C0"];
+    genesis -> output [color="#1565C0"];
+    course -> output [color="#1565C0"];
+    naming -> output [color="#1565C0"];
+    slots -> output [color="#1565C0"];
+    loop_cmd -> output [color="#1565C0"];
+    principle -> output [color="#1565C0"];
+    nested -> output [color="#1565C0"];
+    spec -> output [color="#1565C0"];
+
+    pathsum -> output [color="#E65100"];
+    algebra -> output [color="#E65100"];
+    petri -> output [color="#E65100"];
+    aho -> output [color="#E65100"];
+    buchi -> output [color="#E65100"];
+
+    multi -> output [color="#6A1B9A"];
+    group -> output [color="#6A1B9A"];
+    group_mermaid -> output [color="#6A1B9A"];
+    society -> output [color="#6A1B9A"];
+    society_mermaid -> output [color="#6A1B9A"];
+
+    evolution -> output [color="#2E7D32"];
+    cycle -> output [color="#2E7D32"];
+    intuition -> output [color="#2E7D32"];
+    association -> output [color="#2E7D32"];
+
+    ml -> output [color="#F57F17"];
+    ml_export -> output [color="#F57F17"];
+    dmlref -> output [color="#F57F17"];
+    causal -> output [color="#F57F17"];
+
+    audit -> output [color="#C62828"];
+    fleet -> output [color="#C62828"];
+    mutants -> output [color="#C62828"];
+    mbti -> output [color="#C62828"];
+
+    coordinator -> output [color="#00695C"];
+    journey -> output [color="#00695C"];
+    viz -> output [color="#00695C"];
+
+    all -> output [color="#6A1B9A", penwidth=2];
+    default -> output [color="#C62828"];
+
+    // === Legend ===
+    subgraph cluster_legend {
+        label="图例";
+        style=filled;
+        color="#FAFAFA";
+
+        legend_entry [label="入口/出口", fillcolor="#90CAF9", shape=box];
+        legend_parse [label="参数解析", fillcolor="#FFE0B2", shape=box];
+        legend_route [label="路由", fillcolor="#E1BEE7", shape=diamond];
+        legend_subject [label="主体机", fillcolor="#BBDEFB", shape=box];
+        legend_faces [label="分析面", fillcolor="#FFE0B2", shape=box];
+        legend_multi [label="多主体", fillcolor="#E1BEE7", shape=box];
+        legend_evolution [label="演化层", fillcolor="#C8E6C9", shape=box];
+        legend_ml [label="ML/因果", fillcolor="#FFF59D", shape=box];
+        legend_audit [label="审计", fillcolor="#FFCDD2", shape=box];
+        legend_other [label="协调器/可视化", fillcolor="#B2DFDB", shape=box];
+    }
+}

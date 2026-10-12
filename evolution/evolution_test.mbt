@@ -274,7 +274,7 @@ test "因果进化：被接收的改动效应皆为正，且账本可往返" {
 
 ///|
 /// 主体循环：从立位出发，在缺省世界里走 `rounds` 回合（因果判据）。
-fn small_cycle(rounds : Int) -> @evolution.SubjectCycle {
+fn small_cycle(rounds : Int32) -> @evolution.SubjectCycle {
   @evolution.run_cycle(
     @evolution.default_cycle_seed(),
     @evolution.default_world(),

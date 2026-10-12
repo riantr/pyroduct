@@ -1,0 +1,158 @@
+// Pyroduct Module Dependency Graph
+// Skill: system-modeler + graphviz
+// Date: 2026-10-11
+// Scope: Internal package dependencies and external system boundaries
+// Note: rankdir=TB for dense relationship graph
+
+// model-version: 0.1.30
+digraph pyroduct_modules {
+    rankdir=TB;
+    node [shape=box, style=filled, fontname="Arial"];
+    edge [fontname="Arial", fontsize=10];
+
+    // External systems (boundary)
+    subgraph cluster_external {
+        label="外部系统";
+        style=dashed;
+        color="#999999";
+        fontcolor="#666666";
+
+        moonbit_core [label="moonbitlang/core", fillcolor="#E8E8E8", shape=ellipse];
+        moonbit_async [label="moonbitlang/async\n@0.22.4", fillcolor="#E8E8E8", shape=ellipse];
+        moonbit_doubleml [label="riantr/moonbit_doubleML\n@0.75.0", fillcolor="#E8E8E8", shape=ellipse];
+        moonbit_snn [label="riantr/snn_mbt\n@0.84.0", fillcolor="#E8E8E8", shape=ellipse];
+        moonbit_sa [label="riantr/moonbit_static_analysis\n@0.3.4", fillcolor="#E8E8E8", shape=ellipse];
+    }
+
+    // State machine family (core)
+    subgraph cluster_statemachine {
+        label="状态机家族";
+        style=filled;
+        color="#E3F2FD";
+
+        src [label="src\n(主体机)", fillcolor="#BBDEFB"];
+        multi [label="multi\n(多主体规范)", fillcolor="#BBDEFB"];
+        group [label="group\n(群体机)", fillcolor="#BBDEFB"];
+        society [label="society\n(社会机)", fillcolor="#BBDEFB"];
+    }
+
+    // Agent layer
+    subgraph cluster_agent {
+        label="智能体层";
+        style=filled;
+        color="#F3E5F5";
+
+        evolution [label="evolution\n(演化层)", fillcolor="#E1BEE7"];
+        coordinator [label="coordinator\n(协调器)", fillcolor="#E1BEE7"];
+    }
+
+    // Analysis & tools
+    subgraph cluster_analysis {
+        label="分析与工具";
+        style=filled;
+        color="#FFF3E0";
+
+        ml [label="ml\n(自研DoubleML)", fillcolor="#FFE0B2"];
+        dmlref [label="dmlref\n(外部交叉验证)", fillcolor="#FFE0B2"];
+        causal [label="causal\n(因果诊断)", fillcolor="#FFE0B2"];
+        audit [label="audit\n(三鉴审计)", fillcolor="#FFE0B2"];
+        snnref [label="snnref\n(脉冲沉淀)", fillcolor="#FFE0B2"];
+        viz [label="viz\n(可视化)", fillcolor="#FFE0B2"];
+    }
+
+    // CLI entry points
+    subgraph cluster_cli {
+        label="CLI 入口";
+        style=filled;
+        color="#E8F5E9";
+
+        cmd_main [label="cmd/main\n(WASM CLI)", fillcolor="#C8E6C9"];
+        cmd_coord [label="cmd/coord\n(Native CLI)", fillcolor="#C8E6C9"];
+        cmd_ifacescan [label="cmd/ifacescan\n(Native CLI)", fillcolor="#C8E6C9"];
+        cmd_jsoncli [label="cmd/jsoncli\n(JSON桥接)", fillcolor="#C8E6C9"];
+    }
+
+    // Plugin
+    plugin [label="plugin/\n(MiniMax插件)", fillcolor="#FFECB3", shape=component];
+
+    // Internal dependencies
+    // State machine family
+    multi -> src [label="@sm", color="#666666"];
+    group -> src [label="@sm", color="#666666"];
+    group -> multi [color="#666666"];
+    // society: zero imports (基础包)
+
+    // Agent layer
+    evolution -> src [label="@sm", color="#7B1FA2"];
+    evolution -> multi [color="#7B1FA2"];
+    evolution -> group [label="@g", color="#7B1FA2"];
+    evolution -> ml [color="#7B1FA2"];
+
+    coordinator -> multi [color="#7B1FA2"];
+    coordinator -> ml [color="#7B1FA2"];
+    coordinator -> evolution [color="#7B1FA2"];
+
+    // Analysis
+    ml -> src [label="@sm", color="#E65100"];
+    dmlref -> ml [label="交叉验证", color="#E65100"];
+    causal -> ml [color="#E65100"];
+    audit -> src [label="@sm", color="#E65100"];
+    audit -> group [label="@g", color="#E65100"];
+    audit -> society [label="@so", color="#E65100"];
+    snnref -> src [color="#E65100"];
+    viz -> src [label="@sm", color="#E65100"];
+    viz -> group [color="#E65100"];
+    viz -> society [color="#E65100"];
+
+    // CLI dependencies
+    cmd_main -> src [color="#2E7D32"];
+    cmd_main -> multi [color="#2E7D32"];
+    cmd_main -> group [color="#2E7D32"];
+    cmd_main -> society [color="#2E7D32"];
+    cmd_main -> evolution [color="#2E7D32"];
+    cmd_main -> coordinator [color="#2E7D32"];
+    cmd_main -> ml [color="#2E7D32"];
+    cmd_main -> dmlref [color="#2E7D32"];
+    cmd_main -> causal [color="#2E7D32"];
+    cmd_main -> audit [color="#2E7D32"];
+    cmd_main -> viz [color="#2E7D32"];
+
+    cmd_coord -> coordinator [color="#2E7D32"];
+    cmd_ifacescan -> audit [color="#2E7D32"];
+    cmd_jsoncli -> src [color="#2E7D32"];
+    cmd_jsoncli -> multi [color="#2E7D32"];
+    cmd_jsoncli -> group [color="#2E7D32"];
+    cmd_jsoncli -> society [color="#2E7D32"];
+    cmd_jsoncli -> evolution [color="#2E7D32"];
+    cmd_jsoncli -> coordinator [color="#2E7D32"];
+    cmd_jsoncli -> ml [color="#2E7D32"];
+    cmd_jsoncli -> dmlref [color="#2E7D32"];
+    cmd_jsoncli -> causal [color="#2E7D32"];
+    cmd_jsoncli -> audit [color="#2E7D32"];
+
+    // External dependencies
+    src -> moonbit_core [label="官方标准库", style=dashed, color="#999999"];
+    cmd_coord -> moonbit_async [label="native磁盘IO", style=dashed, color="#999999"];
+    cmd_ifacescan -> moonbit_async [style=dashed, color="#999999"];
+    dmlref -> moonbit_doubleml [label="外部参考", style=dashed, color="#999999"];
+    causal -> moonbit_doubleml [style=dashed, color="#999999"];
+    snnref -> moonbit_snn [label="native专属", style=dashed, color="#999999"];
+    audit -> moonbit_sa [label="三鉴库", style=dashed, color="#999999"];
+
+    // Plugin
+    plugin -> cmd_jsoncli [label="MCP桥接", style=dashed, color="#F57F17"];
+
+    // Legend
+    subgraph cluster_legend {
+        label="图例";
+        style=filled;
+        color="#FAFAFA";
+        fontsize=10;
+
+        legend_core [label="状态机家族", fillcolor="#BBDEFB", shape=box];
+        legend_agent [label="智能体层", fillcolor="#E1BEE7", shape=box];
+        legend_analysis [label="分析工具", fillcolor="#FFE0B2", shape=box];
+        legend_cli [label="CLI入口", fillcolor="#C8E6C9", shape=box];
+        legend_external [label="外部系统", fillcolor="#E8E8E8", shape=ellipse];
+    }
+}

@@ -111,7 +111,7 @@ fn ols_se(
   design : Array[Array[Double]],
   y : Array[Double],
   lambda : Double,
-  col : Int,
+  col : Int32,
 ) -> Double {
   let (xtx, xty) = gram(design, y, lambda)
   let beta = solve(xtx, xty)
@@ -176,11 +176,11 @@ fn ridge_predict(
 /// 多项式特征筛（sieve）：把 d 维协变量展开为全部 1…`degree` 次单项式。
 /// 它扮演 DoubleML 中"任意灵活的机器学习 nuisance"的角色：维数随 degree 上升，
 /// 而 Neyman 正交 + 交叉拟合保证 nuisance 的误差不会一阶地污染 θ。
-fn poly_features(x : Array[Double], degree : Int) -> Array[Double] {
+fn poly_features(x : Array[Double], degree : Int32) -> Array[Double] {
   let out : Array[Double] = []
   fn gen(
-    start : Int,
-    left : Int,
+    start : Int32,
+    left : Int32,
     acc : Double,
     x : Array[Double],
     out : Array[Double],
@@ -201,7 +201,7 @@ fn poly_features(x : Array[Double], degree : Int) -> Array[Double] {
 
 ///|
 /// 对全体样本做特征筛。
-fn sieve(x : Array[Array[Double]], degree : Int) -> Array[Array[Double]] {
+fn sieve(x : Array[Array[Double]], degree : Int32) -> Array[Array[Double]] {
   let out : Array[Array[Double]] = []
   for i = 0; i < x.length(); i = i + 1 {
     out.push(poly_features(x[i], degree))
@@ -232,7 +232,7 @@ fn normal_cdf(z : Double) -> Double {
 
 ///|
 /// 定点格式化，用于报告。
-fn fmt(x : Double, digits : Int) -> String {
+fn fmt(x : Double, digits : Int32) -> String {
   let scale = @math.pow(10.0, digits.to_double())
   let r = (x * scale).round() / scale
   "\{r}"

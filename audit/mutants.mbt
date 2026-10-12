@@ -60,7 +60,7 @@ pub fn families_of(spec : @sa.MachineSpec) -> Array[String] {
 ///
 /// 全程走局部变量、不改结构体字段：规格是外部库的类型，字段赋值不是本层该
 /// 依赖的语义。某一族在这台机上不适用（如没有无路组合）时返回 `None`。
-fn apply(spec : @sa.MachineSpec, kind : Int) -> (@sa.MachineSpec, String)? {
+fn apply(spec : @sa.MachineSpec, kind : Int32) -> (@sa.MachineSpec, String)? {
   let states : Array[String] = []
   for s in spec.states {
     states.push(s)
@@ -172,7 +172,7 @@ fn apply(spec : @sa.MachineSpec, kind : Int) -> (@sa.MachineSpec, String)? {
 
 ///|
 /// 六个破坏点的名字（按 `apply` 的 kind 次序）。
-fn kind_name(kind : Int) -> String {
+fn kind_name(kind : Int32) -> String {
   if kind == 0 {
     "指向不存在的状态"
   } else if kind == 1 {

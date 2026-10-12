@@ -56,7 +56,7 @@ fn named_triggers(leaf : @src.Trace) -> Array[@src.Trigger] {
 fn oracle_paths(
   at : @src.SubjectState,
   slots : Array[@src.Slot],
-  i : Int,
+  i : Int32,
   path : Array[@src.Trigger],
   acc : Array[Array[@src.Trigger]],
 ) -> Unit {

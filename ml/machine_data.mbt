@@ -23,7 +23,7 @@ pub struct Dataset {
 
 ///|
 /// 阶段序号（1 起；来自状态机自己的阶段划分）。
-fn phase_index(p : @sm.Phase) -> Int {
+fn phase_index(p : @sm.Phase) -> Int32 {
   let ps = @sm.all_phases()
   for i = 0; i < ps.length(); i = i + 1 {
     if ps[i] == p {
@@ -35,13 +35,13 @@ fn phase_index(p : @sm.Phase) -> Int {
 
 ///|
 /// 从 `s` 沿状态机的迁移到"宁静"的最少步数；到不了给 40 作为上限。
-pub fn distance_to_rest(s : @sm.SubjectState) -> Int {
+pub fn distance_to_rest(s : @sm.SubjectState) -> Int32 {
   let goal = @sm.terminal()
   if s == goal {
     return 0
   }
   let seen : Array[@sm.SubjectState] = [s]
-  let dist : Array[Int] = [0]
+  let dist : Array[Int32] = [0]
   let mut i = 0
   while i < seen.length() && dist[i] < 40 {
     let u = seen[i]
@@ -70,7 +70,7 @@ pub fn distance_to_rest(s : @sm.SubjectState) -> Int {
 ///|
 /// 从 `s` 出发在状态机上随机走 `steps` 步，返回其中"消除暗礁（修习）"出现的次数。
 /// 这是把状态机的**迁移结构**直接变成可观测处置的一条路径。
-pub fn practice_count(s : @sm.SubjectState, steps : Int, rng : Rng) -> Int {
+pub fn practice_count(s : @sm.SubjectState, steps : Int32, rng : Rng) -> Int32 {
   let mut cur = s
   let mut count = 0
   let mut k = 0
@@ -93,7 +93,7 @@ pub fn practice_count(s : @sm.SubjectState, steps : Int, rng : Rng) -> Int {
 
 ///|
 /// 生成数据集：协变量与处置都来自状态机，θ 为真值，`seed` 保证可重放。
-pub fn make_dataset(n : Int, theta : Double, seed : UInt64) -> Dataset {
+pub fn make_dataset(n : Int32, theta : Double, seed : UInt64) -> Dataset {
   let rng = Rng::new(seed)
   let states = @sm.all_states()
   let y : Array[Double] = []

@@ -228,7 +228,7 @@ pub fn Trigger::label(self : Trigger) -> String {
 ///|
 /// 该状态的谬误残余（不可消尽的余量）；论文：「任何个人的见解中，始终都有谬误的
 /// 残余」（第四章第六节，P.51）。残余恒为正，是 R10 在集体尺度上的形态。
-pub fn State::residue(self : State) -> Int {
+pub fn State::residue(self : State) -> Int32 {
   match self {
     World => 5
     Suprasubjective => 4

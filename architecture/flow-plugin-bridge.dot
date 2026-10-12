@@ -1,0 +1,183 @@
+// model-version: 0.1.30
+digraph plugin_bridge_flow {
+  rankdir=TB
+  node [shape=record, style=filled, fillcolor="#E8E8E8", fontname="Arial"]
+  edge [fontname="Arial", fontsize=10]
+
+  // External actors
+  subgraph cluster_external {
+    label="MiniMax Desktop"
+    style=dashed
+    color="#999999"
+    user [label="用户", shape=ellipse, fillcolor="#FFE4B5"]
+  }
+
+  // MCP protocol layer
+  subgraph cluster_mcp {
+    label="MCP 协议层"
+    style=dashed
+    color="#999999"
+    jsonrpc [label="JSON-RPC 2.0\n{jsonrpc, id, method, params}"]
+  }
+
+  // Plugin MCP server
+  subgraph cluster_plugin {
+    label="plugin/server.mjs (MCP Server)"
+    style=filled
+    color="#B0C4DE"
+
+    handle [label="handle(message)\nJSON-RPC 路由"]
+
+    subgraph cluster_tools {
+      label="tools/call 分发"
+      style=dashed
+      color="#999999"
+
+      tool_faces [label="pyroduct_faces\n返回面目录"]
+      tool_face [label="pyroduct_face\n运行单面"]
+      tool_gates [label="pyroduct_gates\n跑门禁"]
+    }
+
+    resolve [label="resolveBridge(projectDir)\n选择桥路径"]
+    callbridge [label="callBridge(projectDir, request, signal)\nspawn node jsoncli.js"]
+
+    subgraph cluster_bridge_resolution {
+      label="桥解析决策"
+      style=dashed
+      color="#999999"
+
+      has_project_dir [label="PYRODUCT_PROJECT_DIR\n已设置?", shape=diamond, fillcolor="#FFFACD"]
+      checkout_exists [label="checkout\n可构建?", shape=diamond, fillcolor="#FFFACD"]
+
+      bridge_checkout [label="bridge = checkout/\n_build/js/.../jsoncli.js\nsource = 'checkout'"]
+      bridge_bundled [label="bridge = vendor/jsoncli.js\nsource = 'bundled'\nwarning = '已回落'"]
+    }
+
+    spawn [label="runProcess(nodePathOf(),\n  [bridge, JSON.stringify(request)],\n  {cwd, timeoutMs, signal})"]
+    parse_reply [label="解析 stdout 最后一行\nJSON.parse(line)"]
+    check_ok [label="reply.ok === true?", shape=diamond, fillcolor="#FFFACD"]
+  }
+
+  // JSON bridge (MoonBit → JS)
+  subgraph cluster_jsoncli {
+    label="cmd/jsoncli/main.mbt (JS target)"
+    style=filled
+    color="#98FB98"
+
+    main [label="main()\nfind_request_arg(args)"]
+    find_json [label="找以 '{' 开头的参数", shape=diamond, fillcolor="#FFFACD"]
+    handle_jsoncli [label="handle(raw)\n解析 Request JSON"]
+    validate_kind [label="kind ∈ faces()?", shape=diamond, fillcolor="#FFFACD"]
+    render [label="render_kind(kind)\n路由到 @pkg.render_xxx()"]
+    reply_ok [label="ok_reply(kind, rendered)\n{ok: true, kind, rendered, faces}"]
+    reply_err [label="err_reply(msg)\n{ok: false, error, faces}"]
+  }
+
+  // Model packages
+  subgraph cluster_model {
+    label="模型包 (MoonBit)"
+    style=dashed
+    color="#999999"
+
+    sm [label="@sm\nsrc (主体机)"]
+    multi [label="@multi\n多主体"]
+    group [label="@group\n群体"]
+    society [label="@society\n社会"]
+    evolution [label="@evolution\n进化"]
+    audit [label="@audit\n审计"]
+    ml_pkg [label="@ml\n机器学习"]
+    others [label="...\n其他 24 面"]
+  }
+
+  // Response path
+  subgraph cluster_response {
+    label="响应路径"
+    style=dashed
+    color="#999999"
+    stdout [label="stdout:\n一行 JSON"]
+    textresult [label="textResult(body)\n或 toolResult(error, true)"]
+    user_response [label="用户看到报告全文", shape=ellipse, fillcolor="#FFE4B5"]
+  }
+
+  // Flow: user → MCP
+  user -> jsonrpc [label="MCP 请求"]
+
+  // Flow: MCP → plugin
+  jsonrpc -> handle
+
+  // Flow: handle routing
+  handle -> tool_faces [label="method='tools/call'\nname='pyroduct_faces'"]
+  handle -> tool_face [label="method='tools/call'\nname='pyroduct_face'"]
+  handle -> tool_gates [label="method='tools/call'\nname='pyroduct_gates'"]
+
+  // Flow: tool_faces (probe with report)
+  tool_faces -> resolve
+  resolve -> has_project_dir
+  has_project_dir -> checkout_exists [label="是"]
+  has_project_dir -> bridge_bundled [label="否"]
+  checkout_exists -> bridge_checkout [label="是"]
+  checkout_exists -> bridge_bundled [label="否"]
+  bridge_checkout -> callbridge
+  bridge_bundled -> callbridge
+
+  // Flow: callBridge
+  callbridge -> spawn
+  spawn -> parse_reply
+  parse_reply -> check_ok
+  check_ok -> tool_faces [label="false\n(仅探测)"]
+  check_ok -> textresult [label="true\n渲染目录"]
+
+  // Flow: tool_face (run one face)
+  tool_face -> resolve
+  tool_face -> callbridge [label="request = {kind}"]
+  check_ok -> textresult [label="true\n返回 rendered"]
+  check_ok -> tool_result_err [label="false\n返回 error", style=dotted]
+
+  // Flow: jsoncli execution
+  spawn -> main [label="node jsoncli.js '{json}'"]
+  main -> find_json
+  find_json -> handle_jsoncli [label="找到"]
+  find_json -> reply_err [label="未找到\n'missing request argument'"]
+  handle_jsoncli -> validate_kind
+  validate_kind -> render [label="是"]
+  validate_kind -> reply_err [label="否\n'unknown kind'"]
+  render -> reply_ok
+
+  // Flow: render to model packages
+  render -> sm [label="report/slots/loop/\nmermaid/dot/..."]
+  render -> multi [label="multi"]
+  render -> group [label="group"]
+  render -> society [label="society"]
+  render -> evolution [label="evolution/cycle/\nintuition/association"]
+  render -> audit [label="audit/fleet/\nmutants/mbti"]
+  render -> ml_pkg [label="ml/ml-export"]
+  render -> others
+
+  // Flow: response back
+  reply_ok -> stdout
+  reply_err -> stdout
+  stdout -> parse_reply
+  textresult -> user_response
+
+  // Flow: tool_gates (run gate suite)
+  tool_gates -> resolve [label="检查 projectDir"]
+  tool_gates -> run_moon [label="projectDir ≠ null"]
+
+  subgraph cluster_gates {
+    label="门禁执行"
+    style=dashed
+    color="#999999"
+    run_moon [label="依次执行:\nmoon check\nmoon fmt --check\nmoon test"]
+    gate_result [label="汇总退出码\n+ 输出尾部"]
+  }
+
+  run_moon -> gate_result
+  gate_result -> textresult
+
+  // Styling
+  {rank=same; user; jsonrpc}
+  {rank=same; handle; tool_faces; tool_face; tool_gates}
+  {rank=same; resolve; callbridge}
+  {rank=same; main; handle_jsoncli; render}
+  {rank=same; sm; multi; group; society; evolution; audit; ml_pkg; others}
+}

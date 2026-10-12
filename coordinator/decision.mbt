@@ -8,8 +8,8 @@
 ///|
 /// 商谈段：开放。
 pub(all) struct Deliberation {
-  question : Int
-  options : Array[Int] // 候选发现（finding id）
+  question : Int32
+  options : Array[Int32] // 候选发现（finding id）
   open_remainder : String // 未穷尽者（R3），恒非空
 }
 
@@ -39,13 +39,13 @@ pub fn Commitment::label(self : Commitment) -> String {
 ///|
 /// 决策段：必须交付，且恒带可修订标记、残余归属与重开条件。
 pub struct Decision {
-  question : Int
-  chosen : Int
+  question : Int32
+  chosen : Int32
   commitment : Commitment
   revisable : Bool
-  residual_owner : Int
+  residual_owner : Int32
   reopen_when : String
-  at : Int
+  at : Int32
 }
 
 ///|
@@ -53,10 +53,10 @@ pub struct Decision {
 /// 选中项不在方案里、未穷尽者为空、重开条件为空、残余归属无效。
 pub fn decide(
   d : Deliberation,
-  chosen : Int,
-  residual_owner : Int,
+  chosen : Int32,
+  residual_owner : Int32,
   reopen_when : String,
-  at : Int,
+  at : Int32,
 ) -> Decision? {
   if !d.options.contains(chosen) {
     return None
@@ -86,7 +86,7 @@ pub fn decision_ok(dec : Decision) -> Bool {
 
 ///|
 /// 回到商谈段（缺口可达）：交付降为草稿，并把新方案并进来。
-pub fn reopen(dec : Decision, extra : Int) -> Deliberation {
+pub fn reopen(dec : Decision, extra : Int32) -> Deliberation {
   {
     question: dec.question,
     options: [dec.chosen, extra],

@@ -74,6 +74,17 @@ python tools/mutate_review.py          # review harness: mutation table for all 
                                        # compiler proves the syntax, not the criteria.
                                        # Surviving mutations must be classified as
                                        # equivalent or a named gap.
+python tools/validate_dependencies.py  # architecture drift detector: parses every
+                                       # moon.pkg import, compares against the two DOT
+                                       # diagrams in architecture/. Exit 0 if edges
+                                       # match, 1 if drift (false or missing edges).
+                                       # Examples and tools/ excluded by design.
+node plugin/tools/validate-plugin.mjs  # plugin anti-drift (28 checks): pin SHA-256,
+                                       # MCP handshake, 31 faces, face-count anti-drift,
+                                       # test-count anti-drift (gates description must
+                                       # state real wasm test count), version consistency
+                                       # (plugin.json = server.mjs SERVER_VERSION),
+                                       # content invariants, page-citation anti-drift.
 ```
 
 - After changing dependencies in `moon.mod`, run `moon update` first.
@@ -127,6 +138,50 @@ python tools/mutate_review.py          # review harness: mutation table for all 
   so assert on the `Server status:` line, never on the exit code.
 - `moon publish` takes the version from `moon.mod`, not from the tag; the workflow asserts
   they agree and that the repository holds exactly one module.
+
+## Living architecture (`architecture/`, `LIVING_ARCHITECTURE.md`)
+
+The `architecture/` directory holds version-controlled architecture artifacts: system
+models (Structurizr DSL), dependency graphs (Graphviz DOT), flow diagrams, deployment
+topology, health reports, and evolution plans. `LIVING_ARCHITECTURE.md` is the contract —
+it declares which invariants are CI-enforced and how to extend the system.
+
+Three drift detectors run in CI on every push and PR:
+
+- **`python tools/validate_dependencies.py`** — parses every `moon.pkg` import block,
+  compares against `architecture/module-dependencies.dot` and
+  `architecture/dependency-map.dot`. Reports false edges (in diagram, not in code) and
+  missing edges (in code, not in diagram). `examples/*` and `tools/*` are excluded by
+  design (they are intentionally absent from the architecture diagrams). Also checks that
+  every DOT file carries a `// model-version: X.Y.Z` header matching `moon.mod`.
+- **`python tools/validate_readme_facts.py`** — parses both READMEs for numerical claims
+  about states, transitions, phases, triggers and slots, and compares them against the
+  ground truth extracted from source. Catches the drift where the model enums moved and
+  the documentation did not.
+- **`node plugin/tools/validate-plugin.mjs`** — the harness prints its own count; **do not
+  transcribe it into prose**, because the number moves with every check added. That is
+  exactly how the "28 faces" description and a "28 checks" line here both went stale while
+  everything was green. It covers: the pin SHA-256, a real MCP handshake, all 31 faces,
+  face-count anti-drift, test-count anti-drift (the `pyroduct_gates` description must state
+  the real wasm test count), model-fact anti-drift, version consistency (`plugin.json` =
+  `server.mjs` SERVER_VERSION), content invariants, and a page-citation anti-drift rule.
+
+All three are in `gate.yml` (every push/PR) and `publish.yml` (before release). A drift
+failure is a CI failure — it cannot merge.
+
+When you change a `moon.pkg` import, update the DOT diagrams. When you change the test
+count or add/remove a face, update the plugin descriptions. The validators catch it if
+you forget.
+
+## Toolchain
+
+The formatter moves between moon versions, so a release can turn `moon fmt --check` red
+with no edit of your own — moon 0.1.20261012 began writing the `Int` alias as `Int32`.
+When that happens: measure the scope first (it is usually a single alias rewrite across
+many files), apply the canonical copies under `_build/<target>/release/format/`, and
+**prove behaviour is unchanged** by hashing several rendered faces before and after. Do not
+assume "type alias, therefore cosmetic" — measure it, the same way any other rewrite is
+measured.
 
 ## MiniMax Code plugin (`plugin/`)
 

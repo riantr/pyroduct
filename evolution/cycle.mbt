@@ -41,7 +41,7 @@ pub fn cycle_state(state : @sm.SubjectState, genome : Genome) -> CycleState {
 ///|
 /// 一个回合的全部记录。
 pub struct CycleEvent {
-  round : Int
+  round : Int32
   state_before : @sm.SubjectState
   slot : @sm.Slot // 这一步由哪类结构关系驱动
   outcome : @sm.Outcome // 迁／守／未定→已裁决／无路
@@ -118,7 +118,7 @@ fn cycle_slot(f : Fitness, at : @sm.SubjectState) -> @sm.Slot {
 /// 取料与判定分开，`group_lean` 只是它的读取器。`Genome` 在包外是**只读类型**、
 /// 构造不了，所以判据要能验就得能喂数——两根 `Int` 造得出来，两个轴换位也验得了。
 /// 边界一并可测：两轴相等（缺省基因组就是 70:70）归 `超体`。
-pub fn group_lean_of(toward_other : Int, toward_self : Int) -> @g.GroupLean {
+pub fn group_lean_of(toward_other : Int32, toward_self : Int32) -> @g.GroupLean {
   if toward_other > toward_self {
     @g.Inter
   } else {
@@ -188,7 +188,7 @@ pub fn run_cycle(
   seed : CycleState,
   world : Array[Opponent],
   criterion : Criterion,
-  rounds : Int,
+  rounds : Int32,
 ) -> SubjectCycle {
   let objective = match criterion {
     Weighted(o) => o
@@ -281,10 +281,10 @@ fn offer(
   parent : Genome,
   c : Candidate,
   world : Array[Opponent],
-  parent_score : Int,
+  parent_score : Int32,
   criterion : Criterion,
   memo : DecisionMemo,
-  round : Int,
+  round : Int32,
 ) -> Offer {
   let d = memo.judgement(parent, c, round, () => {
     judge(parent, parent_score, c, world, criterion)

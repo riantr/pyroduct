@@ -1,0 +1,109 @@
+// Evolution Layer - Main Cycle Path (Simplified)
+// Skill: flow-visualizer + graphviz
+// Date: 2026-10-11
+// Focus: One round of run_cycle, from response to update
+
+// model-version: 0.1.30
+digraph evolution_main_path {
+    rankdir=TB;
+    node [shape=box, style=filled, fontname="Arial", fontsize=10];
+    edge [fontname="Arial", fontsize=9, penwidth=2];
+
+    // === Main Path ===
+    start [label="回合开始\nround = 0, 1, 2, ...", fillcolor="#64B5F6", penwidth=3];
+
+    response [label="evaluate(genome, world)\n→ Fitness(consensus, stability, residue, cost)\n世界回应: 真跑遭遇得到的四分量", fillcolor="#FFE0B2"];
+
+    slot [label="cycle_slot(fitness, state)\n→ Slot\n选择驱动槽: 按优先序找可走的槽", fillcolor="#FFE0B2"];
+
+    step [label="@sm.step(state, slot)\n→ raw Outcome\n状态机执行: 迁/守/未定/同归/无路", fillcolor="#FFE0B2"];
+
+    resolve {label="raw 是 Open?", fillcolor="#FFCC80", shape=diamond};
+
+    resolved [label="resolve_open(raw, genome, state)\n按双诚之比裁决:\ntoward_other > toward_self → 空间侧\n否则 → 时间侧", fillcolor="#CE93D8"];
+
+    outcome [label="outcome: 最终回执\n(迁/守/同归/无路)", fillcolor="#A5D6A7"];
+
+    position [label="moved_to = outcome.landing()\nSome(next) → next\nNone → state (不推进)", fillcolor="#FFE0B2"];
+
+    candidates [label="生成两个候选:\n修习: carry -4 (≥1)\n开放: toward_self -25 (≥1)", fillcolor="#CE93D8"];
+
+    gate {label="闸门判定\njudge(parent, candidate, ...)", fillcolor="#FFCC80", shape=diamond};
+
+    gate_const [label="宪法检查\nconstitution_violations()\nR10: carry ≥1\nR2/R14: 不得宣告\nR3: toward_other > 0", fillcolor="#E1BEE7"];
+
+    gate_criterion {label="判据?", fillcolor="#FFCC80", shape=diamond};
+
+    gate_weighted [label="Weighted:\nscore 比较\n退步→回滚", fillcolor="#E1BEE7"];
+
+    gate_causal [label="Causal:\nDoubleML θ̂\nθ̂>0 且 下界>0", fillcolor="#E1BEE7"];
+
+    apply {label="裁决结果?", fillcolor="#FFCC80", shape=diamond};
+
+    apply_yes [label="Accepted → 应用改动\nnext_genome = candidate.genome", fillcolor="#A5D6A7"];
+
+    apply_no [label="Rejected/Tie → 保持\nnext_genome = genome", fillcolor="#EF9A9A"];
+
+    record [label="记录 CycleEvent\n(round, state, slot, outcome,\ngenome, response, practice, opening)", fillcolor="#FFE0B2"];
+
+    next {label="还有回合?", fillcolor="#FFCC80", shape=diamond};
+
+    loop [label="cur = { state: moved_to, genome: next_genome }\n→ 下一回合", fillcolor="#64B5F6"];
+
+    done [label="返回 SubjectCycle\n{ seed, objective, events[] }\n.ledger() → 只追加账本", fillcolor="#64B5F6", penwidth=3];
+
+    // === Main Flow ===
+    start -> response [color="#1565C0"];
+    response -> slot [color="#E65100"];
+    slot -> step [color="#E65100"];
+    step -> resolve [color="#E65100"];
+
+    resolve -> resolved [label="是\nOpen", color="#6A1B9A"];
+    resolve -> outcome [label="否\n其他", color="#2E7D32"];
+    resolved -> outcome [color="#6A1B9A"];
+
+    outcome -> position [color="#E65100"];
+    position -> candidates [color="#E65100"];
+    candidates -> gate [color="#6A1B9A"];
+
+    gate -> gate_const [color="#6A1B9A"];
+    gate_const -> gate_criterion [label="合宪", color="#2E7D32"];
+    gate_const -> apply_no [label="违宪", color="#C62828"];
+
+    gate_criterion -> gate_weighted [label="Weighted", color="#2E7D32"];
+    gate_criterion -> gate_causal [label="Causal", color="#6A1B9A"];
+
+    gate_weighted -> apply [color="#E65100"];
+    gate_causal -> apply [color="#E65100"];
+
+    apply -> apply_yes [label="Accepted", color="#2E7D32"];
+    apply -> apply_no [label="其他", color="#C62828"];
+
+    apply_yes -> record [color="#2E7D32"];
+    apply_no -> record [color="#C62828"];
+
+    record -> next [color="#E65100"];
+
+    next -> loop [label="是\nround < rounds", color="#2E7D32"];
+    next -> done [label="否\nround >= rounds", color="#1565C0"];
+
+    loop -> response [style=dashed, color="#1565C0"];
+
+    // === Key Invariants ===
+    subgraph cluster_invariants {
+        label="关键不变量 (Key Invariants)";
+        style=filled;
+        color="#E8F5E9";
+        fontcolor="#2E7D32";
+
+        inv1 [label="位置推进只走迁移表\n@sm.step() 的回执决定位置\n不编造下一步", shape=note, fillcolor="#C8E6C9"];
+
+        inv2 [label="未定由双诚之比裁决\ntoward_other > toward_self\n→ 空间侧(后一条)", shape=note, fillcolor="#C8E6C9"];
+
+        inv3 [label="一切改动都过闸门\n宪法级 + 选择级\n退步就回滚", shape=note, fillcolor="#C8E6C9"];
+
+        inv4 [label="同判不重裁\n备忘录记录首裁结果\n后续回合直接读回", shape=note, fillcolor="#C8E6C9"];
+
+        inv5 [label="残余恒 ≥1 (R10)\n不许把不确定性进化掉\ncarry -4 降到 1 为止", shape=note, fillcolor="#C8E6C9"];
+    }
+}

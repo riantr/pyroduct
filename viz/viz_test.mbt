@@ -1,6 +1,6 @@
 ///|
 /// 数一段 Mermaid 源里带 " --> " 的行（起始行 + 迁移行；注释与声明不算）。
-fn arrow_lines(text : String) -> Int {
+fn arrow_lines(text : String) -> Int32 {
   let mut n = 0
   for line in text.split("\n") {
     if line.contains(" --> ") {

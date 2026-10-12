@@ -9,9 +9,9 @@
 ///|
 /// 一条消息。
 pub struct Message {
-  at : Int
-  from : Int
-  to : Int // -1 = 广播
+  at : Int32
+  from : Int32
+  to : Int32 // -1 = 广播
   discourse : @multi.DiscourseType
   claim : @multi.ClaimKind
   body : String
@@ -20,9 +20,9 @@ pub struct Message {
 ///|
 /// 运行时状态。`clock` 可变，其余是只追加的台账。
 pub struct Runtime {
-  mut clock : Int
+  mut clock : Int32
   log : Array[Message]
-  done : Array[Int]
+  done : Array[Int32]
   notebook : Notebook
   results : Array[Result]
   artifacts : Array[Artifact]
@@ -44,13 +44,13 @@ pub fn Runtime::new() -> Runtime {
 ///|
 /// 一步的回执。
 pub struct StepReport {
-  at : Int
-  task : Int
-  agent : Int
+  at : Int32
+  task : Int32
+  agent : Int32
   discourse : String
   verdict : String
-  result : Int
-  finding : Int
+  result : Int32
+  finding : Int32
 }
 
 ///|
@@ -238,7 +238,7 @@ fn kind_of(s : StringView) -> ArtifactKind {
 }
 
 ///|
-fn ito(s : StringView) -> Int {
+fn ito(s : StringView) -> Int32 {
   @string.from_str(s.to_owned()) catch {
     _ => 0
   }
@@ -301,7 +301,7 @@ pub fn Runtime::checkpoint(self : Runtime) -> String {
 pub fn restore(text : String) -> Runtime {
   let mut clock = 0
   let log : Array[Message] = []
-  let done : Array[Int] = []
+  let done : Array[Int32] = []
   let results : Array[Result] = []
   let artifacts : Array[Artifact] = []
   let nb_lines : Array[String] = []

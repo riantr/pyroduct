@@ -29,7 +29,7 @@ pub struct Offer {
 /// 枚举父代的全部候选，逐个过闸门。
 pub fn breed(
   parent : Genome,
-  parent_score : Int,
+  parent_score : Int32,
   world : Array[Opponent],
   criterion : Criterion,
 ) -> Array[Offer] {
@@ -52,7 +52,7 @@ pub fn evolve(
   seed : Genome,
   world : Array[Opponent],
   criterion : Criterion,
-  generations : Int,
+  generations : Int32,
 ) -> Ledger {
   let objective = match criterion {
     Weighted(o) => o
@@ -108,7 +108,7 @@ pub fn evolve(
 
 ///|
 /// 挑选「最好」的那个改动：加权判据看分数，因果判据看效应。
-fn key_of(d : Decision, criterion : Criterion) -> Int {
+fn key_of(d : Decision, criterion : Criterion) -> Int32 {
   match criterion {
     Weighted(_) => d.score
     Causal(_) => d.effect

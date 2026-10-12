@@ -22,17 +22,17 @@ pub(all) struct Sediment {
   cross_mean : Double
   hit_rate : Double
   chance_rate : Double
-  n_triggers : Int
-  n_slots : Int
-  n_steps : Int
+  n_triggers : Int32
+  n_slots : Int32
+  n_steps : Int32
   recovered : Bool
-  slot_rows : Array[(String, Int, Int)]
+  slot_rows : Array[(String, Int32, Int32)]
 }
 
 ///|
 /// 实验配置（模型整理的节奏参数）：全部随机性只走一个种子。
 pub(all) struct SedimentConfig {
-  episodes : Int
+  episodes : Int32
   block_ms : Float
   dt : Float
   rate_high : Float
@@ -62,7 +62,7 @@ pub fn run_sediment(config : SedimentConfig) -> Sediment {
   let n = triggers.length()
   let k = slots.length()
   // 通道 → 槽下标（驱动槽八分就是对照的真值划分）。
-  let slot_of : Array[Int] = Array::make(n, 0)
+  let slot_of : Array[Int32] = Array::make(n, 0)
   for j in 0..<n {
     let mut idx = 0
     for m in 0..<k {
@@ -73,8 +73,8 @@ pub fn run_sediment(config : SedimentConfig) -> Sediment {
     slot_of[j] = idx
   }
   // 全连接 CSR：行 = 前元（通道 j），列 = 后元（通道 i）。
-  let rowptr : Array[Int] = []
-  let colptr : Array[Int] = []
+  let rowptr : Array[Int32] = []
+  let colptr : Array[Int32] = []
   for j in 0..<=n {
     rowptr.push(j * n)
   }
@@ -153,8 +153,8 @@ pub fn run_sediment(config : SedimentConfig) -> Sediment {
     }
   }
   // 对照 2：每个通道最强伙伴是否同槽；基线由实际槽规模算出。
-  let hits : Array[Int] = Array::make(k, 0)
-  let sizes : Array[Int] = Array::make(k, 0)
+  let hits : Array[Int32] = Array::make(k, 0)
+  let sizes : Array[Int32] = Array::make(k, 0)
   for m in 0..<k {
     for j in 0..<n {
       if slot_of[j] == m {
@@ -184,7 +184,7 @@ pub fn run_sediment(config : SedimentConfig) -> Sediment {
     chance = chance + (sizes[slot_of[j]] - 1).to_double() / (n - 1).to_double()
   }
   chance = chance / n.to_double()
-  let rows : Array[(String, Int, Int)] = []
+  let rows : Array[(String, Int32, Int32)] = []
   for m in 0..<k {
     rows.push((slots[m].designation(), sizes[m], hits[m]))
   }

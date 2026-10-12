@@ -124,3 +124,37 @@ jobs:
         # seed), so it is a legitimate gate: it asserts the experiment still
         # recovers the 8-slot structure rather than merely exiting 0.
         run: moon run --target native examples/sediment
+
+      # ---- architecture drift detectors ----
+      #
+      # Two drift failures happened before any standing check caught them:
+      # (1) module-dependencies.dot drew cmd_jsoncli -> viz, but cmd/jsoncli
+      #     does not import viz — a false edge that no test exercised;
+      # (2) plugin/server.mjs said "190 tests" while the actual count was 197 —
+      #     the same drift shape as the "28 faces" bug commit 7b95863 fixed.
+      # Both are now caught here so they cannot recur.
+
+      - name: architecture · dependency edges + version pins must match code
+        # Parses every moon.pkg import block, compares against the two DOT
+        # diagrams in architecture/. Reports false edges (in diagram, not in
+        # code) and missing edges (in code, not in diagram). Examples and
+        # tools/ are excluded — they are intentionally absent from the diagrams.
+        # Also checks that all DOT files carry a // model-version: X.Y.Z header
+        # matching the current moon.mod version.
+        run: python tools/validate_dependencies.py
+
+      - name: architecture · README model facts must match code
+        # Parses README.mbt.md and README.zh.mbt.md for numerical claims about
+        # states, transitions, phases, triggers, and slots, then compares them
+        # against the ground truth extracted from source code. Catches drift
+        # when model enums change but documentation doesn't.
+        run: python tools/validate_readme_facts.py
+
+      - name: plugin · anti-drift (faces, versions, test count, model facts, invariants)
+        # 36 checks: pin SHA-256, MCP handshake, all 31 faces render, face-count
+        # anti-drift, page-citation anti-drift, test-count anti-drift (the gates
+        # description must state the real wasm test count), model fact anti-drift
+        # (face descriptions must match actual state/transition/phase counts),
+        # version consistency (plugin.json = server.mjs SERVER_VERSION), and
+        # content invariants.
+        run: node plugin/tools/validate-plugin.mjs

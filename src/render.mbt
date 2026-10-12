@@ -3,7 +3,7 @@
 
 ///|
 /// 把阐释性的自由刻度渲染成带正负号的字符串。
-pub fn freedom_text(f : Int) -> String {
+pub fn freedom_text(f : Int32) -> String {
   if f >= 0 {
     "+\{f}"
   } else {

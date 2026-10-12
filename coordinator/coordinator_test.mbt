@@ -3,7 +3,7 @@
 
 ///|
 /// 取 `v` 在 `xs` 中的下标（找不到返回 -1）。
-fn idx(xs : Array[Int], v : Int) -> Int {
+fn idx(xs : Array[Int32], v : Int32) -> Int32 {
   for i = 0; i < xs.length(); i = i + 1 {
     if xs[i] == v {
       return i
@@ -14,7 +14,7 @@ fn idx(xs : Array[Int], v : Int) -> Int {
 
 ///|
 /// 跑一段示例研究。
-fn run_demo(steps : Int) -> @coordinator.Runtime {
+fn run_demo(steps : Int32) -> @coordinator.Runtime {
   let rt = @coordinator.new_runtime()
   let ts = @coordinator.demo_tasks()
   let qs = @coordinator.demo_questions()

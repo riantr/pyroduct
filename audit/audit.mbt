@@ -107,7 +107,7 @@ pub fn run_audit(
 
 ///|
 /// 三位数显示（如 34 → `034`）——与 src 的报告对齐。
-fn fmt3(n : Int) -> String {
+fn fmt3(n : Int32) -> String {
   "\{n / 100}\{(n % 100) / 10}\{n % 10}"
 }
 

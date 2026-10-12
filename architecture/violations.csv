@@ -1,0 +1,22 @@
+CheckType,Package,Severity,Description,Evidence,Recommendation
+Cycle Detection,all,PASS,无循环依赖,依赖图是有向无环图(DAG),无需操作
+Layer Violation,all,PASS,无层违规,依赖方向严格自下而上,无需操作
+Dependency Isolation,all,PASS,第三方依赖隔离良好,async→cmd/coord+ifacescan; doubleML→dmlref+causal; snn→snnref; static_analysis→audit,无需操作
+Zero Import Rule,src,PASS,src 零 import,src/moon.pkg 无 import 块,保持
+Zero Import Rule,society,PASS,society 零 import,society/moon.pkg 无 import 块,建议显式声明
+Self-Containment,ml,PASS,ml 不 import 数值库,ml/moon.pkg 仅 import core/math,保持
+Read-Only Audit,audit,PASS,audit 只读,audit/moon.pkg 注释声明只读,保持
+Read-Only Audit,causal,PASS,causal 只读,causal 依赖 ml 但不修改判据,保持
+High Fan-in Warning,src,INFO,Fan-in=8 变更影响范围广,8个包依赖 src,视为稳定契约; API 版本化
+High Fan-in Warning,multi,INFO,Fan-in=4 变更影响范围中等,4个包依赖 multi,规范规则变更需审查消费者
+High Fan-in Warning,group,INFO,Fan-in=4 变更影响范围中等,4个包依赖 group,群体机变更需审查消费者
+High Fan-in Warning,ml,INFO,Fan-in=4 数值算法敏感,4个包依赖 ml,变更需交叉验证
+High Fan-out Note,cmd/main,INFO,Fan-out=11 聚合入口,import 所有包,设计意图; 无需操作
+High Fan-out Note,cmd/jsoncli,INFO,Fan-out=8 聚合入口,import 8个包,设计意图; 无需操作
+Leaf Node,snnref,INFO,Fan-in=0 叶子节点,无包依赖 snnref,可独立修改
+Leaf Node,dmlref,INFO,Fan-in=1 低影响,仅被 cmd/main 使用,可独立修改
+Leaf Node,causal,INFO,Fan-in=1 低影响,仅被 cmd/main 使用,可独立修改
+Stable Abstraction,src,INFO,Fan-in=8 Fan-out=0,核心基础包,高影响但稳定
+Stable Abstraction,society,INFO,Fan-in=3 Fan-out=0,独立基础包,稳定抽象
+Stable Abstraction,multi,INFO,Fan-in=4 Fan-out=1,规范层,稳定抽象
+Stable Abstraction,ml,INFO,Fan-in=4 Fan-out=1,工具层,稳定抽象

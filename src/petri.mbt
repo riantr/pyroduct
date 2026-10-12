@@ -31,7 +31,7 @@
 ///|
 /// 标识：库所（位置的定名）→ 托肯数。不可变；发火返回新标识。
 pub(all) struct PetriMarking {
-  counts : Map[String, Int]
+  counts : Map[String, Int32]
 } derive(Eq)
 
 ///|
@@ -40,7 +40,7 @@ pub extend PetriMarking with Eq::{not_equal, equal}
 ///|
 /// 从托肯列表构造标识（同库所多托肯自动合并计数）。
 pub fn petri_marking_of(tokens : Array[SubjectState]) -> PetriMarking {
-  let counts : Map[String, Int] = Map([])
+  let counts : Map[String, Int32] = Map([])
   for t in tokens {
     let k = t.designation()
     counts[k] = petri_at_counts(counts, k) + 1
@@ -49,7 +49,7 @@ pub fn petri_marking_of(tokens : Array[SubjectState]) -> PetriMarking {
 }
 
 ///|
-fn petri_at_counts(counts : Map[String, Int], key : String) -> Int {
+fn petri_at_counts(counts : Map[String, Int32], key : String) -> Int32 {
   match counts.get(key) {
     Some(n) => n
     None => 0
@@ -58,13 +58,13 @@ fn petri_at_counts(counts : Map[String, Int], key : String) -> Int {
 
 ///|
 /// 某库所的托肯数。
-pub fn PetriMarking::at(self : PetriMarking, s : SubjectState) -> Int {
+pub fn PetriMarking::at(self : PetriMarking, s : SubjectState) -> Int32 {
   petri_at_counts(self.counts, s.designation())
 }
 
 ///|
 /// 标识上的总托肯数——发火守恒（一对一）不变式的观测量。
-pub fn PetriMarking::total(self : PetriMarking) -> Int {
+pub fn PetriMarking::total(self : PetriMarking) -> Int32 {
   let mut n = 0
   for entry in self.counts {
     let (k, v) = entry
@@ -136,7 +136,7 @@ pub fn PetriMarking::fire(
   if !known {
     return None
   }
-  let counts : Map[String, Int] = Map([])
+  let counts : Map[String, Int32] = Map([])
   for entry in self.counts {
     let (k, v) = entry
     counts[k] = v
@@ -168,7 +168,7 @@ pub fn PetriMarking::fire_by(
 
 ///|
 /// 定点显示：托肯数（供报告）。
-fn petri_fmt_count(n : Int) -> String {
+fn petri_fmt_count(n : Int32) -> String {
   n.to_string()
 }
 

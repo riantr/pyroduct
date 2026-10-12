@@ -5,10 +5,10 @@
 ///|
 /// 便捷：造一个从「相遇」出发的主体。
 fn at(
-  id : Int,
+  id : Int32,
   regime : @multi.TruthRegime,
-  other : Int,
-  self_ : Int,
+  other : Int32,
+  self_ : Int32,
 ) -> @multi.Subject {
   @multi.subject(id, @multi.rendezvous(), regime, other, self_, 9)
 }

@@ -5,10 +5,10 @@
 /// 一次报告的全部超参数。
 pub struct MlPlan {
   theta : Double
-  single_n : Int
+  single_n : Int32
   single : DmlConfig
-  rep_n : Int
-  reps : Int
+  rep_n : Int32
+  reps : Int32
   rep : DmlConfig
 }
 
@@ -87,7 +87,7 @@ pub fn render_ml_report(plan : MlPlan) -> String {
 
 ///|
 /// CSV 前若干行（供 CLI 展示，或导出给 Python 的 DoubleML / EconML 复核）。
-pub fn csv_preview(data : Dataset, rows : Int) -> String {
+pub fn csv_preview(data : Dataset, rows : Int32) -> String {
   let all = export_csv(data).split("\n").collect()
   let out : Array[String] = []
   let mut i = 0

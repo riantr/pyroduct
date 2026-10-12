@@ -28,10 +28,10 @@
 /// 末条（空间侧）取 toward_other，中间候选取两侧均值（中性权重；机器若
 /// 不出现 >2 路并存则此分支不触发）。
 fn association_weight(
-  cands_length : Int,
-  index : Int,
-  toward_self : Int,
-  toward_other : Int,
+  cands_length : Int32,
+  index : Int32,
+  toward_self : Int32,
+  toward_other : Int32,
 ) -> Double {
   if index == 0 {
     toward_self.to_double()
@@ -47,8 +47,8 @@ fn association_weight(
 /// 双诚同为零时（变异可把两诚夹到 0）无似然可言，回退均匀分布——门限外
 /// 无信息，均匀是诚实的无信息先验。
 pub fn association_probs(
-  toward_self : Int,
-  toward_other : Int,
+  toward_self : Int32,
+  toward_other : Int32,
   outcome : @sm.Outcome,
 ) -> Array[Double] {
   let out : Array[Double] = []
@@ -94,8 +94,8 @@ pub fn association_entropy(probs : Array[Double]) -> Double {
 /// 为 β 的 argmax。两诚持平 → argmax 并列取首，恰是硬裁决的「挑首」。
 /// 非未定返回 None。
 pub fn association_consistent(
-  toward_self : Int,
-  toward_other : Int,
+  toward_self : Int32,
+  toward_other : Int32,
   outcome : @sm.Outcome,
 ) -> Bool? {
   match outcome {

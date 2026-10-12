@@ -1,0 +1,76 @@
+// Subject State Machine - Main Execution Path
+// Skill: flow-visualizer + graphviz
+// Date: 2026-10-11
+// Focus: Happy path from step() call to Outcome
+
+// model-version: 0.1.30
+digraph subject_main_path {
+    rankdir=TB;
+    node [shape=box, style=filled, fontname="Arial", fontsize=10];
+    edge [fontname="Arial", fontsize=9, penwidth=2];
+
+    // === Main Path ===
+    start [label="调用 step(state, slot)", fillcolor="#64B5F6", shape=box, penwidth=3];
+
+    collect [label="candidates(state, slot)\n遍历 transitions()\n过滤: from==state && trigger.slot()==slot\n返回: Array[(Trigger, SubjectState)]", fillcolor="#FFE0B2"];
+
+    check_empty {label="候选为空?", fillcolor="#FFCC80", shape=diamond};
+
+    block [label="Block(msg)\n无路\n此槽在此位置无出边", fillcolor="#EF9A9A", penwidth=3];
+
+    count_targets [label="计算不同目标数\n遍历 candidates\n收集唯一的 to 状态", fillcolor="#FFE0B2"];
+
+    check_multi_target {label="多个目标?", fillcolor="#FFCC80", shape=diamond};
+
+    open [label="Open(candidates)\n未定\n多条去处并存\n不替主体决断", fillcolor="#CE93D8", penwidth=3];
+
+    check_multi_trigger {label="多条候选?", fillcolor="#FFCC80", shape=diamond};
+
+    same [label="Same(slot, triggers, to)\n同归\n多条触发归到同一目标\n去处确定，来处不名", fillcolor="#CE93D8", penwidth=3];
+
+    check_self_loop {label="目标==当前?", fillcolor="#FFCC80", shape=diamond};
+
+    held [label="Held(trigger, state)\n守\n出路回到自身\n(17条自环之一)", fillcolor="#A5D6A7", penwidth=3];
+
+    moved [label="Moved(trigger, to)\n迁\n唯一出路\n由该触发迁到该位置", fillcolor="#A5D6A7", penwidth=3];
+
+    // === Main Flow Edges ===
+    start -> collect [color="#1565C0"];
+    collect -> check_empty [color="#E65100"];
+
+    check_empty -> block [label="是\n|candidates| == 0", color="#C62828"];
+    check_empty -> count_targets [label="否\n|candidates| >= 1", color="#2E7D32"];
+
+    count_targets -> check_multi_target [color="#E65100"];
+
+    check_multi_target -> open [label="是\n|targets| > 1", color="#6A1B9A"];
+    check_multi_target -> check_multi_trigger [label="否\n|targets| == 1", color="#2E7D32"];
+
+    check_multi_trigger -> same [label="是\n|candidates| > 1", color="#6A1B9A"];
+    check_multi_trigger -> check_self_loop [label="否\n|candidates| == 1", color="#2E7D32"];
+
+    check_self_loop -> held [label="是\nto == state", color="#2E7D32"];
+    check_self_loop -> moved [label="否\nto != state", color="#2E7D32"];
+
+    // === Statistics ===
+    subgraph cluster_stats {
+        label="执行统计 (Execution Statistics)";
+        style=filled;
+        color="#FAFAFA";
+        fontcolor="#666666";
+
+        stats [label="34位置 × 8槽 = 272组合\n其中:\n• 228个 Block (无路)\n• 17个 Held (自环)\n• 3个 Same (同归)\n• 若干 Open (未定)\n• 其余 Moved (迁)", shape=note, fillcolor="#EEEEEE"];
+    }
+
+    // === Key Invariants ===
+    subgraph cluster_invariants {
+        label="关键不变量 (Key Invariants)";
+        style=filled;
+        color="#E8F5E9";
+        fontcolor="#2E7D32";
+
+        inv1 [label="不编造下一步\nBlock 是一等回执\n无路时不许强行推进", shape=note, fillcolor="#C8E6C9"];
+        inv2 [label="不编造上一步\nSame 不点名触发\n多条来处归一处时只给槽与目标", shape=note, fillcolor="#C8E6C9"];
+        inv3 [label="不替主体决断\nOpen 不择其一\n多条去处并存时返回全部候选", shape=note, fillcolor="#C8E6C9"];
+    }
+}

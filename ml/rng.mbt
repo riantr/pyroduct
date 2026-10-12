@@ -41,7 +41,7 @@ pub fn Rng::normal(self : Rng) -> Double {
 
 ///|
 /// Fisher–Yates 洗牌（就地）。
-pub fn Rng::shuffle(self : Rng, idx : Array[Int]) -> Unit {
+pub fn Rng::shuffle(self : Rng, idx : Array[Int32]) -> Unit {
   let mut i = idx.length() - 1
   while i > 0 {
     let j = (self.uniform() * (i + 1).to_double()).to_int()

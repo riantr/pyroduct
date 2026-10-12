@@ -156,9 +156,13 @@ the complete English rendering of the vocabulary across the three scales
 | CoBeing | 共在 | 3 | MeetOther, GoodFaith, OpenArms |
 | Unveil | 揭蔽 | 5 | AttributeSelf, FillEmptiness, CoolDown, DoubtOneself, ReopenByHorizon |
 
-### Step contract (4 outcomes)
+### Step contract (5 outcomes)
 
-迁 Moved · 守 Held · 未定 Undecided · 无路 No-way
+迁 Moved · 守 Held · 未定 Undecided · 同归 Same · 无路 No-way
+
+`Same` is what a slot-granular step returns when several triggers leave one
+position for one target: the destination is settled, the *sentence* is not named,
+so nothing is invented. Use `step_by_trigger` when you need to know which one.
 
 ### Group — phases (9)
 
@@ -361,13 +365,34 @@ let restored = @coordinator.restore(rt.checkpoint())
 let same : Bool = restored.round_trips()
 ```
 
+## Gates and drift detectors
+
+`moon check`, `moon fmt --check`, `moon test` (197 wasm tests) plus the two
+native-only suites (`snnref`, `tools/ifacescan`) are the baseline. Three
+detectors run on top, because a green suite says nothing about a claim written
+in prose:
+
+| Detector | Catches |
+|---|---|
+| `python tools/validate_dependencies.py` | a dependency edge drawn in `architecture/*.dot` that the code does not have, or one the code has that the diagram omits; also a DOT file whose `model-version` header disagrees with `moon.mod` |
+| `python tools/validate_readme_facts.py` | a state / transition / phase / trigger / slot count in these READMEs that no longer matches the source tables |
+| `node plugin/tools/validate-plugin.mjs` | plugin drift: face count, test count, model facts and page citations in the agent-facing descriptions |
+
+Each was written after a specific drift went unnoticed — a false edge in the
+diagram, a stale test count in a tool description. They run in `gate.yml` on
+every push and PR, and again in `publish.yml` before a release.
+
 ## Used By
 
 - `cmd/main` — the report entry for every layer above: `report` / `slots` /
-  `multi` / `group` / `society` / `evolution` / `cycle` / `coordinator`, plus
-  `mermaid` / `dot` / `genesis` / `course` / `naming` / `principle` / `all`.
+  `loop` / `multi` / `group` / `society` / `evolution` / `cycle` / `coordinator`,
+  `dmlref` / `causal` / `audit` / `fleet` / `mutants` / `mbti`, plus
+  `mermaid` / `dot` / `genesis` / `course` / `naming` / `principle` / `intuition`,
+  the five analysis faces `pathsum` / `algebra` / `petri` / `aho` / `buchi`, and
+  the presentational `all`.
 - `cmd/coord` — a native binary that runs the coordinator and round-trips its
   checkpoint through real disk I/O (`.openseek/`, gitignored).
+- `cmd/jsoncli` — the JSON bridge the two agent plugins spawn (31 faces).
 
 ## Attribution
 

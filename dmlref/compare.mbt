@@ -16,8 +16,8 @@ pub struct RefFit {
   se : Double
   ci_low : Double
   ci_high : Double
-  n : Int
-  folds : Int
+  n : Int32
+  folds : Int32
 }
 
 ///|
@@ -26,7 +26,7 @@ pub fn fit_reference(
   y : Array[Double],
   d : Array[Double],
   x : Array[Array[Double]],
-  n_folds : Int,
+  n_folds : Int32,
 ) -> RefFit {
   let n = y.length()
   let p = if n == 0 { 0 } else { x[0].length() }
@@ -56,8 +56,8 @@ pub fn fit_ours(
   y : Array[Double],
   d : Array[Double],
   x : Array[Array[Double]],
-  n_folds : Int,
-  degree : Int,
+  n_folds : Int32,
+  degree : Int32,
   lambda : Double,
 ) -> @ml.DmlResult {
   @ml.dml_plr(y, d, x, @ml.DmlConfig::new(degree, lambda, n_folds, 3141))
@@ -67,8 +67,8 @@ pub fn fit_ours(
 /// 两实现的对照。
 pub struct Compare {
   label : String
-  n : Int
-  folds : Int
+  n : Int32
+  folds : Int32
   theta_ref : Double
   theta_ours : Double
   se_ref : Double
@@ -89,8 +89,8 @@ pub fn compare_with(
   d : Array[Double],
   x : Array[Array[Double]],
   truth : Double,
-  n_folds : Int,
-  degree : Int,
+  n_folds : Int32,
+  degree : Int32,
   lambda : Double,
   tolerance : Double,
 ) -> Compare {
@@ -121,7 +121,7 @@ pub fn compare_matched(
   d : Array[Double],
   x : Array[Array[Double]],
   truth : Double,
-  n_folds : Int,
+  n_folds : Int32,
   tolerance : Double,
 ) -> Compare {
   compare_with(
@@ -136,7 +136,7 @@ pub fn compare_rich(
   d : Array[Double],
   x : Array[Array[Double]],
   truth : Double,
-  n_folds : Int,
+  n_folds : Int32,
   tolerance : Double,
 ) -> Compare {
   compare_with(
@@ -225,11 +225,11 @@ pub fn rows_of(m : @dml.Matrix) -> Array[Array[Double]] {
 /// 与 `compare_matched` 的区别只在数据来源：这里用它发布的 DGP，而不是我们状态机
 /// 生成的数据——因此这是「拿它的示例数据，跑我们的估计器」。
 pub fn external_plr(
-  n : Int,
-  dim_x : Int,
+  n : Int32,
+  dim_x : Int32,
   theta : Double,
-  seed : Int,
-  folds : Int,
+  seed : Int32,
+  folds : Int32,
   tolerance : Double,
 ) -> Compare {
   let data = @dml.make_plr_CCDDHNR2018(n, dim_x, theta, seed)

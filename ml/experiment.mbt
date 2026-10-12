@@ -50,7 +50,7 @@ fn row(
 ///|
 /// 同一份数据上的五种估计：朴素、线性调整、单向残差化、同一样本内灵活拟合、DoubleML。
 pub fn single_run(
-  n : Int,
+  n : Int32,
   theta : Double,
   config : DmlConfig,
 ) -> Array[EstimateRow] {
@@ -110,8 +110,8 @@ pub fn single_run(
 ///|
 /// 重复 `reps` 次实验，统计平均偏误、RMSE 与 95% 置信区间覆盖率。
 pub fn replicate(
-  reps : Int,
-  n : Int,
+  reps : Int32,
+  n : Int32,
   theta : Double,
   config : DmlConfig,
 ) -> Array[RepSummary] {
@@ -121,7 +121,7 @@ pub fn replicate(
   ]
   let sum_bias : Array[Double] = [0.0, 0.0, 0.0, 0.0, 0.0]
   let sum_sq : Array[Double] = [0.0, 0.0, 0.0, 0.0, 0.0]
-  let cover : Array[Int] = [0, 0, 0, 0, 0]
+  let cover : Array[Int32] = [0, 0, 0, 0, 0]
   let seed_rng = Rng::new(config.seed)
   for r = 0; r < reps; r = r + 1 {
     let cfg : DmlConfig = {

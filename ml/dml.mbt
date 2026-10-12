@@ -30,17 +30,17 @@ pub struct DmlResult {
   ci_high : Double
   z : Double
   p_value : Double
-  n : Int
-  folds : Int
-  degree : Int
+  n : Int32
+  folds : Int32
+  degree : Int32
 }
 
 ///|
 /// DML 配置：nuisance 用几次多项式筛、岭惩罚多大、几折交叉、随机种子。
 pub struct DmlConfig {
-  degree : Int
+  degree : Int32
   lambda : Double
-  folds : Int
+  folds : Int32
   seed : UInt64
 }
 
@@ -59,7 +59,7 @@ fn cross_fit(
   config : DmlConfig,
 ) -> (Array[Double], Array[Double]) {
   let n = y.length()
-  let order : Array[Int] = []
+  let order : Array[Int32] = []
   for i = 0; i < n; i = i + 1 {
     order.push(i)
   }
@@ -78,7 +78,7 @@ fn cross_fit(
     let xte : Array[Array[Double]] = []
     let ytr : Array[Double] = []
     let ttr : Array[Double] = []
-    let held : Array[Int] = []
+    let held : Array[Int32] = []
     for k = 0; k < n; k = k + 1 {
       let i = order[k]
       if k % folds == f {
@@ -261,9 +261,9 @@ pub fn one_sided_residual(
 ///|
 /// 构造一个 DML 配置（字段只读，故包外经由本函数构造）。
 pub fn DmlConfig::new(
-  degree : Int,
+  degree : Int32,
   lambda : Double,
-  folds : Int,
+  folds : Int32,
   seed : UInt64,
 ) -> DmlConfig {
   { degree, lambda, folds, seed, }

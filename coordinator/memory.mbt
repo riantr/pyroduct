@@ -33,17 +33,17 @@ pub fn FindingStatus::label(self : FindingStatus) -> String {
 ///|
 /// 一条发现。
 pub(all) struct Finding {
-  id : Int
-  question : Int
+  id : Int32
+  question : Int32
   text : String
   claim : @multi.ClaimKind
   phase : @multi.ClaimPhase
-  result : Int
-  residual : Int
+  result : Int32
+  residual : Int32
   status : FindingStatus
-  supersedes : Int?
-  author : Int
-  at : Int
+  supersedes : Int32?
+  author : Int32
+  at : Int32
 }
 
 ///|
@@ -60,7 +60,7 @@ pub fn Notebook::new() -> Notebook {
 
 ///|
 /// 追加一条发现，返回新 id。
-pub fn Notebook::add(self : Notebook, f : Finding) -> Int {
+pub fn Notebook::add(self : Notebook, f : Finding) -> Int32 {
   let id = self.findings.length()
   self.findings.push({ ..f, id, })
   id
@@ -68,7 +68,7 @@ pub fn Notebook::add(self : Notebook, f : Finding) -> Int {
 
 ///|
 /// 按 id 取一条发现。
-pub fn Notebook::find(self : Notebook, id : Int) -> Finding? {
+pub fn Notebook::find(self : Notebook, id : Int32) -> Finding? {
   for f in self.findings {
     if f.id == id {
       return Some(f)
@@ -81,7 +81,7 @@ pub fn Notebook::find(self : Notebook, id : Int) -> Finding? {
 /// 改一条发现的状态。
 pub fn Notebook::mark(
   self : Notebook,
-  id : Int,
+  id : Int32,
   status : FindingStatus,
 ) -> Unit {
   for i = 0; i < self.findings.length(); i = i + 1 {
@@ -93,7 +93,7 @@ pub fn Notebook::mark(
 
 ///|
 /// 某问题当前成立的发现（最后一次被支持或待证据者）。
-pub fn Notebook::current(self : Notebook, question : Int) -> Finding? {
+pub fn Notebook::current(self : Notebook, question : Int32) -> Finding? {
   let mut best : Finding? = None
   for f in self.findings {
     if f.question == question &&
@@ -106,9 +106,9 @@ pub fn Notebook::current(self : Notebook, question : Int) -> Finding? {
 
 ///|
 /// 追溯一条发现「取代了谁」的链（内容记忆的关键：被推翻的历史也在）。
-pub fn Notebook::history(self : Notebook, id : Int) -> Array[Int] {
-  let out : Array[Int] = []
-  let mut cur : Int? = Some(id)
+pub fn Notebook::history(self : Notebook, id : Int32) -> Array[Int32] {
+  let out : Array[Int32] = []
+  let mut cur : Int32? = Some(id)
   let mut go = true
   while go {
     match cur {
@@ -200,7 +200,7 @@ fn status_of(s : StringView) -> FindingStatus {
 }
 
 ///|
-fn int_of(s : StringView) -> Int {
+fn int_of(s : StringView) -> Int32 {
   @string.from_str(s.to_owned()) catch {
     _ => 0
   }

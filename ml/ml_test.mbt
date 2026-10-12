@@ -122,6 +122,6 @@ test "设计图：九条接口的实现状态由表生成，3 实现 6 设计点
 }
 
 ///|
-fn count_occurrences(haystack : String, needle : String) -> Int {
+fn count_occurrences(haystack : String, needle : String) -> Int32 {
   haystack.split(needle).collect().length() - 1
 }

@@ -1,0 +1,207 @@
+// model-version: 0.1.30
+digraph deployment_topology {
+  rankdir=TB
+  node [shape=record, style=filled, fillcolor="#E8E8E8", fontname="Arial"]
+  edge [fontname="Arial", fontsize=10]
+
+  // ===== Developer Environment =====
+  subgraph cluster_dev {
+    label="开发者环境（本地）"
+    style=filled
+    color="#E0F0FF"
+
+    dev_machine [label="开发者工作站\n(Windows/Linux/macOS)", shape=box, fillcolor="#B0C4DE"]
+
+    subgraph cluster_dev_tools {
+      label="工具链"
+      style=dashed
+      color="#999999"
+      moon_cli [label="moon CLI\n(check/test/fmt/build/run)", fillcolor="#FFFACD"]
+      node_js [label="Node.js\n(插件工具链)", fillcolor="#FFFACD"]
+      git [label="git\n(双远端推送)", fillcolor="#FFFACD"]
+    }
+
+    subgraph cluster_dev_targets {
+      label="构建目标"
+      style=dashed
+      color="#999999"
+      target_wasm [label="wasm\n(注册中心制品)", fillcolor="#98FB98"]
+      target_js [label="js\n(插件桥 jsoncli.js)", fillcolor="#98FB98"]
+      target_native [label="native\n(本地工具/实验)", fillcolor="#98FB98"]
+    }
+
+    subgraph cluster_dev_run {
+      label="本地运行"
+      style=dashed
+      color="#999999"
+      moon_run [label="moon run cmd/main\n(CLI 36 面)"]
+      moon_test [label="moon test\n(197 wasm + 6 native)"]
+      coord_run [label="moon run cmd/coord\n(协调器落盘)"]
+      face_mjs [label="node tools/face.mjs\n(面运行器)"]
+    }
+  }
+
+  // ===== Source Code Repositories =====
+  subgraph cluster_repos {
+    label="源代码仓库"
+    style=filled
+    color="#FFE4E1"
+
+    gitee [label="Gitee\nriantr/pyroduct\n(日常远端)", shape=box3d, fillcolor="#FFDAB9"]
+    github [label="GitHub\nriantr/pyroduct\n(CI 远端)", shape=box3d, fillcolor="#FFDAB9"]
+  }
+
+  // ===== CI/CD =====
+  subgraph cluster_ci {
+    label="CI/CD（GitHub Actions）"
+    style=filled
+    color="#FFF0E0"
+
+    subgraph cluster_gate {
+      label="gate.yml\n(push/PR)"
+      style=dashed
+      color="#999999"
+      gate_runner [label="ubuntu-latest", fillcolor="#FFFACD"]
+      gate_steps [label="moon update\nmoon check --deny-warn\nmoon fmt --check\nmoon test --deny-warn\nmoon build --target js\nmoon build --target wasm\nmoon test --target native\n(snnref + ifacescan)\nmoon run cmd/ifacescan\nmoon run cmd/coord\nmoon run examples/sediment", fillcolor="#E0FFE0"]
+    }
+
+    subgraph cluster_publish {
+      label="publish.yml\n(v* tag / manual dry-run)"
+      style=dashed
+      color="#999999"
+      pub_runner [label="ubuntu-latest", fillcolor="#FFFACD"]
+      pub_steps [label="moon update\n版本断言 (moon.mod = tag)\n单模块断言\n门禁重跑\nmoon publish\ngh release create", fillcolor="#E0FFE0"]
+      secret [label="MOONCAKES_RIANTR_TOKEN\n(GitHub Secret\n= ~/.moon/credentials.json)", shape=note, fillcolor="#FFB6C1"]
+    }
+  }
+
+  // ===== Package Registry =====
+  subgraph cluster_registry {
+    label="Moonbit 注册中心"
+    style=filled
+    color="#E8F5E9"
+
+    mooncakes [label="mooncakes.io\nriantr/pyroduct@0.1.29\n(wasm 制品)", shape=box3d, fillcolor="#90EE90"]
+    skills_link [label="skills.mooncakes.io\n(技能链接)", shape=box3d, fillcolor="#90EE90"]
+  }
+
+  // ===== Plugin Runtime =====
+  subgraph cluster_plugin_runtime {
+    label="插件运行时"
+    style=filled
+    color="#F0E8FF"
+
+    subgraph cluster_minimax {
+      label="MiniMax Desktop（本地插件）"
+      style=dashed
+      color="#999999"
+
+      minimax_desktop [label="MiniMax Desktop\n(用户界面)", shape=box, fillcolor="#DDA0DD"]
+
+      subgraph cluster_plugin_install {
+        label="~/.minimax/plugins/pyroduct-model/"
+        style=dashed
+        color="#999999"
+        plugin_json [label="plugin.json\n(v0.3.0)", fillcolor="#E6E6FA"]
+        mcp_server [label="server.mjs\n(MCP Server\nstdio JSON-RPC)", fillcolor="#E6E6FA"]
+        skill_md [label="SKILL.md\n(技能说明)", fillcolor="#E6E6FA"]
+        vendor_bundle [label="vendor/jsoncli.js\n(1.38 MB JS bundle\nSHA-256 钉住)", fillcolor="#E6E6FA"]
+        build_json [label="vendor/BUILD.json\n(版本/工具链/哈希)", fillcolor="#E6E6FA"]
+        mcp_config [label="pyroduct.mcp.json\n(stdio, node server.mjs)", fillcolor="#E6E6FA"]
+      }
+
+      subgraph cluster_bridge_runtime {
+        label="桥运行时"
+        style=dashed
+        color="#999999"
+        node_spawn [label="node jsoncli.js '{json}'\n(子进程)", fillcolor="#FFDAB9"]
+        checkout_bridge [label="checkout 桥\n(PYRODUCT_PROJECT_DIR\n→ _build/js/.../jsoncli.js)", fillcolor="#FFDAB9"]
+        bundled_bridge [label="内置快照桥\n(vendor/jsoncli.js)", fillcolor="#FFDAB9"]
+      }
+    }
+
+    subgraph cluster_dsh {
+      label="DeepSeek Harness 插件\n(riantr/dsh-plugin-pyroduct\n独立仓库)"
+      style=dashed
+      color="#999999"
+      dsh_plugin [label="dsh-plugin-pyroduct\n(Node spawner)", shape=box, fillcolor="#DDA0DD"]
+      dsh_bridge [label="同样调用\njsoncli.js 桥", fillcolor="#FFDAB9"]
+    }
+  }
+
+  // ===== External Dependencies =====
+  subgraph cluster_deps {
+    label="外部依赖（mooncakes.io）"
+    style=filled
+    color="#F5F5F5"
+
+    dep_async [label="moonbitlang/async@0.22.4", fillcolor="#D3D3D3"]
+    dep_dml [label="riantr/moonbit_doubleML@0.75.0", fillcolor="#D3D3D3"]
+    dep_snn [label="riantr/snn_mbt@0.84.0\n(+ moonbit_image@0.3.4)", fillcolor="#D3D3D3"]
+    dep_sa [label="riantr/moonbit_static_analysis@0.3.4", fillcolor="#D3D3D3"]
+  }
+
+  // ===== GitHub Release =====
+  subgraph cluster_release {
+    label="GitHub Release"
+    style=filled
+    color="#FFF8DC"
+    gh_release [label="GitHub Releases\nv0.1.29\n(自动生成笔记)", shape=box3d, fillcolor="#FFD700"]
+  }
+
+  // ===== Edges: Developer =====
+  dev_machine -> moon_cli
+  dev_machine -> node_js
+  dev_machine -> git
+  moon_cli -> target_wasm
+  moon_cli -> target_js
+  moon_cli -> target_native
+  moon_cli -> moon_run
+  moon_cli -> moon_test
+  moon_cli -> coord_run
+  node_js -> face_mjs
+
+  // ===== Edges: Source =====
+  git -> gitee [label="日常推送"]
+  git -> github [label="CI 推送"]
+
+  // ===== Edges: CI =====
+  github -> gate_runner [label="push/PR 触发"]
+  gate_runner -> gate_steps
+  github -> pub_runner [label="v* tag 触发"]
+  pub_runner -> pub_steps
+  secret -> pub_steps [label="写入\n~/.moon/credentials.json"]
+
+  // ===== Edges: Registry =====
+  pub_steps -> mooncakes [label="moon publish"]
+  mooncakes -> skills_link [label="技能链接"]
+
+  // ===== Edges: Release =====
+  pub_steps -> gh_release [label="gh release create\n(仅 tag push)"]
+
+  // ===== Edges: Dependencies =====
+  gate_steps -> dep_async [label="moon update\n解析"]
+  gate_steps -> dep_dml
+  gate_steps -> dep_snn
+  gate_steps -> dep_sa
+
+  // ===== Edges: Plugin =====
+  target_js -> vendor_bundle [label="moon build --target js\n→ update-bundle.mjs\n→ sync-install.mjs push"]
+  minimax_desktop -> mcp_config [label="加载插件"]
+  mcp_config -> mcp_server [label="stdio:\nnode server.mjs"]
+  mcp_server -> node_spawn [label="spawn 子进程"]
+  node_spawn -> checkout_bridge [label="PYRODUCT_PROJECT_DIR\n已设置"]
+  node_spawn -> bundled_bridge [label="回落"]
+  checkout_bridge -> node_spawn [label="jsoncli.js"]
+  bundled_bridge -> vendor_bundle [label="读取"]
+  vendor_bundle -> node_spawn
+
+  // ===== Edges: DSH =====
+  dsh_plugin -> dsh_bridge
+  dsh_bridge -> node_spawn [label="同样协议"]
+
+  // ===== Styling =====
+  {rank=same; gitee; github}
+  {rank=same; gate_runner; pub_runner}
+  {rank=same; mooncakes; gh_release}
+}

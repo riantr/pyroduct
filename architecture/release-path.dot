@@ -1,0 +1,126 @@
+// model-version: 0.1.30
+digraph release_path {
+  rankdir=LR
+  node [shape=record, style=filled, fillcolor="#E8E8E8", fontname="Arial"]
+  edge [fontname="Arial", fontsize=10]
+
+  // ===== Source =====
+  subgraph cluster_source {
+    label="源代码"
+    style=filled
+    color="#E0F0FF"
+
+    commit [label="git commit\n(本地)", shape=box, fillcolor="#B0C4DE"]
+    push_gitee [label="git push origin\n(Gitee 日常)", shape=box, fillcolor="#FFDAB9"]
+    push_github [label="git push github\n(CI)", shape=box, fillcolor="#FFDAB9"]
+    tag [label="git tag -a v0.1.29\n-m \"...\"", shape=box, fillcolor="#FFDAB9"]
+    push_tag [label="git push github v0.1.29", shape=box, fillcolor="#FFDAB9"]
+  }
+
+  // ===== CI Gate =====
+  subgraph cluster_gate {
+    label="gate.yml (push/PR)"
+    style=filled
+    color="#FFF0E0"
+
+    gate_trigger [label="push to master/main\n或 PR", shape=diamond, fillcolor="#FFFACD"]
+    gate_install [label="Install moon\n(install/unix.sh)"]
+    gate_update [label="moon update\n(解析注册中心)"]
+    gate_check [label="moon check --deny-warn"]
+    gate_fmt [label="moon fmt --check"]
+    gate_test_wasm [label="moon test --deny-warn\n(wasm, 197 tests)"]
+    gate_build_js [label="moon build --target js\n(桥构建)"]
+    gate_build_wasm [label="moon build --target wasm\n(注册中心制品)"]
+    gate_native [label="moon test --target native\n(snnref + ifacescan)\nmoon run cmd/ifacescan\nmoon run cmd/coord\nmoon run examples/sediment"]
+    gate_pass [label="门禁通过 ✓", shape=doubleoctagon, fillcolor="#90EE90"]
+    gate_fail [label="门禁失败 ✗", shape=doubleoctagon, fillcolor="#FFB6C1"]
+  }
+
+  // ===== Publish =====
+  subgraph cluster_publish {
+    label="publish.yml (v* tag)"
+    style=filled
+    color="#E8F5E9"
+
+    pub_trigger [label="v* tag push\n或 manual dry-run", shape=diamond, fillcolor="#FFFACD"]
+    pub_install [label="Install moon"]
+    pub_update [label="moon update"]
+    pub_assert_ver [label="断言:\nmoon.mod version = tag"]
+    pub_assert_one [label="断言:\n恰好一个 moon.mod"]
+    pub_gate [label="重跑门禁\n(fmt + check + test\n+ native + js + wasm)"]
+    pub_cred [label="写入 ~/.moon/credentials.json\n(from MOONCAKES_RIANTR_TOKEN)"]
+    pub_dry [label="moon publish --dry-run\n(验证 token)"]
+    pub_real [label="moon publish\n(发布到 mooncakes.io)"]
+    pub_release [label="gh release create\n(仅 tag push)"]
+    pub_cleanup [label="trap: rm credentials.json"]
+  }
+
+  // ===== Targets =====
+  subgraph cluster_targets {
+    label="发布目标"
+    style=filled
+    color="#F0E8FF"
+
+    mooncakes [label="mooncakes.io\nriantr/pyroduct@0.1.29\n(wasm 制品)", shape=box3d, fillcolor="#90EE90"]
+    gh_release [label="GitHub Release\nv0.1.29\n(自动笔记)", shape=box3d, fillcolor="#FFD700"]
+    skills_link [label="skills.mooncakes.io\n(技能链接)", shape=box3d, fillcolor="#90EE90"]
+  }
+
+  // ===== Plugin Deploy =====
+  subgraph cluster_plugin {
+    label="插件部署（手动）"
+    style=filled
+    color="#FFE4E1"
+
+    update_bundle [label="node tools/update-bundle.mjs\n(重建 vendor/jsoncli.js\n+ 重钉 SHA-256\n+ 跑 validate-plugin.mjs)"]
+    sync_push [label="node tools/sync-install.mjs push\n(repo → ~/.minimax/plugins/)"]
+    validate [label="validate-plugin.mjs\n(27+ checks:\nMCP 握手 + 31 面 +\n不变量 + 反漂移)"]
+    plugin_live [label="插件生效\n(MiniMax Desktop 重载)", shape=doubleoctagon, fillcolor="#90EE90"]
+  }
+
+  // ===== Edges: Source =====
+  commit -> push_gitee
+  commit -> push_github
+  commit -> tag [label="发版时"]
+  tag -> push_tag
+
+  // ===== Edges: Gate =====
+  push_github -> gate_trigger
+  gate_trigger -> gate_install
+  gate_install -> gate_update
+  gate_update -> gate_check
+  gate_check -> gate_fmt
+  gate_fmt -> gate_test_wasm
+  gate_test_wasm -> gate_build_js
+  gate_build_js -> gate_build_wasm
+  gate_build_wasm -> gate_native
+  gate_native -> gate_pass
+  gate_native -> gate_fail [style=dotted]
+
+  // ===== Edges: Publish =====
+  push_tag -> pub_trigger
+  pub_trigger -> pub_install
+  pub_install -> pub_update
+  pub_update -> pub_assert_ver
+  pub_assert_ver -> pub_assert_one
+  pub_assert_one -> pub_gate
+  pub_gate -> pub_cred
+  pub_cred -> pub_dry [label="dry_run=true"]
+  pub_cred -> pub_real [label="dry_run=false\n或 tag push"]
+  pub_dry -> pub_cleanup [label="验证 token\n不发布"]
+  pub_real -> mooncakes [label="发布制品"]
+  pub_real -> pub_release [label="仅 tag push"]
+  pub_release -> gh_release
+  pub_real -> pub_cleanup
+  mooncakes -> skills_link
+
+  // ===== Edges: Plugin =====
+  gate_build_js -> update_bundle [label="桥构建成功后", style=dashed]
+  update_bundle -> sync_push
+  sync_push -> validate
+  validate -> plugin_live
+
+  // ===== Styling =====
+  {rank=same; commit; push_gitee; push_github}
+  {rank=same; mooncakes; gh_release; skills_link}
+}

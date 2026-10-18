@@ -283,6 +283,20 @@ Expand, Colonize, Distort, Hinder, Reconstruct, Circulate。
 *same verdict, not re-adjudicated* · 三鉴 *three mirrors (structure / type /
 behavior)* · 往返一致 *round-trips identically*。
 
+### 英文对照层
+
+每个构造都在中文原文层旁边带一份英文对照：`SubjectState::en_label` /
+`en_gloss`、`Slot::en_designation` / `en_gloss`、`Phase::en_label`、
+`Trigger::en_label`、`Outcome::en_label`，以及 `GroupState::en_designation` /
+`en_gloss` 与 `GroupPhase::en_label`。
+
+两层刻意不对称。`label()` 与 `gloss()` 是原文所云的记录，一律不译；`en_*`
+系列是给读不了中文的使用方看的读法。两者不一致时，按定义以 `label()` 为准。
+
+英文层不参与状态机。那里写错只会把一条迁移叫错名字，不会凭空造出一条。
+`src/en_test.mbt` 断言的正是使用方真正在意的性质——每条英文串都是 ASCII
+（不会混进中文），且与它旁边的原文串不同——而不是相信 match 写对了就没事。
+
 ## 快速开始
 
 添加模块，然后跑测试套件：
@@ -340,7 +354,7 @@ let same : Bool = restored.round_trips()
 
 ## 门禁与漂移检测
 
-基线是 `moon check`、`moon fmt --check`、`moon test`（wasm 197 个测试），
+基线是 `moon check`、`moon fmt --check`、`moon test`（wasm 208 个测试），
 外加两个只跑 native 的包（`snnref`、`tools/ifacescan`）。其上还有三个检测器——
 因为**测试全绿并不说明写在文档里的那句话还对**：
 

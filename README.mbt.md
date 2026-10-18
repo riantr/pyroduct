@@ -310,6 +310,24 @@ snapshot still equals the files on disk.
 *same verdict, not re-adjudicated* · 三鉴 *three mirrors (structure / type /
 behavior)* · 往返一致 *round-trips identically*.
 
+### English rendering
+
+Every construct carries an English counterpart alongside the Chinese source
+layer: `SubjectState::en_label` / `en_gloss`, `Slot::en_designation` / `en_gloss`,
+`Phase::en_label`, `Trigger::en_label`, `Outcome::en_label`, and
+`GroupState::en_designation` / `en_gloss` / `GroupPhase::en_label`.
+
+The two layers are deliberately asymmetric. `label()` and `gloss()` are the
+record of what the source text said and are never translated; the `en_*` family
+is a reading aid for consumers that cannot render Chinese. Where the two
+disagree, `label()` is right by definition.
+
+Nothing in the English layer participates in the state machine. A mistake there
+can mislabel a transition but cannot invent one. `src/en_test.mbt` asserts the
+property that actually matters to a consumer — that every English string is
+ASCII (so no Chinese has leaked in) and distinct from the source string it sits
+beside — rather than trusting the match statements to be right.
+
 ## Quick Start
 
 Add the module, then run the suite:
@@ -367,7 +385,7 @@ let same : Bool = restored.round_trips()
 
 ## Gates and drift detectors
 
-`moon check`, `moon fmt --check`, `moon test` (197 wasm tests) plus the two
+`moon check`, `moon fmt --check`, `moon test` (208 wasm tests) plus the two
 native-only suites (`snnref`, `tools/ifacescan`) are the baseline. Three
 detectors run on top, because a green suite says nothing about a claim written
 in prose:

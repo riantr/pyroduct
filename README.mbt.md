@@ -338,7 +338,7 @@ Add the module, then run the suite:
 
 ```
 moon add riantr/pyroduct
-moon test             # Total tests: 205, passed: 205, failed: 0.
+moon test             # Total tests: 211, passed: 211, failed: 0.
 ```
 
 From this repository, every layer prints a report:
@@ -389,7 +389,7 @@ let same : Bool = restored.round_trips()
 
 ## Gates and drift detectors
 
-`moon check`, `moon fmt --check`, `moon test` (209 wasm tests) plus the two
+`moon check`, `moon fmt --check`, `moon test` (211 wasm tests) plus the two
 native-only suites (`snnref`, `tools/ifacescan`) are the baseline. Three
 detectors run on top, because a green suite says nothing about a claim written
 in prose:

@@ -306,7 +306,7 @@ behavior)* · 往返一致 *round-trips identically*。
 
 ```
 moon add riantr/pyroduct
-moon test             # Total tests: 205, passed: 205, failed: 0.
+moon test             # Total tests: 211, passed: 211, failed: 0.
 ```
 
 在本仓库里，每一层都打印一份报告：
@@ -357,7 +357,7 @@ let same : Bool = restored.round_trips()
 
 ## 门禁与漂移检测
 
-基线是 `moon check`、`moon fmt --check`、`moon test`（wasm 209 个测试），
+基线是 `moon check`、`moon fmt --check`、`moon test`（wasm 211 个测试），
 外加两个只跑 native 的包（`snnref`、`tools/ifacescan`）。其上还有三个检测器——
 因为**测试全绿并不说明写在文档里的那句话还对**：
 

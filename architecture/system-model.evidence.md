@@ -29,7 +29,7 @@
 | Node ID | Label | Type | Confidence | Source Refs | Notes |
 |---------|-------|------|------------|-------------|-------|
 | `ml` | 自研DoubleML | module | high | `ml/moon.pkg`, `ml/*.mbt` | PLR/交叉拟合/正交分数；完全自包含 |
-| `dmlref` | 外部交叉验证 | module | high | `dmlref/moon.pkg` | 与moonbit_doubleML@0.75.0互校 |
+| `dmlref` | 外部交叉验证 | module | high | `dmlref/moon.pkg` | 与moonbit_doubleML@0.163.3互校 |
 | `causal` | 因果诊断 | module | high | `causal/moon.pkg` | 敏感性/多重检验/异质性；只读 |
 | `audit` | 三鉴审计 | module | high | `audit/moon.pkg` | 结构鉴/类型鉴/行为鉴；参考消费者 |
 | `snnref` | 脉冲沉淀实验 | module | high | `snnref/moon.pkg` | native only；49触发→泊松→STDP |
@@ -55,10 +55,10 @@
 | Node ID | Label | Type | Confidence | Source Refs | Notes |
 |---------|-------|------|------------|-------------|-------|
 | `moonbitlang/core` | 官方标准库 | external | high | `moon.mod` | 所有包可用 |
-| `moonbitlang/async@0.22.4` | 异步库 | external | high | `moon.mod` | 仅cmd/coord, tools/ifacescan, cmd/ifacescan |
-| `riantr/moonbit_doubleML@0.75.0` | 外部DoubleML | external | high | `moon.mod` | 仅dmlref, causal |
-| `riantr/snn_mbt@0.84.0` | 脉冲神经网络 | external | high | `moon.mod` | 仅snnref；native only |
-| `riantr/moonbit_static_analysis@0.3.4` | 静态分析库 | external | high | `moon.mod` | 仅audit |
+| `moonbitlang/async@0.22.5` | 异步库 | external | high | `moon.mod` | 仅cmd/coord, tools/ifacescan, cmd/ifacescan |
+| `riantr/moonbit_doubleML@0.163.3` | 外部DoubleML | external | high | `moon.mod` | 仅dmlref, causal |
+| `riantr/snn_mbt@0.155.0` | 脉冲神经网络 | external | high | `moon.mod` | 仅snnref；native only |
+| `riantr/moonbit_static_analysis@0.4.29` | 静态分析库 | external | high | `moon.mod` | 仅audit |
 | `MiniMax Code Desktop` | 插件宿主 | external | high | `AGENTS.md` | 加载本地插件 |
 
 ---
@@ -99,7 +99,7 @@
 | `e-cmdcoord-async` | cmd/coord | moonbitlang/async | depends-on | high | `cmd/coord/moon.pkg` | native磁盘IO |
 | `e-cmdifacescan-async` | cmd/ifacescan | moonbitlang/async | depends-on | high | `cmd/ifacescan/moon.pkg` | - |
 | `e-dmlref-doubleml` | dmlref | riantr/moonbit_doubleML | depends-on | high | `dmlref/*.mbt` | 外部参考 |
-| `e-causal-doubleml` | causal | riantr/moonbit_doubleML | depends-on | high | `causal/*.mbt` | 0.75.0深用 |
+| `e-causal-doubleml` | causal | riantr/moonbit_doubleML | depends-on | high | `causal/*.mbt` | 0.163.3深用 |
 | `e-snnref-snn` | snnref | riantr/snn_mbt | depends-on | high | `snnref/*.mbt` | native only |
 | `e-audit-sa` | audit | riantr/moonbit_static_analysis | depends-on | high | `audit/moon.pkg` | 三鉴库 |
 

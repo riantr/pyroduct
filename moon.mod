@@ -1,6 +1,6 @@
 name = "riantr/pyroduct"
 
-version = "0.1.31"
+version = "0.1.32"
 
 readme = "README.mbt.md"
 
@@ -28,7 +28,7 @@ description = "把《伽达默尔与哈贝马斯真理观比较》与《通往�
 // 主体循环把驱动槽接到真迁移表上，修习与开放两个候选都过同一个闸门）
 // → 科研 Agent 协调器（制品／规划／外部证据／决策分段／内容记忆／署名／运行时）。
 // 依赖：moonbitlang/async 仅供 cmd/coord（native）真实落盘；riantr/moonbit_doubleML
-// 仅供 dmlref（与外部参考实现互校自研 DoubleML）与 causal（0.75.0 深用诊断层：
+// 仅供 dmlref（与外部参考实现互校自研 DoubleML）与 causal（0.163.3 深用诊断层：
 // 敏感性／多重检验／异质性，只读）；riantr/snn_mbt（连带 riantr/moonbit_image）
 // 仅供 snnref（native 专属的脉冲沉淀实验层）；riantr/moonbit_static_analysis
 // 仅供 audit（三鉴自审计：它的 moon.mod 把本仓库点名为参考消费者）。

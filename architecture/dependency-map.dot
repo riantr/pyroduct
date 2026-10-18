@@ -4,7 +4,7 @@
 // Grain: MoonBit package
 // Edge types: compile-time import (solid), external dependency (dashed)
 
-// model-version: 0.1.31
+// model-version: 0.1.32
 digraph pyroduct_dependencies {
     rankdir=TB;
     node [shape=box, style=filled, fontname="Arial", fontsize=10];
@@ -79,10 +79,10 @@ digraph pyroduct_dependencies {
         fontcolor="#666666";
 
         moonbit_core [label="moonbitlang/core", fillcolor="#E0E0E0", shape=ellipse];
-        moonbit_async [label="moonbitlang/async\n@0.22.4", fillcolor="#E0E0E0", shape=ellipse];
-        moonbit_doubleml [label="riantr/moonbit_doubleML\n@0.75.0", fillcolor="#E0E0E0", shape=ellipse];
-        moonbit_snn [label="riantr/snn_mbt\n@0.84.0", fillcolor="#E0E0E0", shape=ellipse];
-        moonbit_sa [label="riantr/moonbit_static_analysis\n@0.3.4", fillcolor="#E0E0E0", shape=ellipse];
+        moonbit_async [label="moonbitlang/async\n@0.22.5", fillcolor="#E0E0E0", shape=ellipse];
+        moonbit_doubleml [label="riantr/moonbit_doubleML\n@0.163.3", fillcolor="#E0E0E0", shape=ellipse];
+        moonbit_snn [label="riantr/snn_mbt\n@0.155.0", fillcolor="#E0E0E0", shape=ellipse];
+        moonbit_sa [label="riantr/moonbit_static_analysis\n@0.4.29", fillcolor="#E0E0E0", shape=ellipse];
     }
 
     // === Internal Dependencies (compile-time) ===
@@ -150,7 +150,7 @@ digraph pyroduct_dependencies {
     cmd_coord -> moonbit_async [label="磁盘IO", style=dashed, color="#999999"];
     cmd_ifacescan -> moonbit_async [label="磁盘IO", style=dashed, color="#999999"];
     dmlref -> moonbit_doubleml [label="外部参考", style=dashed, color="#999999"];
-    causal -> moonbit_doubleml [label="0.75.0深用", style=dashed, color="#999999"];
+    causal -> moonbit_doubleml [label="0.163.3深用", style=dashed, color="#999999"];
     snnref -> moonbit_snn [label="native专属", style=dashed, color="#999999"];
     audit -> moonbit_sa [label="三鉴库", style=dashed, color="#999999"];
 

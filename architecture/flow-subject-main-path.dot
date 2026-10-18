@@ -3,7 +3,7 @@
 // Date: 2026-10-11
 // Focus: Happy path from step() call to Outcome
 
-// model-version: 0.1.31
+// model-version: 0.1.32
 digraph subject_main_path {
     rankdir=TB;
     node [shape=box, style=filled, fontname="Arial", fontsize=10];

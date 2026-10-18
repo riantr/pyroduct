@@ -1,7 +1,7 @@
 // Model Fact Registry Evolution — Current vs Target State
 // Generated: 2026-10-11
 
-// model-version: 0.1.31
+// model-version: 0.1.32
 digraph EvolutionV2 {
   rankdir=LR;
   fontname="Arial";
@@ -45,7 +45,7 @@ digraph EvolutionV2 {
     target_version_check [label="validate_version_pins.py\nNEW\nchecks DOT pins\nagainst moon.mod"];
     target_readme [label="README files\n(checked by CI)\nDRIFT CAUGHT"];
     target_desc [label="Plugin descriptions\n(checked by CI)\nDRIFT CAUGHT"];
-    target_diagrams [label="Architecture diagrams\n// model-version: 0.1.31\nVERSION PINNED"];
+    target_diagrams [label="Architecture diagrams\n// model-version: 0.1.32\nVERSION PINNED"];
     
     target_source -> target_extractor [label="parse\n(15 facts)", style=bold];
     target_extractor -> target_readme_check [label="JSON\nfacts", style=bold];

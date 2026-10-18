@@ -1,4 +1,4 @@
-// 脉冲沉淀实验层：引入 riantr/snn_mbt@0.84.0（SpikingNeuralNetworks.jl 的
+// 脉冲沉淀实验层：引入 riantr/snn_mbt@0.155.0（SpikingNeuralNetworks.jl 的
 // bit-exact 移植，+连带的 riantr/moonbit_image@0.3.4），把 49 个驱动槽触发编成
 // spike trains，用 Gerstner STDP 让共现沉淀为权重结构，与驱动槽八分对照。
 // 只做实验对照，不进模型本体（src 零依赖、闸门可解释的纪律不破）。

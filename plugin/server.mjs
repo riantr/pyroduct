@@ -28,7 +28,7 @@ const BRIDGE_RELATIVE = path.join('_build', 'js', 'debug', 'build', 'cmd', 'json
 const PROVENANCE_FILE = path.join(PLUGIN_ROOT, 'vendor', 'BUILD.json')
 
 const SERVER_NAME = 'pyroduct-model'
-const SERVER_VERSION = '0.3.0'
+const SERVER_VERSION = '0.3.1'
 const DEFAULT_TIMEOUT_MS = 120_000
 const GATE_TIMEOUT_MS = 900_000
 
@@ -48,8 +48,8 @@ const FACES = [
   ['evolution', 'Agent 层：基因型／变异／适应度／宪法／闸门／只追加账本。'],
   ['cycle', '主体循环：位置 × 驱动槽 → 修习与开放两个候选过同一个因果闸门。'],
   ['coordinator', '科研 Agent 协调器：制品／规划／外部证据（按置信区间）／内容记忆／信用。'],
-  ['dmlref', '自研 DoubleML 与 riantr/moonbit_doubleML@0.75.0 的互校（θ̂ 差、se 差）。'],
-  ['causal', '0.75.0 深用诊断（模型整理）：敏感性 rv、多重检验 BH/Bonferroni、BLP 异质性。'],
+  ['dmlref', '自研 DoubleML 与 riantr/moonbit_doubleML@0.163.3 的互校（θ̂ 差、se 差）。'],
+  ['causal', '0.163.3 深用诊断（模型整理）：敏感性 rv、多重检验 BH/Bonferroni、BLP 异质性。'],
   ['audit', '三鉴自审计（模型整理）：结构鉴／类型鉴／行为鉴；已知设计 4 条、未预期 0 条。'],
   ['fleet', '三鉴自审计扩到另两台机（模型整理）：群体 20 状态·44 迁移、社会 13 状态·28 迁移；两台机无驱动槽、无终点，故类型鉴的槽层整层跳过；未预期 0 条，已知设计豁免只开一格——群体机 `趋同 × 注意汇聚` 通向 共语/商谈（作者已确认，机器返回未定），按（机, 位置, 触发）三级精确匹配。'],
   ['mutants', '迁移表变异网（模型整理）：三台机×六族破坏共 18 处，逐处被抓到且家族对得上——「0 条发现」需要证据才站得住。'],

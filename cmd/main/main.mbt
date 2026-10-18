@@ -25,7 +25,7 @@
 ///   moon run cmd/main -- cycle    主体循环：位置 × 驱动槽 × 因果反馈（修习与开放都过闸门）
 ///   moon run cmd/main -- coordinator 科研 Agent 协调器：制品／规划／证据／决策／记忆／署名／运行时
 ///   moon run cmd/main -- dmlref 与外部参考实现（riantr/moonbit_doubleML）对照
-///   moon run cmd/main -- causal   因果诊断（0.75.0 深用）：敏感性／多重检验／异质性
+///   moon run cmd/main -- causal   因果诊断（0.163.3 深用）：敏感性／多重检验／异质性
 ///   moon run cmd/main -- audit    自审计（三鉴）：主体机当程序读，已知设计 vs 未预期
 ///   moon run cmd/main -- fleet    自审计（三鉴）：群体机与社会机当程序读（无槽无终点）
 ///   moon run cmd/main -- mutants  迁移表变异网：三鉴有没有牙齿（只读压力测试）

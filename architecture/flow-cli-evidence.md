@@ -240,7 +240,7 @@ _ => println(@sm.render_report())  // "report" 与未知子命令均走此默认
 | ml | ml | DoubleML 接口 |
 | ml-export | ml | 数据集导出 (CSV) |
 | dmlref | dmlref | 外部参考对照 |
-| causal | causal | 因果诊断（0.75.0深用） |
+| causal | causal | 因果诊断（0.163.3深用） |
 
 ---
 

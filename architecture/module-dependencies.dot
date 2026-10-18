@@ -4,7 +4,7 @@
 // Scope: Internal package dependencies and external system boundaries
 // Note: rankdir=TB for dense relationship graph
 
-// model-version: 0.1.31
+// model-version: 0.1.32
 digraph pyroduct_modules {
     rankdir=TB;
     node [shape=box, style=filled, fontname="Arial"];
@@ -18,10 +18,10 @@ digraph pyroduct_modules {
         fontcolor="#666666";
 
         moonbit_core [label="moonbitlang/core", fillcolor="#E8E8E8", shape=ellipse];
-        moonbit_async [label="moonbitlang/async\n@0.22.4", fillcolor="#E8E8E8", shape=ellipse];
-        moonbit_doubleml [label="riantr/moonbit_doubleML\n@0.75.0", fillcolor="#E8E8E8", shape=ellipse];
-        moonbit_snn [label="riantr/snn_mbt\n@0.84.0", fillcolor="#E8E8E8", shape=ellipse];
-        moonbit_sa [label="riantr/moonbit_static_analysis\n@0.3.4", fillcolor="#E8E8E8", shape=ellipse];
+        moonbit_async [label="moonbitlang/async\n@0.22.5", fillcolor="#E8E8E8", shape=ellipse];
+        moonbit_doubleml [label="riantr/moonbit_doubleML\n@0.163.3", fillcolor="#E8E8E8", shape=ellipse];
+        moonbit_snn [label="riantr/snn_mbt\n@0.155.0", fillcolor="#E8E8E8", shape=ellipse];
+        moonbit_sa [label="riantr/moonbit_static_analysis\n@0.4.29", fillcolor="#E8E8E8", shape=ellipse];
     }
 
     // State machine family (core)

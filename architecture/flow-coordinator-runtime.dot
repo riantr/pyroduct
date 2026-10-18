@@ -4,7 +4,7 @@
 // Trigger: runtime.step(tasks, questions, agents, datasets, world, parent, candidate)
 // Outcome: StepReport (task, agent, discourse, verdict, result, finding)
 
-// model-version: 0.1.31
+// model-version: 0.1.32
 digraph coordinator_runtime_flow {
     rankdir=TB;
     node [shape=box, style=filled, fontname="Arial", fontsize=10];

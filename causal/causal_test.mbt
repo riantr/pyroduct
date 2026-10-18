@@ -57,5 +57,5 @@ test "报告对称：三项小节与边界齐全，出处层标注" {
   assert_true(report.contains("模型整理"))
   assert_true(report.contains("只读"))
   assert_true(report.contains("Cinelli"))
-  assert_true(report.contains("0.75.0"))
+  assert_true(report.contains("0.163.3"))
 }

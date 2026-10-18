@@ -1,4 +1,4 @@
-// model-version: 0.1.31
+// model-version: 0.1.32
 digraph deployment_topology {
   rankdir=TB
   node [shape=record, style=filled, fillcolor="#E8E8E8", fontname="Arial"]
@@ -135,10 +135,10 @@ digraph deployment_topology {
     style=filled
     color="#F5F5F5"
 
-    dep_async [label="moonbitlang/async@0.22.4", fillcolor="#D3D3D3"]
-    dep_dml [label="riantr/moonbit_doubleML@0.75.0", fillcolor="#D3D3D3"]
-    dep_snn [label="riantr/snn_mbt@0.84.0\n(+ moonbit_image@0.3.4)", fillcolor="#D3D3D3"]
-    dep_sa [label="riantr/moonbit_static_analysis@0.3.4", fillcolor="#D3D3D3"]
+    dep_async [label="moonbitlang/async@0.22.5", fillcolor="#D3D3D3"]
+    dep_dml [label="riantr/moonbit_doubleML@0.163.3", fillcolor="#D3D3D3"]
+    dep_snn [label="riantr/snn_mbt@0.155.0\n(+ moonbit_image@0.3.4)", fillcolor="#D3D3D3"]
+    dep_sa [label="riantr/moonbit_static_analysis@0.4.29", fillcolor="#D3D3D3"]
   }
 
   // ===== GitHub Release =====

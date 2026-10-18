@@ -1,7 +1,7 @@
 ///|
 /// 脉冲沉淀实验（`snnref`，模型整理）。
 ///
-/// 引入 `riantr/snn_mbt@0.84.0`（SpikingNeuralNetworks.jl 的 bit-exact 移植，
+/// 引入 `riantr/snn_mbt@0.155.0`（SpikingNeuralNetworks.jl 的 bit-exact 移植，
 /// 固定种子）。实验只做一件事：把驱动槽的 49 个触发各编成一个通道，同一情境的
 /// 槽内触发以高率放电（Poisson，库自带 `poisson_input_single`，全部随机性只走
 /// 固定种子），其余通道保持低背景率；49×49 全连接突触按 CSR 布局交给 Gerstner
@@ -223,7 +223,7 @@ pub fn render_report() -> String {
   let lines : Array[String] = [
     "# 脉冲沉淀实验：触发 → spike trains → STDP → 驱动槽八分",
     "",
-    "依赖：`riantr/snn_mbt@0.84.0`（SpikingNeuralNetworks.jl 的 bit-exact 移植，固定种子）。",
+    "依赖：`riantr/snn_mbt@0.155.0`（SpikingNeuralNetworks.jl 的 bit-exact 移植，固定种子）。",
     "出处层：模型整理——机制词汇来自神经科学，对照的真值划分是驱动槽八分。",
     "",
     "编码：\{r.n_triggers} 个触发各成一通道；\{c.episodes} 轮 × \{r.n_slots} 情境 × \{c.block_ms}ms；",

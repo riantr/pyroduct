@@ -3,7 +3,7 @@
 // Date: 2026-10-11
 // Focus: One step of runtime.step(), from ready task to StepReport
 
-// model-version: 0.1.31
+// model-version: 0.1.32
 digraph coordinator_main_path {
     rankdir=TB;
     node [shape=box, style=filled, fontname="Arial", fontsize=10];

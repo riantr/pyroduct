@@ -88,7 +88,7 @@ systemModel {
         }
     }
 
-    container(dmlref, "外部交叉验证 (dmlref)", "MoonBit package", "与riantr/moonbit_doubleML@0.75.0互校") {
+    container(dmlref, "外部交叉验证 (dmlref)", "MoonBit package", "与riantr/moonbit_doubleML@0.163.3互校") {
         parent(analysisTools)
         metadata {
             sourceRef("dmlref/moon.pkg")
@@ -96,7 +96,7 @@ systemModel {
         }
     }
 
-    container(causal, "因果诊断 (causal)", "MoonBit package", "敏感性/多重检验/异质性——0.75.0深用") {
+    container(causal, "因果诊断 (causal)", "MoonBit package", "敏感性/多重检验/异质性——0.163.3深用") {
         parent(analysisTools)
         metadata {
             sourceRef("causal/moon.pkg")
@@ -346,7 +346,7 @@ systemModel {
 
     dmlref -> moonbitDoubleML {
         type("depends-on")
-        description("外部参考实现@0.75.0")
+        description("外部参考实现@0.163.3")
         confidence("high")
     }
 
@@ -357,13 +357,13 @@ systemModel {
 
     snnref -> moonbitSNN {
         type("depends-on")
-        description("脉冲神经网络库@0.84.0")
+        description("脉冲神经网络库@0.155.0")
         confidence("high")
     }
 
     audit -> moonbitStaticAnalysis {
         type("depends-on")
-        description("三鉴库@0.3.4")
+        description("三鉴库@0.4.29")
         confidence("high")
     }
 }

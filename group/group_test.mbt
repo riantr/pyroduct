@@ -11,7 +11,10 @@ test "规模与构成" {
 }
 
 ///|
-test "两字纪律：状态名与阶段名一律两字，且各自互异" {
+/// 定名纪律：中文一律两字、各自互异；英文对照层齐备、不与中文重合、也不重复。
+/// 主体机那边（`src/en_test.mbt`）还钉死了具体选了哪些词；这里钉住形状，加上
+/// 修习／规训这一对——群体机整层曾无任何判据，改回去不会让任何东西变红。
+test "定名纪律：两字互异，英文对照层齐备且不与中文重合" {
   let seen : Array[String] = []
   for s in @group.all_states() {
     assert_eq(s.designation().length(), 2)
@@ -25,6 +28,46 @@ test "两字纪律：状态名与阶段名一律两字，且各自互异" {
     assert_true(!phases.contains(p.label()))
     phases.push(p.label())
   }
+  let en_states : Array[String] = []
+  for s in @group.all_states() {
+    let en = s.en_designation()
+    assert_true(en.length() > 0)
+    assert_true(en != s.designation())
+    assert_true(!en_states.contains(en))
+    en_states.push(en)
+    assert_true(s.en_gloss().length() > 0)
+    assert_true(s.en_gloss() != s.gloss())
+  }
+  assert_eq(en_states.length(), 20)
+  let en_phases : Array[String] = []
+  for p in @group.all_phases() {
+    let en = p.en_label()
+    assert_true(en.length() > 0)
+    assert_true(en != p.label())
+    assert_true(!en_phases.contains(en))
+    en_phases.push(en)
+  }
+  assert_eq(en_phases.length(), 9)
+  // 九个阶段名逐个钉死：主体机那边只钉形状时，`Coming to a Body` 这种改法
+  // 完全合规（非空、不等于中文、互异），于是「成体 → Bodied」这种决定可以
+  // 被无声地改回去。形状合格不等于词选对了。
+  let decided_phases = [
+    "Gathering", "Bodied", "Ordering", "Diverging", "Excess", "Self-binding", "Impaired",
+    "Cultivation", "Resting",
+  ]
+  assert_eq(decided_phases.length(), en_phases.length())
+  for name in decided_phases {
+    assert_true(en_phases.contains(name))
+  }
+  // 修习 is one designation, so it is one English word in both places it occurs
+  // — which is the whole reason 修习 gives up `Discipline` here and the group's
+  // 规训 keeps `Disciplined`. Reverting either half leaves 修习 wearing two
+  // different words, so assert the pair explicitly.
+  assert_true(en_states.contains("Cultivation"))
+  assert_true(en_phases.contains("Cultivation"))
+  assert_true(en_states.contains("Disciplined"))
+  assert_true(!en_states.contains("Discipline"))
+  assert_true(!en_phases.contains("Discipline"))
 }
 
 ///|

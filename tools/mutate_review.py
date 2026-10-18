@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Review harness: mutation table for the five capability Loops.
+"""Review harness: mutation table for the capability Loops.
 
 「测试全过」不算 review。每一条 mutation 把某个构件改回**旧样子／错样子**，
 重跑 `moon test`，判据必须变红。跑得通的表才有意义，跑不完的表是陷阱。
@@ -437,19 +437,88 @@ LOOP5 = [
     ),
 ]
 
+# Loop 6 审的是英文对照层。这一层曾只查**形状**——ASCII、非空、不等于中文、
+# 互异——于是把每一个词改回旧样子，整套判据依然全绿。「测试全过」不是 review，
+# 而「形状合格」连测试都算不上。E1–E7 冲 `src/en_test.mbt` 里钉死的 34 位置／
+# 8 槽／11 阶段／5 回执，E8–E10 冲群体机那一侧（那一层曾整层没有任何判据）。
+# 这些词是**决定**，不是中文的直译，所以每个决定都得有牙齿。
+LOOP6 = [
+    (
+        "E1 修习 读回 Discipline（与群体规训 Disciplined 撞车）",
+        "src/en.mbt",
+        '    Discipline => "Cultivation"',
+        '    Discipline => "Discipline"',
+    ),
+    (
+        "E2 交织 读回 Weaving（丢掉「互」）",
+        "src/en.mbt",
+        '    Weaving => "Interweaving"',
+        '    Weaving => "Weaving"',
+    ),
+    (
+        "E3 自缚 读回 Binding（丢掉「自」）",
+        "src/en.mbt",
+        '    Binding => "Self-binding"',
+        '    Binding => "Binding"',
+    ),
+    (
+        "E4 处境 读回 Occasion（occasion 是特定场合，不是境况）",
+        "src/en.mbt",
+        '    Occasion => "Situation"',
+        '    Occasion => "Occasion"',
+    ),
+    (
+        "E5 先行 读回 Anticipation（说的是心态，不是结构关系）",
+        "src/en.mbt",
+        '    Antecedent => "Antecedent"',
+        '    Antecedent => "Anticipation"',
+    ),
+    (
+        "E6 阶段 读回描述短语（会随成员变化悄悄过期）",
+        "src/en.mbt",
+        '    Release => "Release"',
+        '    Release => "The Arising of Freedom"',
+    ),
+    (
+        "E7 无路 读回 No Edge（edge 与「界域 frontier」撞车）",
+        "src/en.mbt",
+        '    Block(_) => "No-way"',
+        '    Block(_) => "No Edge"',
+    ),
+    (
+        "E8 群体修习阶段 读回 Cultivating（一个定名两个英文词）",
+        "group/en.mbt",
+        '    Cultivating => "Cultivation"',
+        '    Cultivating => "Cultivating"',
+    ),
+    (
+        "E9 成体 读回 Coming to a Body（阶段名里唯一的长句）",
+        "group/en.mbt",
+        '    Bodied => "Bodied"',
+        '    Bodied => "Coming to a Body"',
+    ),
+    (
+        "E10 群体自缚 读回 Self-bound（与主体侧 Self-binding 不同源）",
+        "group/en.mbt",
+        '    SelfBound => "Self-binding"',
+        '    SelfBound => "Self-bound"',
+    ),
+]
+
 GROUPS = {
     "loop1": LOOP1,
     "loop2": LOOP2,
     "loop3": LOOP3,
     "loop4": LOOP4,
     "loop5": LOOP5,
+    "loop6": LOOP6,
     "props": PROPS,
     # 单条复查用的别名，**不进默认跑**：它与 loop5 里的一条重复，默认跑带上
     # 就会在留档里出现两行同名的判定，看起来像跑了两次。
     "l3": [LOOP5[2]],
 }
 # 默认跑只取真正的一组一 Loop，别名要显式点名。
-DEFAULT_GROUPS = ["loop1", "loop2", "loop3", "loop4", "loop5", "props"]
+DEFAULT_GROUPS = ["loop1", "loop2", "loop3", "loop4", "loop5", "loop6", "props"]
 
 # 变异条数**由表算出来**，不写死。我在这份头部里写死过「30 条」，而表里其实
 # 是 34 条（A5+B5+M9+S6+L9）——写死的数字在表增长时不会跟着动，漂了也没人知道。

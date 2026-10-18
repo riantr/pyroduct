@@ -13,6 +13,14 @@
 ///
 /// As in `src/en.mbt`, the two layers are asymmetric on purpose: where the
 /// English and the Chinese disagree, `designation()` is right by definition.
+///
+
+///|
+/// The group machine is also where "discipline" had to be kept away from.
+/// The subject machine's 修习 and this machine's 规训 are different things —
+/// the first cultivates, the second binds the group *and* its members and puts
+/// freedom away. So 修习 reads `Cultivation` here as it does there, in both the
+/// phase and the state, and 规训 keeps `Disciplined` to itself.
 
 ///|
 /// The English name of a group state.
@@ -34,7 +42,7 @@ pub fn GroupState::en_designation(self : GroupState) -> String {
     Wounded => "Wounded"
     Dispersed => "Dispersed"
     Returning => "Returning"
-    Practicing => "Practicing"
+    Practicing => "Cultivation"
     Widening => "Widening"
     Attuned => "Attuned"
     Settled => "Settled"
@@ -92,13 +100,13 @@ pub fn GroupState::en_gloss(self : GroupState) -> String {
 pub fn GroupPhase::en_label(self : GroupPhase) -> String {
   match self {
     Gathering => "Gathering"
-    Bodied => "Coming to a Body"
+    Bodied => "Bodied"
     Ordering => "Ordering"
     Diverging => "Diverging"
     Excess => "Excess"
-    SelfBound => "Self-bound"
+    SelfBound => "Self-binding"
     Impaired => "Impaired"
-    Cultivating => "Cultivating"
+    Cultivating => "Cultivation"
     Resting => "Resting"
   }
 }

@@ -17,11 +17,36 @@
 /// record of what the source text actually said; `en_label()` and `en_gloss()`
 /// are a reading aid for consumers that cannot render Chinese. Where the two
 /// disagree, `label()` is right by definition and the English is wrong.
+///
+
+///|
+/// A third name exists and must not be confused with either: the **code
+/// identifier** — the enum variant you actually write (`@src.Discipline`,
+/// `@src.Occasion`). It is a compact in-code name, it is what the published
+/// interface exposes, and it is left alone even where a better English word
+/// exists. So `Occasion` stays the code identifier of 处境 while the reading
+/// here is `Situation`: *occasion* is a particular ceremony, 处境 is the
+/// situation one finds oneself in. Likewise `Discipline` stays the code
+/// identifier of 修习 while the reading is `Cultivation` — 修养 is
+/// cultivation, and "discipline" has to stay free for the group's 规训
+/// `Disciplined`, which means something else entirely. The two are different
+/// jobs, so they are allowed to differ; every case and its reason is listed in
+/// README.mbt.md under "Terminology".
 
 ///|
 /// The English name of a subject state.
 ///
 /// Paired with `label()`, which stays the Chinese source wording.
+///
+
+///|
+/// 隐没 reads `Secret` and should keep reading it. It is tempting to reach for
+/// `Concealed` or `Obscure`, but the group's 遮蔽 already holds `Concealed`,
+/// and the two are not the same kind of thing: 遮蔽 is the *condition* of being
+/// hidden — what is hidden is no longer hidden but forbidden to ask about —
+/// while 隐没 is the hidden thing itself, the secret the person declines to
+/// mention. Naming them alike would flatten a distinction the group machine
+/// draws on purpose.
 pub fn SubjectState::en_label(self : SubjectState) -> String {
   match self {
     NoPast => "No Past"
@@ -33,14 +58,14 @@ pub fn SubjectState::en_label(self : SubjectState) -> String {
     Emptiness => "Emptiness"
     Busyness => "Busyness"
     Selfhood => "Selfhood"
-    Weaving => "Weaving"
+    Weaving => "Interweaving"
     Choosing => "Choosing"
     Encounter => "Encounter"
     Opening => "Opening"
     Evil => "Evil"
     Shame => "Shame"
     Guilt => "Guilt"
-    Binding => "Binding"
+    Binding => "Self-binding"
     Secret => "Secret"
     Suffering => "Suffering"
     Loss => "Loss"
@@ -56,7 +81,7 @@ pub fn SubjectState::en_label(self : SubjectState) -> String {
     Harmony => "Harmony"
     Model => "Model"
     Marking => "Marking"
-    Discipline => "Discipline"
+    Discipline => "Cultivation"
     Tranquility => "Tranquility"
   }
 }
@@ -136,19 +161,27 @@ pub fn SubjectState::en_gloss(self : SubjectState) -> String {
 
 ///|
 /// The English name of a phase.
+///
+/// One word per phase, matching the code identifier, so a phase reads in a
+/// list alongside the states it contains. The earlier descriptive phrases
+/// ("The Arising of Freedom", "Evil, Shame, Guilt, Self-binding") were not
+/// wrong, but they made a phase the only construct in this file named by a
+/// sentence rather than a word, and they silently went stale the moment a
+/// state was added to a phase. What a phase *contains* is the members list's
+/// job, not the name's.
 pub fn Phase::en_label(self : Phase) -> String {
   match self {
     Natural => "Natural"
-    Release => "The Arising of Freedom"
-    Becoming => "Selfhood and Choosing"
-    Otherness => "Encounter with the Other"
-    Bondage => "Evil, Shame, Guilt, Self-binding"
-    Anguish => "Suffering and Loss"
-    Idolatry => "Idol and Ground"
-    Glory => "Sublime, Passion, Honor, Awe"
-    Recollection => "Reflection"
-    Upbringing => "The Way of Discipline"
-    Serenity => "Tranquility"
+    Release => "Release"
+    Becoming => "Becoming"
+    Otherness => "Otherness"
+    Bondage => "Bondage"
+    Anguish => "Anguish"
+    Idolatry => "Idolatry"
+    Glory => "Glory"
+    Recollection => "Recollection"
+    Upbringing => "Upbringing"
+    Serenity => "Serenity"
   }
 }
 
@@ -223,7 +256,7 @@ pub fn Trigger::en_label(self : Trigger) -> String {
       "As the frontier widens, the surroundings grow clearer and the reefs are no longer isolated"
     Endure =>
       "He tries to endure a temporary pain in exchange for greater freedom"
-    RemoveReefs => "The activity of removing these reefs is discipline"
+    RemoveReefs => "The activity of removing these reefs is cultivation"
     Ascend =>
       "Fewer reefs, a wider frontier, and the person's freedom is lifted once more"
     WaitNext => "All he needs to do is wait for the next moment to arrive"
@@ -236,11 +269,16 @@ pub fn Trigger::en_label(self : Trigger) -> String {
 /// The English designation of a drive slot.
 ///
 /// Paired with `designation()`, which names the structural relation in Chinese.
+/// The eight are structural relations, not attitudes, so the English has to name
+/// the relation too: 先行 is what the subject is already moving under, an
+/// antecedent — not an anticipation, which is the state of mind the slot
+/// produces rather than the relation it is, and which this slot's own gloss
+/// already says.
 pub fn Slot::en_designation(self : Slot) -> String {
   match self {
-    Occasion => "Occasion"
+    Occasion => "Situation"
     Orientation => "Orientation"
-    Antecedent => "Anticipation"
+    Antecedent => "Antecedent"
     Act => "Action"
     Feedback => "Feedback"
     Hold => "Holding"
@@ -277,13 +315,23 @@ pub fn Slot::en_gloss(self : Slot) -> String {
 /// Paired with `Outcome::label()`, whose five values are the vocabulary the
 /// loop engine reasons about: `Moved` and `Held` are progress, `Undecided` is
 /// the table declining to choose, `Converge` is several triggers arriving at
-/// one target, and `No Edge` is a gap in the table.
+/// one target, and `No-way` is a gap in the table.
+///
+
+///|
+/// Two of the five readings deliberately differ from their code identifiers.
+/// 同归 is `Same` in code because it pairs with `Moved` and `Held`, but what
+/// actually happens is that several triggers converge on one target, so the
+/// reading says so. 无路 is `Block` in code — the machine refuses to move — but
+/// the receipt an English reader gets is a missing *road*, not a missing
+/// *edge*: 界域 (frontier) is a core concept in this model and "edge" would
+/// collide with it, and a blocked table row is not the absence of a boundary.
 pub fn Outcome::en_label(self : Outcome) -> String {
   match self {
     Moved(_, _) => "Moved"
     Held(_, _) => "Held"
     Open(_) => "Undecided"
     Same(_, _, _) => "Converge"
-    Block(_) => "No Edge"
+    Block(_) => "No-way"
   }
 }

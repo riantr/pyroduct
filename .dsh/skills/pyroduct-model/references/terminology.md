@@ -5,6 +5,13 @@
 两处一起改。出处层：阶段／状态的「原文」列是原文直述；「读法」列含模型整理的
 成分，引用时注明属于哪层。
 
+**English 列是代码标识符**——MoonBit 里的枚举变体，已发布接口暴露的就是它，冻结
+不动；**英文读法**是 `src/en.mbt` 的 `en_*` 系列，散文里用读法。标识符的字面英文
+站不住时读法换掉它：处境 Situation（不是 Occasion）、修习 Cultivation（把
+Discipline 让给群体的规训 Disciplined）、自缚 Self-binding、交织 Interweaving、
+无路 No-way（不是 No Edge）、先行 Antecedent（原 Anticipation 说的是心态，不是
+这个结构关系）。逐条理由记在 `src/en.mbt`。
+
 ## 主体（`src`）
 
 ### 阶段（11）
@@ -75,9 +82,12 @@
 | CoBeing | 共在 | 3 | MeetOther, GoodFaith, OpenArms |
 | Unveil | 揭蔽 | 5 | AttributeSelf, FillEmptiness, CoolDown, DoubtOneself, ReopenByHorizon |
 
-### 执行契约（4 种结果）
+### 执行契约（5 种结果）
 
-迁 Moved · 守 Held · 未定 Undecided · 无路 No-way
+迁 Moved · 守 Held · 未定 Undecided · 同归 Same · 无路 No-way
+
+槽粒度下，多条触发句从同一位置通向同一目标时，机器回「同归」：去处已定，但不
+点名是哪一句——因为认不出来，所以不编。要知道是哪一句，用 `step_by_trigger`。
 
 ## 群体（`group`）
 

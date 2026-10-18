@@ -7,6 +7,16 @@
 /// actually English, and actually distinct from the Chinese source layer they
 /// sit beside. Both are asserted here rather than assumed.
 ///
+
+///|
+/// A third property is asserted too, and it is the one that keeps the others
+/// honest: the *chosen words themselves*. Each name was picked against what its
+/// construct actually is, not by transliterating the Chinese, so `Cultivation`
+/// and `Self-binding` are decisions rather than the only spellings that
+/// compile. An earlier version of this file checked shape but not wording, and
+/// the whole suite stayed green when every one of those decisions was reverted —
+/// which is the state this file now refuses to sit in.
+///
 /// Test names are in English, matching the file under test.
 
 ///|
@@ -45,6 +55,21 @@ test "thirty-four states carry distinct, non-Chinese English names and glosses" 
     }
     seen.push(en)
   }
+  // The words themselves are the decision, so they are pinned. `decided` has
+  // as many entries as `seen` and every one of them is in `seen`, whose entries
+  // the loop above proved pairwise distinct — so the two sets are equal and no
+  // name outside this list can reach a reader.
+  let decided = [
+    "No Past", "Aimless", "Standing", "Freedom", "Urgency", "Alienation", "Emptiness",
+    "Busyness", "Selfhood", "Interweaving", "Choosing", "Encounter", "Opening", "Evil",
+    "Shame", "Guilt", "Self-binding", "Secret", "Suffering", "Loss", "Idol", "Order",
+    "Sublime", "Passion", "Honor", "Awe", "Habit", "Reflection", "Dizziness", "Harmony",
+    "Model", "Marking", "Cultivation", "Tranquility",
+  ]
+  assert_eq(decided.length(), states.length())
+  for name in decided {
+    assert_true(seen.contains(name))
+  }
 }
 
 ///|
@@ -52,6 +77,7 @@ test "thirty-four states carry distinct, non-Chinese English names and glosses" 
 test "eight drive slots carry English designation and gloss" {
   let slots = @src.all_slots()
   assert_eq(slots.length(), 8)
+  let seen : Array[String] = []
   for k in slots {
     let en_d = k.en_designation()
     assert_true(en_d.length() > 0)
@@ -59,6 +85,19 @@ test "eight drive slots carry English designation and gloss" {
     assert_true(all_ascii(k.en_gloss()))
     assert_true(en_d != k.designation())
     assert_true(k.en_gloss() != k.gloss())
+    seen.push(en_d)
+  }
+  // All eight are structural relations, so all eight are named like one. 处境
+  // reads `Situation` because an occasion is a particular ceremony, and 先行
+  // reads `Antecedent` because the slot is the relation, not the anticipation
+  // it produces.
+  let decided = [
+    "Situation", "Orientation", "Antecedent", "Action", "Feedback", "Holding", "Co-being",
+    "Unveiling",
+  ]
+  assert_eq(decided.length(), slots.length())
+  for name in decided {
+    assert_true(seen.contains(name))
   }
 }
 
@@ -67,10 +106,24 @@ test "eight drive slots carry English designation and gloss" {
 test "eleven phases and every trigger carry English names" {
   let phases = @src.all_phases()
   assert_eq(phases.length(), 11)
+  let seen : Array[String] = []
   for p in phases {
     assert_true(p.en_label().length() > 0)
     assert_true(all_ascii(p.en_label()))
     assert_true(p.en_label() != p.label())
+    seen.push(p.en_label())
+  }
+  // One word per phase, like every other construct. The descriptive phrases
+  // these replaced ("The Arising of Freedom", "Evil, Shame, Guilt,
+  // Self-binding") were not wrong, but they went stale the moment a state
+  // joined a phase, and what a phase contains is the members list's job.
+  let decided = [
+    "Natural", "Release", "Becoming", "Otherness", "Bondage", "Anguish", "Idolatry",
+    "Glory", "Recollection", "Upbringing", "Serenity",
+  ]
+  assert_eq(decided.length(), phases.length())
+  for name in decided {
+    assert_true(seen.contains(name))
   }
   let triggers = @src.all_triggers()
   assert_eq(triggers.length(), 49)
@@ -94,7 +147,7 @@ test "the five outcome receipts render in English" {
     @src.Same(@src.Act, no_triggers, @src.Standing),
     @src.Block("gap"),
   ]
-  let expected = ["Moved", "Held", "Undecided", "Converge", "No Edge"]
+  let expected = ["Moved", "Held", "Undecided", "Converge", "No-way"]
   for i = 0; i < outcomes.length(); i = i + 1 {
     let o = outcomes[i]
     let en = o.en_label()

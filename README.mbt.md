@@ -92,6 +92,37 @@ identifier, and the original wording (原文) it designates. The tables below ar
 the complete English rendering of the vocabulary across the three scales
 (subject / group / society) and the normative layer.
 
+The **English** column is the *code identifier*: the enum variant you write,
+which is also what the published interface exposes. It is frozen — renaming
+`Slot::Occasion` would break every caller that passes it to `step`. The
+*English reading* is the separate `en_*` layer described further down, and it
+is what prose should use. The two are allowed to differ, because they answer
+different questions: the identifier names a construct in the source, the
+reading names it to someone reading English.
+
+Where the identifier's literal English word is wrong, the reading replaces it
+and the reason is recorded in `src/en.mbt`:
+
+* 处境 `Occasion` → **Situation** — an *occasion* is a particular ceremony;
+  处境 is the situation one finds oneself in.
+* 修习 `Discipline` → **Cultivation** — 修养 is cultivation, and "discipline"
+  has to stay free for the group's 规训 `Disciplined`, which means something
+  else: binding the group *and* its members and putting freedom away.
+* 自缚 `Binding` → **Self-binding** — the 自 is the whole point. You bind
+  yourself; the table does not.
+* 交织 `Weaving` → **Interweaving** — weaving can be one-sided, 交织 is mutual,
+  and it pairs with the `Interweave` trigger.
+* 无路 `Block` → **No-way** — a missing road, not a missing edge. 界域
+  *frontier* is a core concept in this model and "edge" would collide with it.
+* 先行 `Antecedent` → **Antecedent** — kept. It was `Anticipation`, which names
+  the attitude the slot produces rather than the structural relation it is.
+
+Two more differ on purpose without the identifier being wrong: 无筹 reads
+`NoFuture` / `Aimless` because the identifier names the two-character
+designation while the reading names the original wording 浑噩, and 同归 reads
+`Same` / `Converge` because `Same` is what pairs with `Moved` and `Held` in
+code, while what actually happens is several triggers converging on one target.
+
 ### Phases — subject (11)
 
 | Designation | English | Original |
@@ -325,6 +356,18 @@ The two layers are deliberately asymmetric. `label()` and `gloss()` are the
 record of what the source text said and are never translated; the `en_*` family
 is a reading aid for consumers that cannot render Chinese. Where the two
 disagree, `label()` is right by definition.
+
+The reading is chosen construct by construct against what the construct
+actually is, not by translating the Chinese word for word. One designation gets
+one English word wherever it appears: 修习 is `Cultivation` in the subject
+machine's state, in the group machine's phase, and in the group machine's state
+— which is what forced 规训 to keep `Disciplined` and 修习 to give up
+`Discipline`. A phase is named by one word like every other construct, because
+the phrase it used to carry ("The Arising of Freedom") went stale the moment a
+state joined the phase, and what a phase contains is the members list's job.
+
+No face renders this layer today; it is exported vocabulary for a surface that
+needs to read the model in English.
 
 Nothing in the English layer participates in the state machine. A mistake there
 can mislabel a transition but cannot invent one. `src/en_test.mbt` asserts the

@@ -56,13 +56,13 @@ python tools/apply_fmt.py              # copy `moon fmt --check`'s canonical cop
                                        # (byte-for-byte: `moon fmt` cannot rewrite files
                                        # in this sandbox, and a binary copy cannot mangle
                                        # encoding the way Get-Content/Set-Content does)
-python tools/mutate_review.py          # review harness: mutation table for all five
-                                       # Loops plus the predicate census
-                                       # (48 mutations, counted from the table —
-                                       # don't hardcode it). Each entry reverts one
+python tools/mutate_review.py          # review harness: mutation table for all
+                                       # Loops plus the predicate census (the count
+                                       # is computed from the table — never
+                                       # transcribe it into prose here). Each entry reverts one
                                        # construct to its old/wrong shape, re-runs
                                        # `moon test`, and the criteria MUST go red.
-                                       # `python tools/mutate_review.py loop5` runs one
+                                       # `python tools/mutate_review.py loop6` runs one
                                        # group. Exit 0 only if every mutation turned a
                                        # criterion red — so it can gate CI rather than
                                        # depend on someone reading the output. Verdicts

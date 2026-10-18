@@ -304,6 +304,49 @@ test "树形：序列化往返后父子关系不变" {
 }
 
 ///|
+/// 树形：**写坏的账本不能把进程挂住**。
+///
+/// `ancestry` 向上走，若不设上限，一本把父指到自己或指到后面的账本会让它绕圈到
+/// 天荒地老——CI 上就是一个挂到超时的作业，而不是一条报错。所以这里拿两种畸形账本
+/// 真跑一遍：一条自指，一条前指。测试跑完本身就是「没挂」的证据。
+///
+/// 另外验证判据**说得出**坏在哪：不是「不 ok」，而是点名那条记录与那个下标。
+test "树形：畸形账本（自指／前指）不挂死，且判据点名" {
+  let seed_line = "seed\tsugg|inter|70|70|3|70"
+  let obj_line = "objective\t求真"
+  let mk = fn(parent : String) -> String {
+    "trail\t0\t0\t" +
+    parent +
+    "\tprompt\tacc\t120\t0\t0\t10,20,10,35\tdecl|inter|70|70|3|70\tX\tY"
+  }
+  // 自指：第 0 条的父就是自己。
+  let self_ref = @evolution.parse(
+    [seed_line, obj_line, mk("0"), mk("0")].join("\n"),
+  )
+  assert_eq(self_ref.trails.length(), 2)
+  assert_true(!self_ref.tree_ok())
+  // 判据要报出**具体几条**坏，而不是给一个布尔了事。
+  assert_true(self_ref.tree_faults().length() > 0)
+  for f in self_ref.tree_faults() {
+    assert_true(f.length() > 0) // 每条都带得动它的下标
+  }
+  // 前指：第 0 条的父指向尚不存在的第 1 条。
+  let forward = @evolution.parse(
+    [seed_line, obj_line, mk("1"), mk("1")].join("\n"),
+  )
+  assert_true(!forward.tree_ok())
+  assert_true(forward.tree_faults().length() > 0)
+  // 无论哪种畸形，读它都得有结果（而不是卡住），且祖先里不含越界的下标。
+  for bad in [self_ref, forward] {
+    for k in 0..<bad.trails.length() {
+      for a in bad.ancestry(k) {
+        assert_true(a >= 0 && a < bad.trails.length())
+      }
+    }
+  }
+}
+
+///|
 /// 树形：坏掉的账本要能**说**出哪儿坏了，不能只是「不 ok」。
 test "树形：判据只抓真的坏，不抓好的" {
   let ok = @evolution.evolve(

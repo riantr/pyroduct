@@ -1,6 +1,6 @@
 ///|
 /// 接口面自审计：把本仓库**自己的** `pkg.generated.mbti` 当被测对象，交给
-/// `riantr/moonbit_static_analysis@0.2.0` 的 `src/moonfiles` 审（模型整理）。
+/// `riantr/moonbit_static_analysis@0.4.29` 的 `src/moonfiles` 审（模型整理）。
 ///
 /// 与 `audit.mbt`／`fleet.mbt` 的分工要分清：那两面审的是**状态机表**——把真表
 /// 转成纯数据 `MachineSpec` 再喂进去；本面审的是**工具链自己生成出来的接口
@@ -17,8 +17,35 @@
 
 ///|
 /// 审一段接口文件。薄透镜：语义全在库里，本层只负责「本仓库用什么口径称它」。
+///
+/// 第三参（0.4.29 起）是**外部名字表**：`iface` 要靠它回答「这个引用有没有定义」。
+/// 单个片段按「它自成一个文件」审，传空表——这是口径声明，不是权宜：本仓任何
+/// `.mbti` 都没声明 `Widget`，正控那条裸名引用并表与否都必然被抓（实测）。
+/// 同一片段里 `@statecheck.MachineSpec` 那行按库自己的形状口径跳过，所以正控
+/// 恰好只报 1 条。真表走 `snapshot_symtab()` 那条路。
 pub fn audit_iface(src : String, file : String) -> Array[@sareport.Report] {
-  @safiles.iface(src, file)
+  @safiles.iface(src, file, @sacore.IfaceSymTab::empty())
+}
+
+///|
+/// 本仓全部 `.mbti` 合起来声明了哪些名字——即那张外部名字表。
+///
+/// 0.3.4 的 `iface` 没有这一参，跨包引用只能按形状免检；0.4.29 把「有没有定义」
+/// 变成一张可填的表。**实测：并表在当前数据上是中性的**——21 份真 `.mbti` 传并集
+/// 与传空表同为 0 发现。原因是库在查表**之前**先按形状无条件跳过 `ty.has_prefix("@")
+/// || ty.contains("::")`（`moonfiles.mbt` 未知类型那一支），而生成接口里的外部引用
+/// 全是这种形状；表只走一次 `has_type` → `continue`，**只抑制、不新增**。
+///
+/// 既然中性，为什么还并：语义与库自己 `--extern-iface-dir` 一致（并集，无法归因到
+/// 具体哪个包，故先放宽别误报），且哪天生成的接口里出现一个**裸名**而它由别的包
+/// 声明时，这张表就是防误报的那道闸。它今天**不是承重墙**，这一点如实记下，
+/// 免得下一个 session 把它当成「不并表就一片红」而去修一个不存在的问题。
+pub fn snapshot_symtab() -> @sacore.IfaceSymTab {
+  let mut tab = @sacore.IfaceSymTab::empty()
+  for row in iface_snapshot() {
+    tab = tab.union(@safiles.collect_iface_names(row.1))
+  }
+  tab
 }
 
 ///|
@@ -31,9 +58,10 @@ pub fn audit_iface(src : String, file : String) -> Array[@sareport.Report] {
 /// 真计数，不是对一份样例报「0 发现」。
 pub fn scan_snapshot() -> Array[IfaceRow] {
   let rows : Array[IfaceRow] = []
+  let tab = snapshot_symtab()
   for row in iface_snapshot() {
     let (rel, src) = row
-    rows.push((rel, audit_iface(src, rel)))
+    rows.push((rel, @safiles.iface(src, rel, tab)))
   }
   rows
 }

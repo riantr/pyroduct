@@ -200,6 +200,10 @@ pub fn Ledger::lineage(self : Ledger, i : Int32) -> String {
 ///      注意是 `>` 不是 `≠`：深度与世代号只在「一条干净的链」上相等，一旦某回合的
 ///      改动没被接下（见 `descent_faults`），后来的记录会重新起根，那时深度 < 世代号
 ///      是对的。把相等当不变量，等于逼所有账本都得是链。
+///   3. **世代号没有往前走**：非根记录的父必须来自**更早的**世代。一代只推进一格，
+///      所以 `父.世代 < 子.世代` 恒应成立。早先只查「深度 ≤ 世代」，于是 hand-built
+///      的一条 `gen3(根) → gen3 → gen4` 能同时骗过两层判据：下标合法、深度合法，
+///      可父与子自称同一代。这一条补的就是那个缝。
 pub fn Ledger::tree_faults(self : Ledger) -> Array[String] {
   let bad : Array[String] = []
   for i = 0; i < self.trails.length(); i = i + 1 {
@@ -215,6 +219,10 @@ pub fn Ledger::tree_faults(self : Ledger) -> Array[String] {
         if p < 0 || p >= i {
           bad.push(
             "#\{i} 的父下标 \{p} 不在它自己之前（只追加的账本里父必在子前）",
+          )
+        } else if self.trails[p].generation >= self.trails[i].generation {
+          bad.push(
+            "#\{i} 的父 #\{p} 与它同代或更晚（父 #{self.trails[p].generation} ≥ 子 #{self.trails[i].generation}）",
           )
         }
     }
@@ -235,26 +243,37 @@ pub fn Ledger::tree_ok(self : Ledger) -> Bool {
 ///   1. **父既不是根、也不是被接收的记录**。下一代的候选是从上一代**被接收**的基因组
 ///      生成的。宪法拦下或闸门回滚的改动不能成为谁的父——从别处借一个当父，记下来的
 ///      「遗传」就是假的。
-///   2. **与父差的不止一处**。变异是单步的（`mutations` 每次只改一层），差多处说明
-///      父子关系记错了。根没有记录在案的父，参照对象是种子。
+///   2. **与父差的多于一处**。变异是单步的（`mutations` 每次只改一层），差多处说明
+///      父子关系记错了。
+///   3. **父下标不在可分析的范围里**（越界或指到后面）。这一条是补上一个洞：早先
+///      的写法在 `0 <= p < i` 不成立时**直接跳过**，于是一本自指／前指的账本
+///      `descent_ok` 会**真空地成立**——恰恰是结构那一层要抓的畸形，遗传这一层却
+///      报「没问题」。不可分析不等于没问题。
 ///
-/// 这一组才是「把父写成世代号」那种错法的克星：下标仍在范围内，结构检查全过，
-/// 只有拿基因组去比才看得出它指错了记录。
+/// **「至多一处」，不是「恰好一处」**：这一条最初写的是 `== 1`，并且因此把一本合法
+/// 账本判红了（实测：省力目标、8 代，`#93 与父 #79 差 0 处`）。原因是 `mutations`
+/// 用 `clamp100` 夹取两诚，某层触底后再加同一方向的改动就是**原地踏步**，候选与父代
+/// 逐字节相同。`diff == 0` 是合法结果，不是记账错误——判据红了健康账本，比漏了
+/// 坏账本更糟，它会教人忽略自己。
 ///
 /// **适用范围要说准**：`evolve` 的账本记的是真遗传，本判据对它成立。
-/// `SubjectCycle::ledger` **不**满足它，也不该满足——那个循环每回合有两个 F_t
-/// （修习与开放），而账本只记了修习一个；当被接下的是开放时，下一回合的候选所从
-/// 出发的那份基因组**根本没有对应的记录**。那种情况下父子关系只能断在这里，
-/// 记 `None`（账本里确实没有父）是诚实的，假装接在前一条上才是假的。
+///
+/// `SubjectCycle::ledger` **不**满足它，也不该满足，但**理由不是**「开放被接下时来路
+/// 没有记录」——那是早先文档里的说法，`cycle.mbt:316` 并非如此：它每回合都写
+/// `Some(i - 1)`，从不停在 `None`。真实理由是**这本账记的是尝试的先后，不是遗传**：
+/// 每一回合的修习候选都从**该回合进场时的基因组**生成，而那份基因组只在某个 F_t 被
+/// 接下时才往前走。若某一回合被拒或回滚，下一回合的候选其实是从**更早**的那份基因组
+/// 生成的——此时「父＝上一条」声称的正是一次没有发生的遗传。差 0 处也是同一个成因：
+/// 残余已到 1 时再减 4，候选与父代相同。
 pub fn Ledger::descent_faults(self : Ledger) -> Array[String] {
   let bad : Array[String] = []
   for i = 0; i < self.trails.length(); i = i + 1 {
     let t = self.trails[i]
     match t.parent {
       None =>
-        if diff_count(self.seed, t.genome) != 1 {
+        if diff_count(self.seed, t.genome) > 1 {
           bad.push(
-            "#\{i} 是根，与种子差 \{diff_count(self.seed, t.genome)} 处（应为单步）",
+            "#\{i} 是根，与种子差 \{diff_count(self.seed, t.genome)} 处（至多一处）",
           )
         }
       Some(p) =>
@@ -265,11 +284,15 @@ pub fn Ledger::descent_faults(self : Ledger) -> Array[String] {
               "#\{i} 的父 #\{p} 是「\{par.verdict.label()}」，不是被接收的记录",
             )
           }
-          if diff_count(par.genome, t.genome) != 1 {
+          if diff_count(par.genome, t.genome) > 1 {
             bad.push(
-              "#\{i} 与父 #\{p} 差 \{diff_count(par.genome, t.genome)} 处（应为单步）",
+              "#\{i} 与父 #\{p} 差 \{diff_count(par.genome, t.genome)} 处（至多一处）",
             )
           }
+        } else {
+          bad.push(
+            "#\{i} 的父下标 #{p} 不在可分析的范围（本条无法验证，不等于没问题）",
+          )
         }
     }
   }

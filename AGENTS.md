@@ -12,7 +12,7 @@ Long-form context lives in `README.mbt.md` (English) and `README.zh.mbt.md`
 
 ```console
 moon test                              # all tests (default target: wasm); currently
-                                       # 205/205 on wasm + 2 snnref on native
+                                       # 211/211 on wasm + 2 snnref on native
                                        # + 4 ifacescan on native
 moon test --target native snnref       # spike-sediment experiment (native only)
 moon test --target native tools/ifacescan  # .mbti drift tripwire (native only)

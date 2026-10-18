@@ -311,17 +311,23 @@ test "树形：序列化往返后父子关系不变" {
 /// 真跑一遍：一条自指，一条前指。测试跑完本身就是「没挂」的证据。
 ///
 /// 另外验证判据**说得出**坏在哪：不是「不 ok」，而是点名那条记录与那个下标。
-test "树形：畸形账本（自指／前指）不挂死，且判据点名" {
+///
+/// 还要压住一个更隐蔽的失效：早先的 `descent_faults` 在父下标不可分析时**直接跳过**，
+/// 于是自指／前指的账本 `descent_ok` 会**真空地成立**——恰恰是结构那一层要抓的畸形，
+/// 遗传这一层却报「没问题」。不可分析不等于没问题，所以这两种账本必须两层都红。
+test "树形：畸形账本（自指／前指）不挂死，且两层判据都点名" {
   let seed_line = "seed\tsugg|inter|70|70|3|70"
   let obj_line = "objective\t求真"
-  let mk = fn(parent : String) -> String {
-    "trail\t0\t0\t" +
+  let mk = fn(gen : String, parent : String) -> String {
+    "trail\t" +
+    gen +
+    "\t0\t" +
     parent +
     "\tprompt\tacc\t120\t0\t0\t10,20,10,35\tdecl|inter|70|70|3|70\tX\tY"
   }
   // 自指：第 0 条的父就是自己。
   let self_ref = @evolution.parse(
-    [seed_line, obj_line, mk("0"), mk("0")].join("\n"),
+    [seed_line, obj_line, mk("0", "0"), mk("1", "0")].join("\n"),
   )
   assert_eq(self_ref.trails.length(), 2)
   assert_true(!self_ref.tree_ok())
@@ -330,12 +336,16 @@ test "树形：畸形账本（自指／前指）不挂死，且判据点名" {
   for f in self_ref.tree_faults() {
     assert_true(f.length() > 0) // 每条都带得动它的下标
   }
+  // 父不可分析时遗传层不许「沉默地通过」。
+  assert_true(!self_ref.descent_ok())
+  assert_true(self_ref.descent_faults().length() > 0)
   // 前指：第 0 条的父指向尚不存在的第 1 条。
   let forward = @evolution.parse(
-    [seed_line, obj_line, mk("1"), mk("1")].join("\n"),
+    [seed_line, obj_line, mk("0", "1"), mk("1", "1")].join("\n"),
   )
   assert_true(!forward.tree_ok())
   assert_true(forward.tree_faults().length() > 0)
+  assert_true(!forward.descent_ok())
   // 无论哪种畸形，读它都得有结果（而不是卡住），且祖先里不含越界的下标。
   for bad in [self_ref, forward] {
     for k in 0..<bad.trails.length() {
@@ -362,6 +372,57 @@ test "树形：判据只抓真的坏，不抓好的" {
   let empty = @evolution.parse("seed\tdecl|logos|70|70|3|70")
   assert_true(empty.tree_ok())
   assert_eq(empty.tree_faults().length(), 0)
+}
+
+///|
+/// 判据要能抓住「下标合法、深度合法、但世代号没往前走」的那本账。
+///
+/// 早先只查「父在子前」与「深度 ≤ 世代」，于是 `gen3(根) → gen3 → gen4` 能同时骗过
+/// 两层：下标在范围内，深度也够。一代只推进一格，所以父必须来自**更早**的世代。
+/// 这条判据就是补那个缝的，故必须有它自己会红的证据。
+test "树形：同代的父子骗不过世代邻接判据" {
+  let seed_line = "seed\tsugg|inter|70|70|3|70"
+  let obj_line = "objective\t求真"
+  let mk = fn(gen : String, parent : String) -> String {
+    "trail\t" +
+    gen +
+    "\t0\t" +
+    parent +
+    "\tprompt\tacc\t120\t0\t0\t10,20,10,35\tdecl|inter|70|70|3|70\tX\tY"
+  }
+  // 世代 3 的根 → 世代 3 的子（同代）→ 世代 4 的孙。
+  let same_gen = @evolution.parse(
+    [seed_line, obj_line, mk("3", "-"), mk("3", "0"), mk("4", "1")].join("\n"),
+  )
+  assert_eq(same_gen.trails.length(), 3)
+  assert_true(!same_gen.tree_ok()) // 早先这一本是绿的
+  assert_true(same_gen.tree_faults().length() > 0)
+  // 对照：把中间那条挪到世代 2（父更早），这本就是合法的。
+  let ok = @evolution.parse(
+    [seed_line, obj_line, mk("2", "-"), mk("3", "0"), mk("4", "1")].join("\n"),
+  )
+  assert_true(ok.tree_ok())
+  assert_eq(ok.tree_faults().length(), 0)
+}
+
+///|
+/// 判据不能把**合法的**账本判红。`mutations()` 用 `clamp100` 夹取两诚，于是某一层
+/// 触底之后再加同一个方向的改动就是**原地踏步**——候选与父代逐字节相同。
+///
+/// 这不是假想的边界：省力目标、8 代（实际跑到第 7 代）就能撞上，账本里那条候选的
+/// 「他／己之诚」写作 `0 → 0`。所以「与父恰好差一处」写死了 `== 1`，而事实是
+/// 差 0 处也是合法的。判据红了健康账本，比判据漏了坏账本更糟——它会让人开始忽略它。
+test "判据不把原地踏步的合法候选判红" {
+  let ledger = @evolution.evolve(
+    @evolution.default_agent(),
+    @evolution.default_world(),
+    @evolution.Weighted(@evolution.thrifty_objective()),
+    8,
+  )
+  assert_true(ledger.tree_ok())
+  let faults = ledger.descent_faults()
+  assert_eq(faults.length(), 0) // 带理由
+  assert_true(ledger.descent_ok())
 }
 
 ///|

@@ -181,6 +181,7 @@ pub(all) enum Outcome {
   Same(Slot, Array[Trigger], SubjectState)
   Block(String)
 } derive(Eq, @debug.Debug)
+pub fn Outcome::en_label(Self) -> String
 pub fn Outcome::equal(Self, Self) -> Bool
 pub fn Outcome::forks_from(Self, SubjectState) -> Array[Self]
 pub fn Outcome::label(Self) -> String
@@ -228,6 +229,7 @@ pub(all) enum Phase {
   Serenity
 } derive(Eq, @debug.Debug)
 pub fn Phase::designation(Self) -> String
+pub fn Phase::en_label(Self) -> String
 pub fn Phase::equal(Self, Self) -> Bool
 pub fn Phase::label(Self) -> String
 pub fn Phase::not_equal(Self, Self) -> Bool
@@ -245,6 +247,8 @@ pub(all) enum Slot {
   Unveil
 } derive(Eq, @debug.Debug)
 pub fn Slot::designation(Self) -> String
+pub fn Slot::en_designation(Self) -> String
+pub fn Slot::en_gloss(Self) -> String
 pub fn Slot::equal(Self, Self) -> Bool
 pub fn Slot::gloss(Self) -> String
 pub fn Slot::not_equal(Self, Self) -> Bool
@@ -307,6 +311,8 @@ pub(all) enum SubjectState {
   Tranquility
 } derive(Eq, @debug.Debug)
 pub fn SubjectState::designation(Self) -> String
+pub fn SubjectState::en_gloss(Self) -> String
+pub fn SubjectState::en_label(Self) -> String
 pub fn SubjectState::equal(Self, Self) -> Bool
 pub fn SubjectState::freedom(Self) -> Int
 pub fn SubjectState::gloss(Self) -> String
@@ -385,6 +391,7 @@ pub(all) enum Trigger {
   WaitNext
   ReopenByHorizon
 } derive(Eq, @debug.Debug)
+pub fn Trigger::en_label(Self) -> String
 pub fn Trigger::equal(Self, Self) -> Bool
 pub fn Trigger::label(Self) -> String
 pub fn Trigger::not_equal(Self, Self) -> Bool

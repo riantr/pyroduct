@@ -60,10 +60,21 @@ pub extend State with Eq::{not_equal, equal}
 
 ///|
 /// 模型的阶段（8 个，两字）。
+///
+/// 阶段名取**理论术语**，状态名取**结构位置**，两者不是同一套词：缺口阶段是
+/// `Aporia`（无法化解的僵局），缺口位置是 `Gap`；系统阶段是 `Instrument`
+/// （工具理性的那一层），系统位置是 `System`；规范阶段是 `Rule`，规范位置是
+/// `Norm`；殖民阶段是 `Domination`（支配关系），殖民位置是 `Colony`。每个词
+/// 都贴合它指的那个东西，所以这种不同是设计，不是漂移。
+///
+/// 商谈阶段是唯一的例外，也因此被改掉了：它曾作 `Speech`，那是「言语」，
+/// 既不合商谈作为**受验程序**的特性（哈贝马斯比作洗衣机），又和相邻的语言
+/// 阶段 `Language` 概念相撞。现在它读 `Discourse`，与商谈位置同名——此处
+/// 中文定名与原文措辞都相同，两个构造本就该是同一个词。
 pub(all) enum Phase {
   Life // 生活
   Language // 语言
-  Speech // 商谈
+  Discourse // 商谈（受验程序；曾作 Speech，言语之误）
   Rule // 规范
   Aporia // 缺口
   Instrument // 系统
@@ -168,10 +179,10 @@ pub fn State::phase(self : State) -> Phase {
     World => Life
     Suprasubjective => Language
     Intersubjective => Language
-    Claim => Speech
-    Discourse => Speech
-    Justification => Speech
-    Consensus => Speech
+    Claim => Discourse
+    Discourse => Discourse
+    Justification => Discourse
+    Consensus => Discourse
     Norm => Rule
     Gap => Aporia
     System => Instrument
@@ -187,7 +198,7 @@ pub fn Phase::label(self : Phase) -> String {
   match self {
     Life => "生活"
     Language => "语言"
-    Speech => "商谈"
+    Discourse => "商谈"
     Rule => "规范"
     Aporia => "缺口"
     Instrument => "系统"
@@ -269,7 +280,7 @@ pub fn all_states() -> Array[State] {
 ///|
 /// 全部阶段。
 pub fn all_phases() -> Array[Phase] {
-  [Life, Language, Speech, Rule, Aporia, Instrument, Domination, Rebuild]
+  [Life, Language, Discourse, Rule, Aporia, Instrument, Domination, Rebuild]
 }
 
 ///|

@@ -93,6 +93,7 @@ pub(all) enum GroupPhase {
   Cultivating
   Resting
 } derive(Eq)
+pub fn GroupPhase::en_label(Self) -> String
 pub fn GroupPhase::equal(Self, Self) -> Bool
 pub fn GroupPhase::label(Self) -> String
 pub fn GroupPhase::not_equal(Self, Self) -> Bool
@@ -121,6 +122,8 @@ pub(all) enum GroupState {
 } derive(Eq)
 pub fn GroupState::claims_closure(Self) -> Bool
 pub fn GroupState::designation(Self) -> String
+pub fn GroupState::en_designation(Self) -> String
+pub fn GroupState::en_gloss(Self) -> String
 pub fn GroupState::equal(Self, Self) -> Bool
 pub fn GroupState::gloss(Self) -> String
 pub fn GroupState::not_equal(Self, Self) -> Bool

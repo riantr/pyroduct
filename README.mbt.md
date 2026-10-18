@@ -245,11 +245,21 @@ Widen, MutualCheng, Settle, Reenter.
 
 ### Society — phases (8)
 
+The society machine has no English reading layer — the code identifier *is*
+the English here. Its phases name the **theoretical moment**, its states the
+**structural position**, so four pairs differ on purpose and every word fits
+what it names: 缺口 is `Aporia` (an impasse) as a phase and `Gap` as a position;
+系统 is `Instrument` (the instrumental layer) and `System`; 规范 is `Rule` and
+`Norm`; 殖民 is `Domination` and `Colony`. 商谈 was the exception and has been
+corrected: the phase read `Speech`, which is 言语 rather than the procedure
+Habermas compares to a washing machine, and which collided with the adjacent
+`Language` phase. It now reads `Discourse`, like the position it contains.
+
 | Designation | English | Gloss |
 |---|---|---|
 | 生活 | Life | the lifeworld, organized by language |
 | 语言 | Language | supra-subjective (Gadamer) vs. intersubjective (Habermas) |
-| 商谈 | Speech | claims raised, filtered, justified, turned into consensus |
+| 商谈 | Discourse | claims raised, filtered, justified, turned into consensus |
 | 规范 | Rule | norms set by practical discourse carry a "past tense" label |
 | 缺口 | Aporia | the third party is impossible in reality — the utopian fate |
 | 系统 | Instrument | the system, mediated by money and power |
@@ -263,10 +273,10 @@ Widen, MutualCheng, Settle, Reenter.
 | 世界 | World | Life |
 | 超体 | Suprasubjective | Language |
 | 间性 | Intersubjective | Language |
-| 主张 | Claim | Speech |
-| 商谈 | Discourse | Speech |
-| 辩护 | Justification | Speech |
-| 共识 | Consensus | Speech |
+| 主张 | Claim | Discourse |
+| 商谈 | Discourse | Discourse |
+| 辩护 | Justification | Discourse |
+| 共识 | Consensus | Discourse |
 | 规范 | Norm | Rule |
 | 缺口 | Gap | Aporia |
 | 系统 | System | Instrument |

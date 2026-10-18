@@ -107,8 +107,13 @@ Reenter。
 
 ## 社会（`society`）
 
-阶段（8）：生活 Life · 语言 Language · 商谈 Speech · 规范 Rule · 缺口 Aporia ·
+阶段（8）：生活 Life · 语言 Language · 商谈 Discourse · 规范 Rule · 缺口 Aporia ·
 系统 Instrument · 殖民 Domination · 复建 Rebuild
+
+社会机没有英文对照层，这里的 English 就是代码标识符。阶段取理论术语、状态取结构
+位置，所以有四对故意不同：`Aporia`/`Gap`、`Instrument`/`System`、`Rule`/`Norm`、
+`Domination`/`Colony`，每个词都贴合它所指。商谈阶段原作 `Speech`（言语），既不合
+商谈作为受验程序的特性，又与相邻的 `Language` 相撞，已改正为 `Discourse`。
 
 状态（13）：世界 World · 超体 Suprasubjective · 间性 Intersubjective ·
 主张 Claim · 商谈 Discourse · 辩护 Justification · 共识 Consensus · 规范 Norm ·

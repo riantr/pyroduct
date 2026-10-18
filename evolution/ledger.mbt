@@ -77,6 +77,211 @@ pub fn Ledger::rejected_example(self : Ledger) -> String? {
   None
 }
 
+// ── 树视图 ────────────────────────────────────────────────────
+//
+// 账本是**只追加**的，而每条记录都记着「我的父是账本里的第几条」。这两件事合起来
+// 就已经是一棵树：父下标必然小于自身，所以不会有环；每条记录至多一个父，所以
+// 不会分叉出两条同父的世系之外的东西。下面这组函数只是把这棵已经在那里的树
+// 显式地读出来，并给出它的健康检查（`tree_ok` / `tree_faults`）。
+//
+// 为什么值得显式化：账本原本把父写成「上一代的**编号**」。而一代要记十四条候选，
+// 于是那个编号根本不是下标——记下来的「遗传」指向了别的候选。树视图的存在让这条
+// 关系可证伪，而不是靠注释声称。
+
+///|
+/// 全部根：父为 None 的记录下标。只追加的账本里根必在前面，故天然有序。
+pub fn Ledger::roots(self : Ledger) -> Array[Int32] {
+  let out : Array[Int32] = []
+  for i = 0; i < self.trails.length(); i = i + 1 {
+    if self.trails[i].parent == None {
+      out.push(i)
+    }
+  }
+  out
+}
+
+///|
+/// 某条记录的直接子记录下标（按追加顺序）。
+pub fn Ledger::children(self : Ledger, i : Int32) -> Array[Int32] {
+  let out : Array[Int32] = []
+  if i < 0 || i >= self.trails.length() {
+    return out
+  }
+  for j = 0; j < self.trails.length(); j = j + 1 {
+    match self.trails[j].parent {
+      Some(p) => if p == i { out.push(j) }
+      None => ()
+    }
+  }
+  out
+}
+
+///|
+/// 从根到该记录的血缘路径：根在前，含自己。
+///
+/// 向上走有步数上限。只追加的账本里父必在子前，三步就到根；但一本手改过或旧版
+/// 写坏的账本可能把父指到后面去，没有上限就是死循环——**读一个坏掉的结构不该把
+/// 进程挂住**。超限时返回已经走到的部分，不假装它是一条完整世系。
+pub fn Ledger::ancestry(self : Ledger, i : Int32) -> Array[Int32] {
+  let up : Array[Int32] = []
+  let mut cur = i
+  let mut steps = 0
+  while cur >= 0 && cur < self.trails.length() && steps <= self.trails.length() {
+    up.push(cur)
+    match self.trails[cur].parent {
+      Some(p) => cur = p
+      None => break
+    }
+    steps += 1
+  }
+  let out : Array[Int32] = []
+  for k = up.length() - 1; k >= 0; k = k - 1 {
+    out.push(up[k])
+  }
+  out
+}
+
+///|
+/// 某条记录的深度：根为 0。
+pub fn Ledger::depth(self : Ledger, i : Int32) -> Int32 {
+  let a = self.ancestry(i)
+  if a.length() == 0 {
+    0
+  } else {
+    a.length() - 1
+  }
+}
+
+///|
+/// 树高：最深一条记录的深度 + 1；空账本为 0。
+pub fn Ledger::height(self : Ledger) -> Int32 {
+  let mut h = 0
+  for i = 0; i < self.trails.length(); i = i + 1 {
+    let d = self.depth(i) + 1
+    if d > h {
+      h = d
+    }
+  }
+  h
+}
+
+///|
+/// 叶子（没有子记录的那些）。
+pub fn Ledger::leaves(self : Ledger) -> Array[Int32] {
+  let out : Array[Int32] = []
+  for i = 0; i < self.trails.length(); i = i + 1 {
+    if self.children(i).length() == 0 {
+      out.push(i)
+    }
+  }
+  out
+}
+
+///|
+/// 世系：根到该记录，每一步「改了什么」串成一行。
+pub fn Ledger::lineage(self : Ledger, i : Int32) -> String {
+  let parts : Array[String] = []
+  for k in self.ancestry(i) {
+    parts.push(self.trails[k].what)
+  }
+  if parts.length() == 0 {
+    "（无）"
+  } else {
+    parts.join(" ⟶ ")
+  }
+}
+
+///|
+/// **结构**不变式被破坏的理由（空数组 = 全部成立）。只查账本自身能查的东西：
+///
+///   1. **父不在自己之前**：只追加的账本里父必在子前。越界、或指到后面 ⇒ 这本账坏了。
+///      这条同时保证无环，所以 `ancestry` 不必再做别的防护。
+///   2. **深度 > 世代号**：一回合至多往下一代传一层，深过世代号说明父子关系乱指。
+///      注意是 `>` 不是 `≠`：深度与世代号只在「一条干净的链」上相等，一旦某回合的
+///      改动没被接下（见 `descent_faults`），后来的记录会重新起根，那时深度 < 世代号
+///      是对的。把相等当不变量，等于逼所有账本都得是链。
+pub fn Ledger::tree_faults(self : Ledger) -> Array[String] {
+  let bad : Array[String] = []
+  for i = 0; i < self.trails.length(); i = i + 1 {
+    let d = self.depth(i)
+    if d > self.trails[i].generation {
+      bad.push(
+        "#\{i} 深度 \{d} 超过它的世代号 \{self.trails[i].generation}",
+      )
+    }
+    match self.trails[i].parent {
+      None => ()
+      Some(p) =>
+        if p < 0 || p >= i {
+          bad.push(
+            "#\{i} 的父下标 \{p} 不在它自己之前（只追加的账本里父必在子前）",
+          )
+        }
+    }
+  }
+  bad
+}
+
+///|
+/// 结构不变式是否全部成立（无环、父在子前、深度不超世代）。任何只追加的账本都该过。
+pub fn Ledger::tree_ok(self : Ledger) -> Bool {
+  self.tree_faults().length() == 0
+}
+
+///|
+/// **遗传**不变式被破坏的理由（空数组 = 全部成立）。比结构更进一步：它问的不是
+/// 「父下标合不合法」，而是「父指向的那条记录，是不是这一条真正的来路」。
+///
+///   1. **父既不是根、也不是被接收的记录**。下一代的候选是从上一代**被接收**的基因组
+///      生成的。宪法拦下或闸门回滚的改动不能成为谁的父——从别处借一个当父，记下来的
+///      「遗传」就是假的。
+///   2. **与父差的不止一处**。变异是单步的（`mutations` 每次只改一层），差多处说明
+///      父子关系记错了。根没有记录在案的父，参照对象是种子。
+///
+/// 这一组才是「把父写成世代号」那种错法的克星：下标仍在范围内，结构检查全过，
+/// 只有拿基因组去比才看得出它指错了记录。
+///
+/// **适用范围要说准**：`evolve` 的账本记的是真遗传，本判据对它成立。
+/// `SubjectCycle::ledger` **不**满足它，也不该满足——那个循环每回合有两个 F_t
+/// （修习与开放），而账本只记了修习一个；当被接下的是开放时，下一回合的候选所从
+/// 出发的那份基因组**根本没有对应的记录**。那种情况下父子关系只能断在这里，
+/// 记 `None`（账本里确实没有父）是诚实的，假装接在前一条上才是假的。
+pub fn Ledger::descent_faults(self : Ledger) -> Array[String] {
+  let bad : Array[String] = []
+  for i = 0; i < self.trails.length(); i = i + 1 {
+    let t = self.trails[i]
+    match t.parent {
+      None =>
+        if diff_count(self.seed, t.genome) != 1 {
+          bad.push(
+            "#\{i} 是根，与种子差 \{diff_count(self.seed, t.genome)} 处（应为单步）",
+          )
+        }
+      Some(p) =>
+        if p >= 0 && p < i {
+          let par = self.trails[p]
+          if par.verdict != Accepted {
+            bad.push(
+              "#\{i} 的父 #\{p} 是「\{par.verdict.label()}」，不是被接收的记录",
+            )
+          }
+          if diff_count(par.genome, t.genome) != 1 {
+            bad.push(
+              "#\{i} 与父 #\{p} 差 \{diff_count(par.genome, t.genome)} 处（应为单步）",
+            )
+          }
+        }
+    }
+  }
+  bad
+}
+
+///|
+/// 遗传不变式是否成立。只对**确实在记真遗传**的账本才有意义（见 `descent_faults`）。
+pub fn Ledger::descent_ok(self : Ledger) -> Bool {
+  self.descent_faults().length() == 0
+}
+
 // ── 持久化：编解码 ──────────────────────────────────────────────
 
 ///|

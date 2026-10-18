@@ -61,19 +61,25 @@ pub fn evolve(
   let trails : Array[Trail] = []
   let mut current = seed
   let mut current_score = score(evaluate(seed, world), objective)
+  // 在册的「来路」：上一代**被接收**的那条记录的下标。下一代的所有候选都是从
+  // `current` 生成的，而 `current` 恰好是那条记录的基因组——所以父就该是它。
+  //
+  // 这里原来写的是 `Some(gen - 1)`：那是**世代号**，不是账本下标。一代要记
+  // mutations() 返回的十四条候选，于是那个「下标」落在第 0 代那一片里，指的
+  // 是某个跟下一代无关的候选。结构上完全合法（小于自身），所以任何只查下标
+  // 合不合法的检查都会放过它——账本看上去是一棵树，记下来的却不是遗传。
+  let mut parent_of : Int32? = None
   for gen = 0; gen < generations; gen = gen + 1 {
     let offers = breed(current, current_score, world, criterion)
     let mut best : Offer? = None
+    let mut best_at : Int32 = -1
     for i = 0; i < offers.length(); i = i + 1 {
       let offer = offers[i]
+      let at = trails.length()
       trails.push({
         generation: gen,
         step: i,
-        parent: if gen == 0 {
-          None
-        } else {
-          Some(gen - 1)
-        },
+        parent: parent_of,
         locus: offer.candidate.locus,
         what: offer.candidate.what,
         why: offer.decision.reason,
@@ -92,6 +98,7 @@ pub fn evolve(
         }
         if better {
           best = Some(offer)
+          best_at = at
         }
       }
     }
@@ -99,6 +106,7 @@ pub fn evolve(
       Some(b) => {
         current = b.candidate.genome
         current_score = b.decision.score
+        parent_of = Some(best_at)
       }
       None => break
     }

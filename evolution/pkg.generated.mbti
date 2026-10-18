@@ -87,6 +87,8 @@ pub fn render_objectives() -> String
 
 pub fn render_report() -> String
 
+pub fn render_tree(Ledger) -> String
+
 pub fn render_variation() -> String
 
 pub fn run_cycle(CycleState, Array[Opponent], Criterion, Int) -> SubjectCycle
@@ -204,10 +206,21 @@ pub struct Ledger {
   trails : Array[Trail]
 }
 pub fn Ledger::accepted_count(Self) -> Int
+pub fn Ledger::ancestry(Self, Int) -> Array[Int]
+pub fn Ledger::children(Self, Int) -> Array[Int]
 pub fn Ledger::current(Self) -> Genome
+pub fn Ledger::depth(Self, Int) -> Int
+pub fn Ledger::descent_faults(Self) -> Array[String]
+pub fn Ledger::descent_ok(Self) -> Bool
+pub fn Ledger::height(Self) -> Int
+pub fn Ledger::leaves(Self) -> Array[Int]
+pub fn Ledger::lineage(Self, Int) -> String
 pub fn Ledger::rejected_count(Self) -> Int
 pub fn Ledger::rejected_example(Self) -> String?
+pub fn Ledger::roots(Self) -> Array[Int]
 pub fn Ledger::serialize(Self) -> String
+pub fn Ledger::tree_faults(Self) -> Array[String]
+pub fn Ledger::tree_ok(Self) -> Bool
 
 pub(all) enum Locus {
   Prompt

@@ -43,7 +43,7 @@ pub fn render_objectives() -> String {
 }
 
 ///|
-/// 账本：接收了哪些改动、被宪法拦下了什么。
+/// 账本：接收了哪些改动、被宪法拦下了什么，以及它们长成了一棵什么样的树。
 pub fn render_ledger(ledger : Ledger) -> String {
   let lines : Array[String] = [
     "共 \{ledger.trails.length()} 条记录：接收 \{ledger.accepted_count()}，违宪拒收 \{ledger.rejected_count()}",
@@ -55,12 +55,53 @@ pub fn render_ledger(ledger : Ledger) -> String {
       )
     }
   }
+  lines.push("")
+  lines.push(render_tree(ledger))
   match ledger.rejected_example() {
     Some(e) => {
       lines.push("")
       lines.push("被宪法拦下的一例：\{e}")
     }
     None => ()
+  }
+  lines.join("\n")
+}
+
+///|
+/// 账本的树形：根有几个、树有多高、以及那条被走了下去的世系。
+///
+/// **不变量与判词一起印出来**，而不是只印一个「看起来对」的形状。账本坏掉的两种方式
+/// 长得完全不一样，而报告必须能让人当场分辨：
+///
+///   - 结构（`tree_ok`）：无环、父在子前、深度不超世代。任何只追加的账本都该成立。
+///   - 遗传（`descent_ok`）：父确实是下一代真正的来路，且只差一处。只有
+///     `evolve` 那本账主张这个；`SubjectCycle::ledger` 记的是尝试的先后——
+///     它每回合有两个 F_t 而只记了修习一个，被接下的是开放时下一回合的来路根本没有
+///     记录，故对它不成立，口径不同不是缺陷。
+///
+/// 坏在哪时把 `faults` 原样列出：报「不 ok」而不说哪儿不对，等于把排查推给读者。
+pub fn render_tree(ledger : Ledger) -> String {
+  let lines : Array[String] = [
+    "树：\{ledger.roots().length()} 根 · 高 \{ledger.height()} · 叶 \{ledger.leaves().length()}",
+  ]
+  // 走到底的那条世系：从根一路到最深的那片叶子。
+  let mut deepest = 0
+  for i in 0..<ledger.trails.length() {
+    if ledger.depth(i) > ledger.depth(deepest) {
+      deepest = i
+    }
+  }
+  if ledger.trails.length() > 0 {
+    lines.push(
+      "最深的世系（\{ledger.depth(deepest)} 层）：\{ledger.lineage(deepest)}",
+    )
+  }
+  lines.push(
+    "结构不变量：\{if ledger.tree_ok() { "成立" } else { "**被破坏**" }}；遗传不变量：\{if ledger.descent_ok() { "成立" } else { "**被破坏**（这本账不主张真遗传）" }}",
+  )
+  let faults = ledger.tree_faults() + ledger.descent_faults()
+  for f in faults {
+    lines.push("- 结构/遗传违例：\{f}")
   }
   lines.join("\n")
 }

@@ -1,13 +1,13 @@
 {
   "module": "riantr/pyroduct",
-  "version": "0.1.30",
+  "version": "0.1.31",
   "artifact": "vendor/jsoncli.js",
   "builtWith": "moon 0.1.20261012 / moonc v0.10.15+943464bfa",
   "buildCommand": "moon build --target js",
   "sourcePath": "_build/js/debug/build/cmd/jsoncli/jsoncli.js",
   "target": "js",
-  "bytes": 1382502,
-  "bundleSha256": "b1bdd9b2d2ec607261d57f8a10689d3e53fc3e3ccd5faa70b01cec503276b510",
+  "bytes": 1397926,
+  "bundleSha256": "e4c5ccd766640ef48f859fb2f9497028dd1bfb68c76e12eb26c3744733d40c1a",
   "note": "jsoncli is a pure spawner bridge: one JSON request argument {kind} in, one JSON reply line {ok,kind,rendered,faces} out. All model semantics stay in MoonBit and are gated with the module itself.",
   "pinRule": "bundleSha256 and bytes are asserted by tools/validate-plugin.mjs: the model semantics live inside this bundle, so an edited or stale copy must fail loudly rather than be discovered at the next release. tools/update-bundle.mjs rewrites all three fields together."
 }

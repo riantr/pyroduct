@@ -1,7 +1,7 @@
 // Model Fact Registry Evolution — Current vs Target State
 // Generated: 2026-10-11
 
-// model-version: 0.1.30
+// model-version: 0.1.31
 digraph EvolutionV2 {
   rankdir=LR;
   fontname="Arial";

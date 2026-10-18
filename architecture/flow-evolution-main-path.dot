@@ -3,7 +3,7 @@
 // Date: 2026-10-11
 // Focus: One round of run_cycle, from response to update
 
-// model-version: 0.1.30
+// model-version: 0.1.31
 digraph evolution_main_path {
     rankdir=TB;
     node [shape=box, style=filled, fontname="Arial", fontsize=10];

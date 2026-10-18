@@ -158,6 +158,170 @@ test "持久化：写下、读回、接着跑" {
 }
 
 ///|
+/// 树形：账本是父子结构——无环、父在子前、深度不超世代号。
+test "树形：账本是一棵无环的树" {
+  for o in [@evolution.truth_objective(), @evolution.thrifty_objective()] {
+    let ledger = @evolution.evolve(
+      @evolution.default_agent(),
+      @evolution.default_world(),
+      @evolution.Weighted(o),
+      4,
+    )
+    let faults = ledger.tree_faults()
+    assert_eq(faults.length(), 0) // 带理由，才知道是哪一条被破坏
+    assert_true(ledger.tree_ok())
+  }
+}
+
+///|
+/// 遗传：`evolve` 记的父必须是上一代**被接收**的那条记录，且与它恰好差一处。
+///
+/// 这两条是承重的。只查「父下标合法」的话，把父写成**世代号**（而一代有十四条
+/// 候选，那个编号根本不是下标）照样能过——下标在范围内，只是指错了记录。父指向的
+/// 那条是不是下一代真正的起点，只有拿基因组去比才知道。
+///
+/// `evolve` 修好之前这条是红的（一条四代的账本报出 26 条），那是判据自己有牙的证据。
+test "遗传：父子关系是真遗传，不是把世代号当成了下标" {
+  for o in [@evolution.truth_objective(), @evolution.thrifty_objective()] {
+    let ledger = @evolution.evolve(
+      @evolution.default_agent(),
+      @evolution.default_world(),
+      @evolution.Weighted(o),
+      4,
+    )
+    let faults = ledger.descent_faults()
+    assert_eq(faults.length(), 0)
+    assert_true(ledger.descent_ok())
+    let n = ledger.trails.length()
+    for i in 0..<n {
+      match ledger.trails[i].parent {
+        Some(p) => {
+          let par = ledger.trails[p]
+          assert_true(par.verdict == @evolution.Accepted)
+          assert_eq(
+            @evolution.diff_count(par.genome, ledger.trails[i].genome),
+            1,
+          )
+        }
+        None =>
+          assert_eq(
+            @evolution.diff_count(ledger.seed, ledger.trails[i].genome),
+            1,
+          )
+      }
+    }
+  }
+}
+
+///|
+/// 树形：树高 = 实际跑到的代数 + 1；根就是第一代的全部候选。
+///
+/// 这两个数都**从账本自己推**，不写死：`evolve` 在没有可接收的改动时就停（`break`），
+/// 所以跑了四代参数不代表账本里有四代——写死 4 会把「爬到哪儿算哪儿」这个行为
+/// 当成偶然。
+test "树形：树高随代数增长，根就是第一代那批候选" {
+  let ledger = @evolution.evolve(
+    @evolution.default_agent(),
+    @evolution.default_world(),
+    @evolution.Weighted(@evolution.truth_objective()),
+    4,
+  )
+  assert_true(ledger.descent_ok())
+  let mut max_gen = 0
+  for t in ledger.trails {
+    if t.generation > max_gen {
+      max_gen = t.generation
+    }
+  }
+  assert_true(max_gen >= 1) // 至少爬了一代，否则这棵树没有可测的形状
+  assert_eq(ledger.height(), max_gen + 1)
+  // 第 0 代全部起根：它们都是种子的单步改动，且此后每一代都挂在被接收的那条下。
+  assert_eq(
+    ledger.roots().length(),
+    @evolution.mutations(@evolution.default_agent()).length(),
+  )
+}
+
+///|
+/// 主体循环的账本**只是**结构上成树，不主张真遗传。
+///
+/// 它每回合有两个 F_t（修习、开放），而账本只记了修习一个。当被接下的是开放时，
+/// 下一回合候选所从出发的那份基因组没有对应记录，父子关系只能断在那里。故
+/// `descent_ok` 对它不成立——这是口径不同，不是判据失效，故只断言结构那一半。
+///
+/// 顺带把口径钉死：判据不是「见红就错」。`descent_ok` 在这本账上为假，
+/// 正是它没有对所有账本一律放行的证据。
+test "树形：主体循环的账本结构成树，但不主张真遗传" {
+  let led = small_cycle(3).ledger()
+  assert_true(led.tree_ok())
+  assert_eq(led.tree_faults().length(), 0)
+  assert_true(!led.descent_ok()) // 记的是尝试的先后，不是遗传
+}
+
+///|
+/// 树形：世系可读——从根到某条记录，每一步都是「从被接收的父代改一处」。
+test "树形：世系串起来是一条可读的改法链" {
+  let ledger = @evolution.evolve(
+    @evolution.default_agent(),
+    @evolution.default_world(),
+    @evolution.Weighted(@evolution.truth_objective()),
+    4,
+  )
+  assert_true(ledger.descent_ok())
+  // 取任意一条非根记录：世系长度 = 深度 + 1，末两条正是它与它的父。
+  let n = ledger.trails.length()
+  for i in 0..<n {
+    match ledger.trails[i].parent {
+      Some(p) => {
+        let chain = ledger.ancestry(i)
+        assert_eq(chain.length(), ledger.depth(i) + 1)
+        assert_eq(chain[chain.length() - 1], i)
+        assert_eq(chain[chain.length() - 2], p)
+        assert_true(ledger.lineage(i).length() > 0)
+        break
+      }
+      None => ()
+    }
+  }
+}
+
+///|
+/// 树形：往返之后仍然是同一棵树（序列化不能把父子关系压平）。
+test "树形：序列化往返后父子关系不变" {
+  let ledger = @evolution.evolve(
+    @evolution.default_agent(),
+    @evolution.default_world(),
+    @evolution.Weighted(@evolution.truth_objective()),
+    4,
+  )
+  let back = @evolution.parse(ledger.serialize())
+  assert_true(back.tree_ok())
+  assert_true(back.descent_ok())
+  assert_eq(back.height(), ledger.height())
+  assert_eq(back.roots(), ledger.roots())
+  let last = ledger.trails.length() - 1
+  assert_eq(back.lineage(last), ledger.lineage(last))
+}
+
+///|
+/// 树形：坏掉的账本要能**说**出哪儿坏了，不能只是「不 ok」。
+test "树形：判据只抓真的坏，不抓好的" {
+  let ok = @evolution.evolve(
+    @evolution.default_agent(),
+    @evolution.default_world(),
+    @evolution.Weighted(@evolution.truth_objective()),
+    4,
+  )
+  assert_true(ok.tree_ok())
+  assert_true(ok.descent_ok())
+  assert_eq(ok.descent_faults().length(), 0)
+  // 空的账本没有可破坏的东西，不该红。
+  let empty = @evolution.parse("seed\tdecl|logos|70|70|3|70")
+  assert_true(empty.tree_ok())
+  assert_eq(empty.tree_faults().length(), 0)
+}
+
+///|
 test "遗传：子代＝父代 + 一处改动；宪法不在基因组里" {
   let g = @evolution.default_agent()
   for c in @evolution.mutations(g) {

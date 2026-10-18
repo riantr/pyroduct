@@ -2,7 +2,7 @@
 
 这张表是 `python tools/mutate_review.py` 的**输出留档**，为的是让
 「每条变异都被判据抓住」这句话不必靠重跑一次破坏工作树的运行来核对。
-重跑方式：`python tools/mutate_review.py`（58 条变异 × 全量测试，约 20-30 分钟）。
+重跑方式：`python tools/mutate_review.py`（60 条变异 × 全量测试，约 20-30 分钟）。
 本文件**只由全量跑生成**。`python tools/mutate_review.py loop3` 这样的单组跑会
 另写 `mutation_review_log.loop3.md`，不会碰这份——单组跑曾经把这份全量记录
 覆盖成自己那几行，而我把截断版提交了；工具静默毁掉自己的记录比没有工具更糟。
@@ -71,6 +71,8 @@
 | E8 群体修习阶段 读回 Cultivating（一个定名两个英文词） | CAUGHT | Total tests: 211, passed: 210, failed: 1 |
 | E9 成体 读回 Coming to a Body（阶段名里唯一的长句） | CAUGHT | Total tests: 211, passed: 210, failed: 1 |
 | E10 群体自缚 读回 Self-bound（与主体侧 Self-binding 不同源） | CAUGHT | Total tests: 211, passed: 210, failed: 1 |
+| E11 修习位置 gloss 退回 discipline（与本次改名自相矛盾） | CAUGHT | Total tests: 211, passed: 210, failed: 1 |
+| E12 群体修习 gloss 退回 discipline（与 group/en.mbt 的规则相矛盾） | CAUGHT | Total tests: 211, passed: 210, failed: 1 |
 | P1 src::exitable 恒真（缺口那侧不再被认出来） | CAUGHT | Total tests: 211, passed: 210, failed: 1 |
 | P2 src::every_phase_has_non_act_of 恒真 | CAUGHT | Total tests: 211, passed: 210, failed: 1 |
 | P3 src::any_returns_to 恒真（非空性不再被检查） | CAUGHT | Total tests: 211, passed: 210, failed: 1 |
@@ -92,10 +94,10 @@
 | RESTORED audit/mutants.mbt | OK | 0027919f8386bf85 |
 | RESTORED ml/design.mbt | OK | fc0d26c9f8b898f7 |
 | RESTORED src/petri.mbt | OK | e36db7b3e06cdc4b |
-| RESTORED src/en.mbt | OK | e17f2797ceabeb42 |
-| RESTORED group/en.mbt | OK | c4f6b3b003d72fe8 |
+| RESTORED src/en.mbt | OK | 6ce7ab1fd6731d29 |
+| RESTORED group/en.mbt | OK | 95f7f0adeaa1bdf5 |
 | RESTORED src/buchi.mbt | OK | 9dc87ccf3eb376c8 |
 | RESTORED src/paths.mbt | OK | c3e7e19117da3ec1 |
-| RESTORED society/state.mbt | OK | 0c732aaa2f732aea |
+| RESTORED society/state.mbt | OK | 8ac5d23123170178 |
 | RESTORED evolution/cycle.mbt | OK | 751c57c3f97402b3 |
 | RESTORED group/machine.mbt | OK | 5fb036c76f123d02 |

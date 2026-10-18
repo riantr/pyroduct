@@ -70,6 +70,15 @@ test "thirty-four states carry distinct, non-Chinese English names and glosses" 
   for name in decided {
     assert_true(seen.contains(name))
   }
+  // The glosses are how this whole change slipped through. A gloss is prose
+  // about the source rather than a name, so nobody looked at it — and 修习's
+  // gloss went on calling the state "discipline" in the very commit that
+  // renamed it. Assert the reading positively: the gloss must say the word the
+  // designation now wears. A negative test ("must not say discipline") would
+  // also have to survive an unrelated sentence using the ordinary word, and a
+  // check that misfires teaches you to ignore it.
+  assert_true(@src.Discipline.en_gloss().contains("cultivation"))
+  assert_true(@src.RemoveReefs.en_label().contains("cultivation"))
 }
 
 ///|

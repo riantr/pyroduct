@@ -68,6 +68,10 @@ test "定名纪律：两字互异，英文对照层齐备且不与中文重合" 
   assert_true(en_states.contains("Disciplined"))
   assert_true(!en_states.contains("Discipline"))
   assert_true(!en_phases.contains("Discipline"))
+  // 同一条读法也要落在散文里。gloss 是关于原文的散文，所以没人看它，而 修习
+  // 的 gloss 在把状态改名的那次提交里仍然写着 "discipline"。正向断言：gloss
+  // 必须说出该定名现在穿的词。
+  assert_true(@group.Practicing.en_gloss().contains("cultivation"))
 }
 
 ///|

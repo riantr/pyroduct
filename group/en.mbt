@@ -85,7 +85,7 @@ pub fn GroupState::en_gloss(self : GroupState) -> String {
     Returning =>
       "Someone turns back and asks the question again: the cycle reopens."
     Practicing =>
-      "Collectively enduring a temporary pain in order to remove the reefs -- discipline, reenacted at group scale."
+      "Collectively enduring a temporary pain in order to remove the reefs -- cultivation, reenacted at group scale."
     Widening =>
       "The frontier widens, and new members and new content are taken in."
     Attuned =>

@@ -153,7 +153,7 @@ pub fn SubjectState::en_gloss(self : SubjectState) -> String {
     Marking =>
       "He marks the good and the bad to guide the orientation of the next moment, setting waymarks ahead and avoiding the reefs as far as possible; and every change renders the previous moment's map invalid."
     Discipline =>
-      "The frontier keeps widening, the reefs are no longer isolated; the person tries to endure a temporary pain in exchange for greater freedom, and the activity of removing those reefs is discipline."
+      "The frontier keeps widening, the reefs are no longer isolated; the person tries to endure a temporary pain in exchange for greater freedom, and the activity of removing those reefs is cultivation."
     Tranquility =>
       "Fewer and fewer reefs, a wider and wider frontier, the person's freedom lifted once more; suffering lightens, the reefs cease to be reefs, and all that the eye sees and the finger points to is nothing but a piece of light."
   }

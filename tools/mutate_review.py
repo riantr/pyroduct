@@ -503,6 +503,21 @@ LOOP6 = [
         '    SelfBound => "Self-binding"',
         '    SelfBound => "Self-bound"',
     ),
+    # gloss 是散文而不是名字，所以这一层整体漏检过一次：把状态改名为 Cultivation
+    # 的那次提交里，位置 gloss 和触发句两处已经改了，位置 gloss 却仍然写着
+    # discipline。E11／E12 就是冲这个来的。
+    (
+        "E11 修习位置 gloss 退回 discipline（与本次改名自相矛盾）",
+        "src/en.mbt",
+        "those reefs is cultivation.",
+        "those reefs is discipline.",
+    ),
+    (
+        "E12 群体修习 gloss 退回 discipline（与 group/en.mbt 的规则相矛盾）",
+        "group/en.mbt",
+        "-- cultivation, reenacted at group scale.",
+        "-- discipline, reenacted at group scale.",
+    ),
 ]
 
 GROUPS = {

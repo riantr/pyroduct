@@ -123,6 +123,13 @@ designation while the reading names the original wording 浑噩, and 同归 read
 `Same` / `Converge` because `Same` is what pairs with `Moved` and `Held` in
 code, while what actually happens is several triggers converging on one target.
 
+One pair looks like an oversight and is not: 反顾 is `Recollection` as a phase
+and `Reflection` as a position. Like 立位 (`Natural` / `Standing`), the two
+carry different original wording — the phase's is 反思, the position's is 审视
+— so the source itself distinguishes them. Where a designation and its source
+wording are the *same*, one English word is the right answer; where the source
+distinguishes them, it should.
+
 ### Phases — subject (11)
 
 | Designation | English | Original |

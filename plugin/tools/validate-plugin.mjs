@@ -119,7 +119,17 @@ const FRESH_BUILD = process.argv.includes('--fresh-build')
   }
 }
 
-const child = spawn('node', [SERVER], { stdio: ['pipe', 'pipe', 'pipe'] })
+// `PYRODUCT_PROJECT_DIR` steers *this* harness's own file walk — that is what
+// the wasm test count check below reads it for, and what AGENTS.md documents it
+// as. The server under test must therefore NOT inherit it: the check "gates
+// degrades cleanly without a checkout" is only true when the server sees no
+// checkout, and an inherited variable makes gates find a real module and run it
+// for real. That check could not pass on the command AGENTS.md tells you to
+// run. The decoy spawn further down sets the variable deliberately, for the
+// opposite reason, and must keep doing so.
+const childEnv = { ...process.env }
+delete childEnv.PYRODUCT_PROJECT_DIR
+const child = spawn('node', [SERVER], { stdio: ['pipe', 'pipe', 'pipe'], env: childEnv })
 let buf = ''
 const pending = new Map()
 child.stdout.setEncoding('utf8')

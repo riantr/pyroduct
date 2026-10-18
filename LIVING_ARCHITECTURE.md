@@ -78,7 +78,7 @@
 | Content invariants | Report says "34 states · 53 transitions · 11 phases", audit says "未预期 0 条", etc. |
 | Page citations | Exactly 4 faces print P.xx (group, intuition, multi, society) |
 | Page citation anti-drift | Catalog doesn't claim page refs for faces without them |
-| **Test count** | `pyroduct_gates` description says the real wasm test count (197) |
+| **Test count** | `pyroduct_gates` description says the real wasm test count (and never transcribes it) |
 | **Model facts** | Face descriptions match actual state/transition/phase counts (8 checks) |
 | Checkout guard | Gates hard-fail on bad path, face falls back to snapshot |
 

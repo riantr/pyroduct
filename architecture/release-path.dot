@@ -28,7 +28,7 @@ digraph release_path {
     gate_update [label="moon update\n(解析注册中心)"]
     gate_check [label="moon check --deny-warn"]
     gate_fmt [label="moon fmt --check"]
-    gate_test_wasm [label="moon test --deny-warn\n(wasm, 197 tests)"]
+    gate_test_wasm [label="moon test --deny-warn\n(wasm, 209 tests)"]
     gate_build_js [label="moon build --target js\n(桥构建)"]
     gate_build_wasm [label="moon build --target wasm\n(注册中心制品)"]
     gate_native [label="moon test --target native\n(snnref + ifacescan)\nmoon run cmd/ifacescan\nmoon run cmd/coord\nmoon run examples/sediment"]

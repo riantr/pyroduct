@@ -40,7 +40,10 @@
 
   `evolution` 把 Agent 的配置当作 `Genome`，枚举单步候选（提示／策略／记忆／
   代码），把「更好」写成 `Objective`，用宪法不变量圈起边界，并把每次
-  接受／拒绝／回退连同理由记进一个只追加、可序列化的 `Ledger`。闸门有两档：
+  接受／拒绝／回退连同理由记进一个只追加、可序列化的 `Ledger`。每条记录都记着它是从
+  账本里哪一条长出来的，于是这本账同时是一棵树：`roots`、`children`、`depth`、
+  `ancestry`、`leaves`、`height`、`lineage`——而这条世系是被检查的，不是被声称的：
+  非根记录的父必须是根或一条被接收的改动，且与它恰好差一处。闸门有两档：
   手写权重，或 DoubleML 因果效应（θ̂ > 0 且 95% 下界 > 0）。主体循环
   `run_cycle` 按驱动槽驱动真实位置，把修习与开放送进同一个闸门——
   没有证据就不前进。
@@ -303,7 +306,7 @@ behavior)* · 往返一致 *round-trips identically*。
 
 ```
 moon add riantr/pyroduct
-moon test             # Total tests: 197, passed: 197, failed: 0.
+moon test             # Total tests: 205, passed: 205, failed: 0.
 ```
 
 在本仓库里，每一层都打印一份报告：
@@ -354,7 +357,7 @@ let same : Bool = restored.round_trips()
 
 ## 门禁与漂移检测
 
-基线是 `moon check`、`moon fmt --check`、`moon test`（wasm 208 个测试），
+基线是 `moon check`、`moon fmt --check`、`moon test`（wasm 209 个测试），
 外加两个只跑 native 的包（`snnref`、`tools/ifacescan`）。其上还有三个检测器——
 因为**测试全绿并不说明写在文档里的那句话还对**：
 

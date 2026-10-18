@@ -426,6 +426,30 @@ check('naming row no longer claims a provenance layer',
   check('gates description states the real wasm test count',
     descCount === wasmTests,
     `description says ${descCount}, code has ${wasmTests} (${totalTests} total - ${nativeTests} native-only)`)
+
+  // The same number also appears in the shipped SKILL doc, and NOTHING read it.
+  // Measured 2026-10-18: the harness printed PASS on the test-count anti-drift
+  // while SKILL.md told a live agent "197 个测试" and the code ran 205. This is
+  // the same failure the check above was written for — a number in prose that
+  // drifts with every release — one document further from the counter. A check
+  // that only covers the tool description covers the class of bug it was
+  // invented to catch, and leaves the sibling copy to rot in peace.
+  const skillPath = path.join(PLUGIN, 'skills', 'pyroduct-model', 'SKILL.md')
+  const skillText = es(skillPath) ? rf(skillPath, 'utf8') : ''
+  // Any <number> 个测试 / <number> tests near the gate row. Requiring exactly one
+  // match keeps this from silently passing on a doc that stopped claiming it.
+  const skillCounts = [...skillText.matchAll(/(\d+)\s*(?:个测试|tests)/g)]
+    .map((m) => Number(m[1]))
+  const skillWrong = skillCounts.filter((n) => n !== wasmTests)
+  check('SKILL.md states the real wasm test count',
+    skillText.length > 0 && skillCounts.length > 0 && skillWrong.length === 0,
+    skillText.length === 0
+      ? 'SKILL.md not found under plugin/skills/pyroduct-model/'
+      : skillCounts.length === 0
+        ? 'SKILL.md claims no test count at all — nothing for this check to hold'
+        : skillWrong.length === 0
+          ? `all ${skillCounts.length} claim(s) say ${wasmTests}`
+          : `says ${[...new Set(skillWrong)].join(', ')}, code has ${wasmTests}`)
   }
 }
 

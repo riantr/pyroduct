@@ -12,7 +12,7 @@ Long-form context lives in `README.mbt.md` (English) and `README.zh.mbt.md`
 
 ```console
 moon test                              # all tests (default target: wasm); currently
-                                       # 197/197 on wasm + 2 snnref on native
+                                       # 205/205 on wasm + 2 snnref on native
                                        # + 4 ifacescan on native
 moon test --target native snnref       # spike-sediment experiment (native only)
 moon test --target native tools/ifacescan  # .mbti drift tripwire (native only)
@@ -122,8 +122,13 @@ node plugin/tools/validate-plugin.mjs  # plugin anti-drift (the harness prints
 - `gate.yml` names every `+native` package explicitly (assertions via
   `moon test --target native`, entrypoints run directly), because the wasm target skips
   all of them — a wasm-only gate would silently never execute them, which is the same
-  failure shape as "zero findings because it cannot see". **A sixth `+native` package must
-  be added there too**, or its only execution is somebody's terminal.
+  failure shape as "zero findings because it cannot see". It names **five** today —
+  `cmd/coord`, `cmd/ifacescan`, `examples/sediment`, `snnref`, `tools/ifacescan`.
+  **If you add a sixth `+native` package**, add it to `gate.yml` in the same
+  commit, or its only execution will be somebody's terminal. (This line used to
+  say "a sixth must be added", which reads as a pending chore for a package that
+  does not exist — measured 2026-10-18: `grep -l '^supported_targets = "+native"'
+  ** **/moon.pkg` returns five files.)
 - Do **not** add `moon check --target native` to either workflow: it is red by design.
   `tools/ifacescan/moon.pkg` imports `moonbitlang/async` purely so its test file can hold
   `async test`, and moon's unused-package scan does not read test files, so that one
@@ -230,7 +235,7 @@ node plugin\tools\sync-install.mjs push <checkout> # install, then rebuild + re-
 | `group` | one group | Emergence state machine (20 states), member config → group state, R7 write-back; **execution contract** (`loop.mbt`, 0.1.27): no drive slots, so the trigger *is* the driver — `step(state, trigger)` → 迁/守/未定/无路, `walk`, `open_pairs`, `no_dead_end`; the table holds exactly one **one-trigger-two-destinations** pair (`Converging × Attention` → 共语 or 商谈) which the machine reports as `Open` rather than picking — a data question for the author, not for the machine |
 | `society` | one society | Two-level social model from the thesis (13 states), lifeworld vs. system; **execution contract** (`loop.mbt`, 0.1.27): same four receipts, and `one_edge_per_trigger()` asserts the table is trigger-deterministic, so `Open` is unreachable there (arm kept as the landing place if the table ever changes) |
 | `ml` | — | From-scratch DoubleML (PLR, cross-fitting, orthogonal scores, inference), RNG, linear algebra |
-| `evolution` | one agent | `Genome`, mutations, `Objective`, update gates (weighted or DoubleML-based), append-only `Ledger`, heredity; subject cycle (`cycle.mbt`: `run_cycle` drives `@sm.step` by slot and judges 修习/开放 candidates through the gate); decision memo (`replay.mbt`: one judgement per (parent, candidate) pair per cycle, repeats annotated 同判·不重裁); backdating (`gate.mbt`: zero-diff candidates → Tie without re-running the estimator); intuition reading (`intuition.mbt`: memo read as background-intuition repository, marked 模型整理); soft association for 未定 (`association.mbt`: JPDA-flavoured β weights + entropy over co-existing candidates — argmax-consistent with the 两诚 hard rule, diagnostic only, no sampling; port of PDA-JPDA, marked 模型整理) |
+| `evolution` | one agent | `Genome`, mutations, `Objective`, update gates (weighted or DoubleML-based), append-only `Ledger` read as a **tree** (0.1.31: `roots`/`children`/`depth`/`ancestry`/`leaves`/`height`/`lineage`, plus two separately-asserted invariant sets — `tree_faults` structural, `descent_faults` genetic: every non-root's parent must be a root or an accepted trail and differ from it by exactly one mutation; `SubjectCycle::ledger` is structural-only by design, since it logs one of its two F_t per round); heredity; subject cycle (`cycle.mbt`: `run_cycle` drives `@sm.step` by slot and judges 修习/开放 candidates through the gate); decision memo (`replay.mbt`: one judgement per (parent, candidate) pair per cycle, repeats annotated 同判·不重裁); backdating (`gate.mbt`: zero-diff candidates → Tie without re-running the estimator); intuition reading (`intuition.mbt`: memo read as background-intuition repository, marked 模型整理); soft association for 未定 (`association.mbt`: JPDA-flavoured β weights + entropy over co-existing candidates — argmax-consistent with the 两诚 hard rule, diagnostic only, no sampling; port of PDA-JPDA, marked 模型整理) |
 | `coordinator` | research agents | Tasks/artifacts, planning, external evidence by confidence interval, content memory, credit, deliberation/decision split, replayable runtime |
 | `dmlref` | — | Cross-check of our DoubleML against `riantr/moonbit_doubleML@0.75.0` |
 | `causal` | one dataset | 0.75.0-deep diagnostics (read-only, data from the state machine): sensitivity (Cinelli–Hazlett `rv = \|θ̂\|/max_bias`), multiple-testing correction (BH/Bonferroni — naive OLS also passes, significance ≠ evidence), BLP heterogeneity (residualized treatment × centered covariates, HC0 se; d̃ recovers θ̂); marked 模型整理 |

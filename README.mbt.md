@@ -56,7 +56,11 @@ One society: 13 · 28 · 8. Two subjects: 14 normative rules.
   candidates (prompt / strategy / memory / code), writes "better" as an
   `Objective`, fences off constitutional invariants, and records every
   accept / reject / revert with its reason in an append-only, serializable
-  `Ledger`. Gates come in two grades: hand-written weights, or a DoubleML
+  `Ledger`. Because every trail names the trail it came from, that ledger is
+  also a tree — `roots`, `children`, `depth`, `ancestry`, `leaves`, `height`,
+  `lineage` — and the lineage it reports is checked, not assumed: a non-root's
+  parent must be a root or an accepted change, and differ from it by exactly one
+  mutation. Gates come in two grades: hand-written weights, or a DoubleML
   causal effect (θ̂ > 0 and the 95% lower bound > 0). The subject cycle
   `run_cycle` drives real positions by drive slot and puts Cultivation (修习)
   and Opening (开放) through the same gate — no evidence, no advance
@@ -334,7 +338,7 @@ Add the module, then run the suite:
 
 ```
 moon add riantr/pyroduct
-moon test             # Total tests: 197, passed: 197, failed: 0.
+moon test             # Total tests: 205, passed: 205, failed: 0.
 ```
 
 From this repository, every layer prints a report:
@@ -385,7 +389,7 @@ let same : Bool = restored.round_trips()
 
 ## Gates and drift detectors
 
-`moon check`, `moon fmt --check`, `moon test` (208 wasm tests) plus the two
+`moon check`, `moon fmt --check`, `moon test` (209 wasm tests) plus the two
 native-only suites (`snnref`, `tools/ifacescan`) are the baseline. Three
 detectors run on top, because a green suite says nothing about a claim written
 in prose:

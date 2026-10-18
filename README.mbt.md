@@ -457,7 +457,7 @@ in prose:
 | Detector | Catches |
 |---|---|
 | `python tools/validate_dependencies.py` | a dependency edge drawn in `architecture/*.dot` that the code does not have, or one the code has that the diagram omits; also a DOT file whose `model-version` header disagrees with `moon.mod` |
-| `python tools/validate_readme_facts.py` | a state / transition / phase / trigger / slot count in these READMEs that no longer matches the source tables |
+| `python tools/validate_readme_facts.py` | a state / transition / phase / trigger / slot count in these READMEs that no longer matches the source tables, and a wasm test count that disagrees with itself or with the code — published 0.1.31 claimed 205 in one place and 209 in another, and this detector said everything matched, because it had only ever counted model facts |
 | `node plugin/tools/validate-plugin.mjs` | plugin drift: face count, test count, model facts and page citations in the agent-facing descriptions |
 
 Each was written after a specific drift went unnoticed — a false edge in the

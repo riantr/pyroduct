@@ -18,7 +18,17 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Optional, Tuple
+
+# The verbose path prints a ✓, which a GBK console cannot encode -- so `--verbose`
+# used to die with a UnicodeEncodeError partway through its own output. Reconfigure
+# once here rather than edit a dozen call sites; the non-ASCII detail lines in this
+# script (仓名, 模型整理) are exactly the text that needs the wider codec.
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        _stream.reconfigure(encoding='utf-8', errors='replace')
+    except (AttributeError, ValueError):
+        pass
 
 
 def extract_facts() -> dict:
@@ -49,7 +59,66 @@ def find_numbers_in_line(line: str) -> List[int]:
     return [int(x) for x in re.findall(r'\b(\d+)\b', line)]
 
 
-def check_readme(readme_path: Path, facts: dict, verbose: bool = False) -> List[str]:
+def wasm_test_count(root: Path) -> Optional[int]:
+    """
+    Count the wasm test functions the way `plugin/tools/validate-plugin.mjs` does.
+
+    Two detectors counting one number by two rules is its own drift waiting to
+    happen, so this mirrors that harness exactly: count `test "` / `async test "`
+    at line start across every `*_test.mbt`, then subtract the packages whose
+    sibling `moon.pkg` declares `supported_targets = "+native"` -- the wasm gate
+    never executes those, so quoting them as wasm tests is wrong twice over.
+
+    Returns None when no `*_test.mbt` is visible at all. A check that cannot see
+    its subject must say so rather than report zero: "no tests" and "cannot
+    count here" are different findings, and conflating them manufactures a pass.
+    """
+    skip_dirs = {'_build', '.mooncakes', 'node_modules', '.git'}
+    counts = {}
+    for path in root.rglob('*_test.mbt'):
+        if any(part in skip_dirs for part in path.parts):
+            continue
+        text = path.read_text(encoding='utf-8', errors='replace')
+        counts[path] = len(re.findall(r'^\s*(?:async\s+)?test\s+"', text, re.MULTILINE))
+
+    if not counts:
+        return None
+
+    native = 0
+    for path, count in counts.items():
+        moon_pkg = path.parent / 'moon.pkg'
+        if moon_pkg.exists() and re.search(
+            r'^\s*supported_targets\s*=\s*"\+native"\s*$',
+            moon_pkg.read_text(encoding='utf-8', errors='replace'),
+            re.MULTILINE,
+        ):
+            native += count
+    return sum(counts.values()) - native
+
+
+def readme_test_count_claims(content: str) -> List[Tuple[int, int]]:
+    """
+    Every `(line_number, count)` a README claims for the wasm test suite.
+
+    Three spellings, all of which have shipped: the `moon test` sample output,
+    the prose "(N wasm tests)", and the Chinese "（wasm N 个测试）". Missing one
+    is the same bug as not checking it -- a stale number nobody reads is still a
+    stale number the registry now serves.
+    """
+    claims = []
+    patterns = [
+        r'Total tests:\s*(\d+)',
+        r'\((\d+)\s+wasm\s+tests?\)',
+        r'（wasm\s*(\d+)\s*个测试',
+    ]
+    for pattern in patterns:
+        for match in re.finditer(pattern, content):
+            line_no = content[:match.start()].count('\n') + 1
+            claims.append((line_no, int(match.group(1))))
+    return sorted(claims)
+
+
+def check_readme(readme_path: Path, facts: dict, verbose: bool = False, wasm_tests: Optional[int] = None) -> List[str]:
     """
     Check a README file for model fact drift.
     
@@ -224,7 +293,31 @@ def check_readme(readme_path: Path, facts: dict, verbose: bool = False) -> List[
                 )
             elif verbose:
                 print(f"✓ {readme_path}:{line_num}: society standalone {actual}")
-    
+
+    # --- wasm test count ------------------------------------------------
+    # Published 0.1.31 shipped a README claiming 205 tests in one place and 209
+    # in another, and this detector said everything matched: it only ever looked
+    # at model facts, so the one number every reader runs `moon test` to confirm
+    # had no counter watching it. The harness counted this number for the tool
+    # description and SKILL.md; the README was the sibling copy left to rot.
+    claims = readme_test_count_claims(content)
+    if not claims:
+        if verbose:
+            print(f"✓ {readme_path}: no wasm test count claimed (nothing to check)")
+    else:
+        distinct = sorted({count for _, count in claims})
+        if len(distinct) > 1:
+            rendered = ', '.join(f'{n}@{ln}' for ln, n in claims)
+            errors.append(
+                f"{readme_path}: wasm test count disagrees with itself: {rendered}"
+            )
+        elif wasm_tests is not None and distinct[0] != wasm_tests:
+            errors.append(
+                f"{readme_path}: wasm test count: claims {distinct[0]}, code has {wasm_tests}"
+            )
+        elif verbose:
+            print(f"✓ {readme_path}: wasm test count {distinct[0]} (line {claims[0][0]})")
+
     return errors
 
 
@@ -253,9 +346,16 @@ def main():
     
     # Check both READMEs
     all_errors = []
-    
+
+    wasm_tests = wasm_test_count(project_root)
+    if wasm_tests is None:
+        print("SKIP  wasm test count — no *_test.mbt under "
+              f"{project_root}. Unmeasurable here, which is not the same as zero.")
+    elif verbose:
+        print(f"Wasm tests counted from source: {wasm_tests}\n")
+
     for readme in [readme_en, readme_zh]:
-        errors = check_readme(readme, facts, verbose)
+        errors = check_readme(readme, facts, verbose, wasm_tests)
         all_errors.extend(errors)
     
     # Report results

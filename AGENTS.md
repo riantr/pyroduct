@@ -165,7 +165,13 @@ Three drift detectors run in CI on every push and PR:
 - **`python tools/validate_readme_facts.py`** — parses both READMEs for numerical claims
   about states, transitions, phases, triggers and slots, and compares them against the
   ground truth extracted from source. Catches the drift where the model enums moved and
-  the documentation did not.
+  the documentation did not. It also counts the wasm test functions the way
+  `plugin/tools/validate-plugin.mjs` does (same rule, or the two detectors would drift
+  apart) and checks every test-count claim in a README against that — first against the
+  other claims **in the same file**, because published 0.1.31 shipped 205 in one place
+  and 209 in another while this detector reported everything matched. When no `*_test.mbt`
+  is visible it prints SKIP, never a finding: "cannot count here" is not "zero tests".
+  Keep scratch trees **out of the repo root** — it counts every `*_test.mbt` under it.
 - **`node plugin/tools/validate-plugin.mjs`** — the harness prints its own count; **do not
   transcribe it into prose**, because the number moves with every check added. That is
   exactly how the "28 faces" description and a "28 checks" line here both went stale while

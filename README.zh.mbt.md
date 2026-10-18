@@ -412,7 +412,7 @@ let same : Bool = restored.round_trips()
 | 检测器 | 抓什么 |
 |---|---|
 | `python tools/validate_dependencies.py` | `architecture/*.dot` 里画了、代码里没有的依赖边；以及代码有、图里漏的边；顺带查每个 DOT 的 `model-version` 头是否与 `moon.mod` 一致 |
-| `python tools/validate_readme_facts.py` | 两份 README 里关于状态／迁移／阶段／触发／槽的数字，与源码表对不上 |
+| `python tools/validate_readme_facts.py` | 两份 README 里关于状态／迁移／阶段／触发／槽的数字与源码表对不上；以及 wasm 测试数自相矛盾或与代码对不上——已发布的 0.1.31 一处写 205、另一处写 209，而这个检测器当时全绿，因为它只数模型事实 |
 | `node plugin/tools/validate-plugin.mjs` | 插件漂移：面数、测试数、模型事实、页码出处，与面向 agent 的描述对不上 |
 
 每一个都是因为某次具体漂移没被发现才写的——图里的一条假边、工具描述里一个过期的

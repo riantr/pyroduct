@@ -79,6 +79,12 @@ python tools/validate_dependencies.py  # architecture drift detector: parses eve
                                        # diagrams in architecture/. Exit 0 if edges
                                        # match, 1 if drift (false or missing edges).
                                        # Examples and tools/ excluded by design.
+python tools/validate_resolved_deps.py # asserts the RESOLVED dependency tree
+                                       # matches the pins in moon.mod (every pin
+                                       # resolves to exactly the version moon.mod
+                                       # names). Exit 0 if they match, 1 if a pin
+                                       # drifted or could not be resolved.
+                                       # Transitive deps are listed, not asserted.
 node plugin/tools/validate-plugin.mjs  # plugin anti-drift (the harness prints
                                        # its own count — do not transcribe it:
                                        # one check is skipped when run outside a
@@ -154,7 +160,7 @@ models (Structurizr DSL), dependency graphs (Graphviz DOT), flow diagrams, deplo
 topology, health reports, and evolution plans. `LIVING_ARCHITECTURE.md` is the contract —
 it declares which invariants are CI-enforced and how to extend the system.
 
-Three drift detectors run in CI on every push and PR:
+Four drift detectors run in CI on every push and PR:
 
 - **`python tools/validate_dependencies.py`** — parses every `moon.pkg` import block,
   compares against `architecture/module-dependencies.dot` and
@@ -162,6 +168,13 @@ Three drift detectors run in CI on every push and PR:
   missing edges (in code, not in diagram). `examples/*` and `tools/*` are excluded by
   design (they are intentionally absent from the architecture diagrams). Also checks that
   every DOT file carries a `// model-version: X.Y.Z` header matching `moon.mod`.
+- **`python tools/validate_resolved_deps.py`** — asserts the **resolved** dependency tree
+  matches the pins in `moon.mod`: every pin must resolve to exactly the version `moon.mod`
+  names, and the root module to the version it declares. Transitive dependencies are listed
+  but not asserted — we do not pin them, so they are not ours to claim. This exists because
+  nothing else in the build checks the pins were honoured: `moon update` only refreshes the
+  registry index, and `moon upgrade` is not a dependency command at all (see the Toolchain
+  section). A pin that cannot be resolved makes this fail loudly rather than skip.
 - **`python tools/validate_readme_facts.py`** — parses both READMEs for numerical claims
   about states, transitions, phases, triggers and slots, and compares them against the
   ground truth extracted from source. Catches the drift where the model enums moved and
@@ -180,7 +193,7 @@ Three drift detectors run in CI on every push and PR:
   the real wasm test count), model-fact anti-drift, version consistency (`plugin.json` =
   `server.mjs` SERVER_VERSION), content invariants, and a page-citation anti-drift rule.
 
-All three are in `gate.yml` (every push/PR) and `publish.yml` (before release). A drift
+All four are in `gate.yml` (every push/PR) and `publish.yml` (before release). A drift
 failure is a CI failure — it cannot merge.
 
 When you change a `moon.pkg` import, update the DOT diagrams. When you change the test
@@ -196,6 +209,27 @@ many files), apply the canonical copies under `_build/<target>/release/format/`,
 **prove behaviour is unchanged** by hashing several rendered faces before and after. Do not
 assume "type alias, therefore cosmetic" — measure it, the same way any other rewrite is
 measured.
+
+### `moon upgrade` is not a dependency command
+
+`moon upgrade` upgrades the **toolchain** (the MoonBit compiler itself) — `moon upgrade
+--help` says "Upgrade toolchains", and `--dev` installs the latest development build. It is
+*not* the way to move a dependency pin. The three commands are easy to confuse, so:
+
+| command | what it actually does | touches `moon.mod`? |
+|---|---|---|
+| `moon update` | refreshes the **registry index** | no |
+| `moon upgrade` | upgrades the **toolchain** | no |
+| `moon add --upgrade <pkg>@<ver>` | moves a **dependency pin** | yes |
+
+So `moon update` and `moon upgrade` in CI would do nothing for the pins — and `moon upgrade`
+would move the compiler under the release, which is exactly the drift the `MOON_VERSION`
+assertion in the workflows exists to catch. The only command that changes a pin is
+`moon add --upgrade`, and it belongs in a developer's working tree, never in CI: a gate that
+auto-bumped pins would test something other than what the tag publishes.
+
+Because nothing in the build checks the pins were honoured, `tools/validate_resolved_deps.py`
+asserts the resolved tree against them (see the drift detectors above).
 
 ## MiniMax Code plugin (`plugin/`)
 

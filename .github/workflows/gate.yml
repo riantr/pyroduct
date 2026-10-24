@@ -81,6 +81,23 @@ jobs:
       - name: Resolve the registry index
         run: moon update
 
+      # The pins in moon.mod are a promise about what this gate builds, and
+      # nothing else in the build checks that the promise was kept. `moon
+      # update` only refreshes the registry index -- it does not change a pin
+      # and does not change what resolves. `moon upgrade` is not a dependency
+      # command at all: it upgrades the TOOLCHAIN (the MoonBit compiler), so
+      # putting it here would move the compiler under the gate rather than
+      # check the dependencies.
+      #
+      # This asserts the RESOLVED tree against the pins: every pin in moon.mod
+      # must resolve to exactly the version moon.mod names, and the root
+      # module to the version it declares. Transitive dependencies are listed
+      # but not asserted -- we do not pin them, so they are not ours to claim.
+      # It runs before the build and test steps so a resolution problem is
+      # reported as itself rather than as a mysterious failure later.
+      - name: The resolved dependency tree must match the pins
+        run: python tools/validate_resolved_deps.py
+
       # --deny-warn per the official package-configuration guidance: without it
       # this gate passes on a warning regression while the docs claim zero.
       - name: moon check

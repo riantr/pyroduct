@@ -59,9 +59,9 @@
 
   四个具名的第三方依赖，各自限于其消费者：`moonbitlang/async@0.22.5` →
   `cmd/coord`（native 落盘）与 `tools/ifacescan`／`cmd/ifacescan`（`.mbti` 漂移
-  绊线，native）；`riantr/moonbit_doubleML@0.163.3` → `dmlref` /
-  `causal`；`riantr/snn_mbt@0.155.0` → `snnref`（native）；`riantr/
-  moonbit_static_analysis@0.4.29` → `audit`。其余包只用官方 `moonbitlang/*`。
+  绊线，native）；`riantr/moonbit_doubleML@0.164.34` → `dmlref` /
+  `causal`；`riantr/snn_mbt@0.166.2` → `snnref`（native）；`riantr/
+  moonbit_static_analysis@0.4.33` → `audit`。其余包只用官方 `moonbitlang/*`。
 
 ## 术语表
 

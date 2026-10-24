@@ -15,7 +15,7 @@
 | `ml` | — | 自研 DoubleML（PLR、交叉拟合、正交分数、推断）、RNG、线性代数 |
 | `evolution` | 一个 agent | `Genome`、变异、`Objective`、更新闸门（加权或 DoubleML 因果）、只追加 `Ledger`、遗传；主体循环（`cycle.mbt`） |
 | `coordinator` | 科研 agent | 任务/制品、规划、按置信区间的外部证据、内容记忆、署名、商谈/决策分段、可重放运行时 |
-| `dmlref` | — | 自研 DoubleML 与 `riantr/moonbit_doubleML@0.163.3` 的互校 |
+| `dmlref` | — | 自研 DoubleML 与 `riantr/moonbit_doubleML@0.164.34` 的互校 |
 | `causal` | 一份数据 | 0.163.3 深用诊断（只读，数据来自状态机）：敏感性（Cinelli–Hazlett rv）、多重检验校正（BH/Bonferroni——天真 OLS 也过线，显著性≠证据）、BLP 异质性（d̃ 回收 θ̂）；标模型整理 |
 | `audit` | 一台机器 | 三鉴自审计：真实主体机的表 → 纯数据 MachineSpec → 结构鉴／类型鉴／行为鉴（库的 moon.mod 点名 pyroduct 为参考消费者；「鉴」兼照镜与审察）；发现分已知设计（无忆／无筹只出不进，0.3.4 已验证）与未预期（必须为零——活的绊线）；标模型整理 |
 | `snnref` | 一个实验 | 脉冲沉淀实验（native 专属）：49 触发 → Poisson spike trains（槽内共现高率）→ Gerstner STDP → 权重结构能否恢复驱动槽八分（比值、命中率对基线、分槽表）；标模型整理 |
@@ -31,12 +31,12 @@
 ## 依赖规则（按约定执行）
 
 - 官方 `moonbitlang/*` 之外只允许 `riantr/*`。
-- `moonbitlang/async@0.22.5` 消费者 `cmd/coord`（native 落盘）与 `tools/ifacescan`／`cmd/ifacescan`（`.mbti` 漂移绊线，native）；`riantr/moonbit_doubleML@0.163.3`
+- `moonbitlang/async@0.22.5` 消费者 `cmd/coord`（native 落盘）与 `tools/ifacescan`／`cmd/ifacescan`（`.mbti` 漂移绊线，native）；`riantr/moonbit_doubleML@0.164.34`
   消费者 `dmlref`（互校）与 `causal`（0.163.3 深用诊断，只读）；
-  `riantr/snn_mbt@0.155.0`（连带 `riantr/moonbit_image@0.3.4`）
+  `riantr/snn_mbt@0.166.2`（连带 `riantr/moonbit_image@0.3.9`）
   唯一消费者 `snnref`——`snn_mbt` 只声明 native 目标，`snnref` 与 `examples/sediment`
   随之 `+native`，wasm 门禁自动跳过，须单独 `moon test --target native snnref`；
-  `riantr/moonbit_static_analysis@0.4.29` 唯一消费者 `audit`（三鉴自审计——库的
+  `riantr/moonbit_static_analysis@0.4.33` 唯一消费者 `audit`（三鉴自审计——库的
   moon.mod 点名 pyroduct 为参考消费者，`src` 保持零 import，表在 `audit` 层转
   纯数据）。
 - `src/moon.pkg` **零 import**——永不给 `src` 加环境、RNG 或数值依赖；槽内容的

@@ -218,8 +218,8 @@ node plugin\tools\sync-install.mjs push <checkout> # install, then rebuild + re-
   `node <installed>\tools\update-bundle.mjs <checkout>`, which also rewrites the pin from
   `moon.mod` and re-runs `tools/validate-plugin.mjs`.
 - After any plugin change run the package's own net: `node <installed>\tools\validate-plugin.mjs`
-  (the harness prints its own count — 27 at the time of writing, and **do not transcribe it
-  into prose**: the number moves with every check added, which is exactly how the face count in
+  (the harness prints its own count, and **do not transcribe it into prose**: the number moves
+  with every check added, which is exactly how the face count in
   the tool description went stale unnoticed). What it covers: the pin, a real MCP handshake, all
   31 faces, the model-count invariants including `audit`'s 「未预期 0 条」 tripwire, a face-count
   anti-drift rule over the tool *description* (it once read 28 while the catalog rendered 31,
@@ -243,7 +243,7 @@ node plugin\tools\sync-install.mjs push <checkout> # install, then rebuild + re-
 | `ml` | — | From-scratch DoubleML (PLR, cross-fitting, orthogonal scores, inference), RNG, linear algebra |
 | `evolution` | one agent | `Genome`, mutations, `Objective`, update gates (weighted or DoubleML-based), append-only `Ledger` read as a **tree** (0.1.31: `roots`/`children`/`depth`/`ancestry`/`leaves`/`height`/`lineage`, plus two separately-asserted invariant sets — `tree_faults` structural, `descent_faults` genetic: every non-root's parent must be a root or an accepted trail and differ from it by exactly one mutation; `SubjectCycle::ledger` is structural-only by design, since it logs one of its two F_t per round); heredity; subject cycle (`cycle.mbt`: `run_cycle` drives `@sm.step` by slot and judges 修习/开放 candidates through the gate); decision memo (`replay.mbt`: one judgement per (parent, candidate) pair per cycle, repeats annotated 同判·不重裁); backdating (`gate.mbt`: zero-diff candidates → Tie without re-running the estimator); intuition reading (`intuition.mbt`: memo read as background-intuition repository, marked 模型整理); soft association for 未定 (`association.mbt`: JPDA-flavoured β weights + entropy over co-existing candidates — argmax-consistent with the 两诚 hard rule, diagnostic only, no sampling; port of PDA-JPDA, marked 模型整理) |
 | `coordinator` | research agents | Tasks/artifacts, planning, external evidence by confidence interval, content memory, credit, deliberation/decision split, replayable runtime |
-| `dmlref` | — | Cross-check of our DoubleML against `riantr/moonbit_doubleML@0.163.3` |
+| `dmlref` | — | Cross-check of our DoubleML against `riantr/moonbit_doubleML@0.164.34` |
 | `causal` | one dataset | 0.163.3-deep diagnostics (read-only, data from the state machine): sensitivity (Cinelli–Hazlett `rv = \|θ̂\|/max_bias`), multiple-testing correction (BH/Bonferroni — naive OLS also passes, significance ≠ evidence), BLP heterogeneity (residualized treatment × centered covariates, HC0 se; d̃ recovers θ̂); marked 模型整理 |
 | `audit` | one machine | Three-lens static audit of the real subject machine (`riantr/moonbit_static_analysis/src/statecheck`; the library's moon.mod names pyroduct its reference consumer): real tables → plain-data `MachineSpec` → structural (states are bindings) / type (slots placed, no silent Block) / behavior (course abstractly executed) lenses; findings split 已知设计（无忆／无筹 only-exit, verified 0.3.4）vs 未预期（must stay 0 — live tripwire）; marked 模型整理. 0.2.0 起另加**接口面**（`mbti.mbt`）：把本仓库**自己的** `pkg.generated.mbti` 交给库的 `src/moonfiles` 审（重复签名／畸形行／未知类型引用）。wasm／JS 读不了盘，故真扫靠 `iface_data.mbt` 这份**内嵌快照**（由 `tools/gen_iface_data.py` 逐字节生成）；正控是三段坏片段必被抓 + 干净样本必为 0 |
 | `audit` fleet + mutants | two more machines | 0.1.28: the same three lenses over the group machine (20 states · 44 transitions · 397 无路) and the society machine (13 · 28 · 206) — `fleet.mbt`. Two 口径 differ and are stated up front: **no drive slots** (the trigger *is* the driver, so lens 2's slot layer is skipped via an empty `slot_names`) and **no terminal** (`no_dead_end` holds everywhere; filling one would misreport 不封闭 as a defect). 未预期 is 0 with a known-design exemption opened on **exactly one cell** (`Converging × Attention`, key-matched on machine+state+trigger, not on the family) — measured, not assumed. `mutants.mbt` is the standing answer to "can it even see?": 3 machines × 6 breakages = 18, each must be caught **and** report the expected family; `split_fleet`/`probe_finding` exist so the layering itself is testable (three narrowness criteria cover the exemption); marked 模型整理 |
@@ -268,14 +268,14 @@ package's purpose — those comments are package-level docs, keep them accurate.
 - `moonbitlang/async@0.22.5` — consumers `cmd/coord` (native disk I/O, the
   coordinator checkpoint) and `tools/ifacescan` + `cmd/ifacescan` (the `.mbti`
   drift tripwire and its CLI; also native disk I/O).
-- `riantr/moonbit_doubleML@0.163.3` — consumers `dmlref` (cross-check of our
+- `riantr/moonbit_doubleML@0.164.34` — consumers `dmlref` (cross-check of our
   from-scratch estimator) and `causal` (0.163.3-deep diagnostics: sensitivity,
   multiple-testing correction, BLP heterogeneity — read-only, no gate).
-- `riantr/snn_mbt@0.155.0` (pulls `riantr/moonbit_image@0.3.4`) — sole consumer `snnref`
+- `riantr/snn_mbt@0.166.2` (pulls `riantr/moonbit_image@0.3.9`) — sole consumer `snnref`
   (spike-sediment experiment, cross-check only). `snn_mbt` declares native as its only
   target, so `snnref` and `examples/sediment` are `+native`: the wasm gate skips them,
   run `moon test --target native snnref` separately.
-- `riantr/moonbit_static_analysis@0.4.29` — sole consumer `audit` (three-lens
+- `riantr/moonbit_static_analysis@0.4.33` — sole consumer `audit` (three-lens
   static audit of the subject machine: the library's moon.mod names pyroduct
   its reference consumer; `src` stays zero-import — `audit` converts the real
   tables into a plain-data `MachineSpec` above it).

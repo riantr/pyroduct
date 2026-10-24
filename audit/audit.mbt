@@ -1,7 +1,7 @@
 ///|
 /// 自审计层（模型整理）。
 ///
-/// `riantr/moonbit_static_analysis@0.4.29` 的 `statecheck` 把状态机当程序读：
+/// `riantr/moonbit_static_analysis@0.4.33` 的 `statecheck` 把状态机当程序读：
 /// 三鉴——结构鉴（状态即绑定：每状态至少被一条迁移绑定、被进入一次、
 /// 从初始可达；终点可达）、类型鉴（注解即契约：触发落槽、无路必须说出口）、
 /// 行为鉴（历程抽象执行：每一步有触发承载）。「鉴」兼照镜与审察二义：
@@ -119,7 +119,7 @@ pub fn render_report() -> String {
   let lines : Array[String] = [
     "# 自审计（三鉴）：主体机当程序读",
     "",
-    "依赖：`riantr/moonbit_static_analysis@0.4.29`——它的 moon.mod 把本仓库点名",
+    "依赖：`riantr/moonbit_static_analysis@0.4.33`——它的 moon.mod 把本仓库点名",
     "为参考消费者。三鉴（「鉴」兼照镜与审察）：结构鉴（状态即绑定）／类型鉴",
     "（注解即契约）／行为鉴（历程抽象执行）。出处层：模型整理——被审的**表**",
     "是原文直述，审计的**工具**是外部库。",

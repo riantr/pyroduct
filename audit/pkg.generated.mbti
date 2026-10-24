@@ -48,7 +48,9 @@ pub fn run_fleet_audit() -> Array[Verdict]
 
 pub fn scan_snapshot() -> Array[(String, Array[@report.Report])]
 
-pub fn snapshot_fresh_total() -> Int
+pub fn snapshot_fresh_total() -> Int32
+
+pub fn snapshot_symtab() -> @core.IfaceSymTab
 
 pub fn split_fleet(String, Array[@report.Report]) -> Verdict
 

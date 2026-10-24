@@ -31,21 +31,21 @@ systemContext {
     system(moonbitDoubleML, "riantr/moonbit_doubleML", "外部 DoubleML 参考实现") {
         metadata {
             location("External")
-            version("0.163.3")
+            version("0.164.34")
         }
     }
 
     system(moonbitSNN, "riantr/snn_mbt", "脉冲神经网络库（native 专属）") {
         metadata {
             location("External")
-            version("0.155.0")
+            version("0.166.2")
         }
     }
 
     system(moonbitStaticAnalysis, "riantr/moonbit_static_analysis", "静态分析库（三鉴审计）") {
         metadata {
             location("External")
-            version("0.4.29")
+            version("0.4.33")
         }
     }
 

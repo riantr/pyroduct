@@ -1,6 +1,6 @@
 ///|
 /// 接口面自审计：把本仓库**自己的** `pkg.generated.mbti` 当被测对象，交给
-/// `riantr/moonbit_static_analysis@0.4.29` 的 `src/moonfiles` 审（模型整理）。
+/// `riantr/moonbit_static_analysis@0.4.33` 的 `src/moonfiles` 审（模型整理）。
 ///
 /// 与 `audit.mbt`／`fleet.mbt` 的分工要分清：那两面审的是**状态机表**——把真表
 /// 转成纯数据 `MachineSpec` 再喂进去；本面审的是**工具链自己生成出来的接口

@@ -244,15 +244,55 @@ check('catalog face list === FACES (no face escapes validation)',
   onlyInCatalog.length === 0 && onlyHere.length === 0,
   `catalog-only: ${onlyInCatalog.join(',') || '—'} | harness-only: ${onlyHere.join(',') || '—'}`)
 // The count written into the pyroduct_faces DESCRIPTION is prose that no other
-// check reads: it said 28 while the catalog rendered 31, and every one of the
-// 26 checks stayed green — including the one that counts the faces. A live agent
-// reading that description was simply told the wrong number. Held to FACES here,
+// check reads: it said 28 while the catalog rendered 31, and every check stayed
+// green — including the one that counts the faces. A live agent reading that
+// description was simply told the wrong number. Held to FACES here,
 // so a face added later cannot leave the description behind again.
 const facesDesc = tools.find((t) => t.name === 'pyroduct_faces')?.description ?? ''
 const descCount = Number((facesDesc.match(/the (\d+) runnable views/) || [])[1])
 check('faces description states the real face count',
   descCount === FACES.length,
   `description says ${Number.isNaN(descCount) ? '(no count found)' : descCount}, catalog has ${FACES.length}`)
+// The same number appears a third time, in plugin.json's description — the blurb
+// the plugin catalog shows before any tool is called. Nothing read it: it said
+// 28 while the catalog rendered 31, and the harness stayed green, because the
+// check above only covers the tool description. A count that three documents
+// publish is three chances to rot, so all three are held to FACES here.
+const pluginJson = JSON.parse(
+  await import('node:fs').then((fs) => fs.readFileSync(path.join(PLUGIN, '.minimax-plugin', 'plugin.json'), 'utf8')),
+)
+const pluginDescCount = Number((pluginJson.description?.match(/(\d+)\s*个分析面/) || [])[1])
+check('plugin.json description states the real face count',
+  pluginDescCount === FACES.length,
+  `plugin.json says ${Number.isNaN(pluginDescCount) ? '(no count found)' : pluginDescCount}, catalog has ${FACES.length}`)
+// And once more inside the package's own shipped prose: the plugin README, the
+// SKILL doc an agent reads, and the tools reference each publish the face count
+// ("31 faces") as something a reader can act on. A count that four documents
+// publish is four chances to rot, so every number they state is held to FACES.
+const shippedDocs = [
+  path.join(PLUGIN, 'README.md'),
+  path.join(PLUGIN, 'skills', 'pyroduct-model', 'SKILL.md'),
+  path.join(PLUGIN, 'skills', 'pyroduct-model', 'references', 'tools.md'),
+]
+{
+  const { readFileSync: rf, existsSync: es } = await import('node:fs')
+  const offenders = []
+  let scanned = 0
+  for (const p of shippedDocs) {
+    if (!es(p)) continue
+    scanned += 1
+    for (const m of rf(p, 'utf8').matchAll(/(\d+)\s*(?:个|条)?\s*(?:分析)?面/g)) {
+      if (Number(m[1]) !== FACES.length) {
+        offenders.push(`${path.basename(p)}: "${m[0]}"`)
+      }
+    }
+  }
+  check('shipped docs state the real face count',
+    offenders.length === 0,
+    offenders.length === 0
+      ? `${FACES.length} faces, ${scanned} doc(s) scanned`
+      : offenders.join(' | '))
+}
 // Version-agnostic on purpose: the number moves with every release, so pinning a
 // literal here would turn each version bump into a harness edit. What must hold is
 // that the catalog reports the version the pin file records — that pair drifting

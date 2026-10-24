@@ -6,7 +6,7 @@ import {
 }
 
 // Values
-pub fn csv_preview(Dataset, Int) -> String
+pub fn csv_preview(Dataset, Int32) -> String
 
 pub fn default_dml_config() -> DmlConfig
 
@@ -14,7 +14,7 @@ pub fn default_ml_plan() -> MlPlan
 
 pub fn design_status_table() -> Array[(String, String)]
 
-pub fn distance_to_rest(@src.SubjectState) -> Int
+pub fn distance_to_rest(@src.SubjectState) -> Int32
 
 pub fn dml_in_sample(Array[Double], Array[Double], Array[Array[Double]], DmlConfig) -> DmlResult
 
@@ -24,21 +24,21 @@ pub fn export_csv(Dataset) -> String
 
 pub fn linear_adjust_ols(Array[Double], Array[Double], Array[Array[Double]]) -> (Double, Double)
 
-pub fn make_dataset(Int, Double, UInt64) -> Dataset
+pub fn make_dataset(Int32, Double, UInt64) -> Dataset
 
 pub fn naive_ols(Array[Double], Array[Double]) -> (Double, Double)
 
 pub fn one_sided_residual(Array[Double], Array[Double], Array[Array[Double]], DmlConfig) -> DmlResult
 
-pub fn practice_count(@src.SubjectState, Int, Rng) -> Int
+pub fn practice_count(@src.SubjectState, Int32, Rng) -> Int32
 
 pub fn render_ml_design() -> String
 
 pub fn render_ml_report(MlPlan) -> String
 
-pub fn replicate(Int, Int, Double, DmlConfig) -> Array[RepSummary]
+pub fn replicate(Int32, Int32, Double, DmlConfig) -> Array[RepSummary]
 
-pub fn single_run(Int, Double, DmlConfig) -> Array[EstimateRow]
+pub fn single_run(Int32, Double, DmlConfig) -> Array[EstimateRow]
 
 pub fn state_features() -> Array[(String, Array[Double])]
 
@@ -53,12 +53,12 @@ pub struct Dataset {
 }
 
 pub struct DmlConfig {
-  degree : Int
+  degree : Int32
   lambda : Double
-  folds : Int
+  folds : Int32
   seed : UInt64
 }
-pub fn DmlConfig::new(Int, Double, Int, UInt64) -> Self
+pub fn DmlConfig::new(Int32, Double, Int32, UInt64) -> Self
 
 pub struct DmlResult {
   theta : Double
@@ -67,9 +67,9 @@ pub struct DmlResult {
   ci_high : Double
   z : Double
   p_value : Double
-  n : Int
-  folds : Int
-  degree : Int
+  n : Int32
+  folds : Int32
+  degree : Int32
 }
 
 pub struct EstimateRow {
@@ -83,10 +83,10 @@ pub struct EstimateRow {
 
 pub struct MlPlan {
   theta : Double
-  single_n : Int
+  single_n : Int32
   single : DmlConfig
-  rep_n : Int
-  reps : Int
+  rep_n : Int32
+  reps : Int32
   rep : DmlConfig
 }
 
@@ -103,7 +103,7 @@ pub struct Rng {
 pub fn Rng::new(UInt64) -> Self
 pub fn Rng::next_u64(Self) -> UInt64
 pub fn Rng::normal(Self) -> Double
-pub fn Rng::shuffle(Self, Array[Int]) -> Unit
+pub fn Rng::shuffle(Self, Array[Int32]) -> Unit
 pub fn Rng::uniform(Self) -> Double
 
 // Type aliases

@@ -7,19 +7,19 @@ import {
 }
 
 // Values
-pub fn agent_of(Plan, Int) -> Int
+pub fn agent_of(Plan, Int32) -> Int32
 
-pub fn assign(Question, Array[Worker]) -> Int?
+pub fn assign(Question, Array[Worker]) -> Int32?
 
-pub fn author_order(Array[Contribution]) -> Array[Int]
+pub fn author_order(Array[Contribution]) -> Array[Int32]
 
-pub fn contribution(Int, Int, Role, Int) -> Contribution
+pub fn contribution(Int32, Int32, Role, Int32) -> Contribution
 
-pub fn credit_of_task(Array[Contribution], Int) -> Array[Int]
+pub fn credit_of_task(Array[Contribution], Int32) -> Array[Int32]
 
-pub fn dataset(Int, String, Int, UInt64, String) -> Dataset
+pub fn dataset(Int32, String, Int32, UInt64, String) -> Dataset
 
-pub fn decide(Deliberation, Int, Int, String, Int) -> Decision?
+pub fn decide(Deliberation, Int32, Int32, String, Int32) -> Decision?
 
 pub fn decision_ok(Decision) -> Bool
 
@@ -45,9 +45,9 @@ pub fn new_runtime() -> Runtime
 
 pub fn parse_notebook(String) -> Notebook
 
-pub fn question(Int, String, @multi.DiscourseType) -> Question
+pub fn question(Int32, String, @multi.DiscourseType) -> Question
 
-pub fn ready(Array[Task], Array[Int]) -> Array[Int]
+pub fn ready(Array[Task], Array[Int32]) -> Array[Int32]
 
 pub fn render_decision(Decision) -> String
 
@@ -57,34 +57,34 @@ pub fn render_report() -> String
 
 pub fn render_statement(Array[Contribution]) -> String
 
-pub fn reopen(Decision, Int) -> Deliberation
+pub fn reopen(Decision, Int32) -> Deliberation
 
 pub fn replicate(Binding, Dataset, @evolution.Genome, @evolution.Genome, Array[@evolution.Opponent]) -> Binding
 
-pub fn replication_of(Int, Dataset, Binding, Bool) -> Replication
+pub fn replication_of(Int32, Dataset, Binding, Bool) -> Replication
 
 pub fn restore(String) -> Runtime
 
-pub fn result(Int, Int, Int, @multi.ClaimKind, @multi.ClaimPhase, String, Int, Int, Int, Int, Int) -> Result
+pub fn result(Int32, Int32, Int32, @multi.ClaimKind, @multi.ClaimPhase, String, Int32, Int32, Int32, Int32, Int32) -> Result
 
-pub fn schedule(Array[Task], Array[Question], Array[Worker], Int) -> Plan
+pub fn schedule(Array[Task], Array[Question], Array[Worker], Int32) -> Plan
 
-pub fn task(Int, Int, String, Array[Int], Array[Int], Int, Int) -> Task
+pub fn task(Int32, Int32, String, Array[Int32], Array[Int32], Int32, Int32) -> Task
 
-pub fn topological(Array[Task]) -> (Array[Int], Bool)
+pub fn topological(Array[Task]) -> (Array[Int32], Bool)
 
-pub fn totals(Array[Contribution]) -> Array[(Int, Int)]
+pub fn totals(Array[Contribution]) -> Array[(Int32, Int32)]
 
-pub fn worker(Int, String, @multi.TruthRegime, Int, Int, Int) -> Worker
+pub fn worker(Int32, String, @multi.TruthRegime, Int32, Int32, Int32) -> Worker
 
 // Errors
 
 // Types and methods
 pub struct Artifact {
-  id : Int
+  id : Int32
   kind : ArtifactKind
   name : String
-  task : Int
+  task : Int32
   digest : String
 }
 
@@ -101,12 +101,12 @@ pub fn ArtifactKind::not_equal(Self, Self) -> Bool
 
 pub struct Binding {
   claim_text : String
-  dataset : Int
+  dataset : Int32
   digest : String
-  effect : Int
-  ci_low : Int
-  ci_high : Int
-  replicas : Int
+  effect : Int32
+  ci_low : Int32
+  ci_high : Int32
+  replicas : Int32
   warrant : Warrant
 }
 pub fn Binding::pinned_to(Self, Dataset) -> Bool
@@ -128,33 +128,33 @@ pub fn Commitment::label(Self) -> String
 pub fn Commitment::not_equal(Self, Self) -> Bool
 
 pub struct Contribution {
-  agent : Int
-  task : Int
+  agent : Int32
+  task : Int32
   role : Role
-  weight : Int
+  weight : Int32
 }
 
 pub struct Dataset {
-  id : Int
+  id : Int32
   name : String
-  rows : Int
+  rows : Int32
   seed : UInt64
   digest : String
 }
 
 pub struct Decision {
-  question : Int
-  chosen : Int
+  question : Int32
+  chosen : Int32
   commitment : Commitment
   revisable : Bool
-  residual_owner : Int
+  residual_owner : Int32
   reopen_when : String
-  at : Int
+  at : Int32
 }
 
 pub(all) struct Deliberation {
-  question : Int
-  options : Array[Int]
+  question : Int32
+  options : Array[Int32]
   open_remainder : String
 }
 
@@ -169,17 +169,17 @@ pub fn EvidenceVerdict::label(Self) -> String
 pub fn EvidenceVerdict::not_equal(Self, Self) -> Bool
 
 pub(all) struct Finding {
-  id : Int
-  question : Int
+  id : Int32
+  question : Int32
   text : String
   claim : @multi.ClaimKind
   phase : @multi.ClaimPhase
-  result : Int
-  residual : Int
+  result : Int32
+  residual : Int32
   status : FindingStatus
-  supersedes : Int?
-  author : Int
-  at : Int
+  supersedes : Int32?
+  author : Int32
+  at : Int32
 }
 
 pub(all) enum FindingStatus {
@@ -194,9 +194,9 @@ pub fn FindingStatus::label(Self) -> String
 pub fn FindingStatus::not_equal(Self, Self) -> Bool
 
 pub struct Message {
-  at : Int
-  from : Int
-  to : Int
+  at : Int32
+  from : Int32
+  to : Int32
   discourse : @multi.DiscourseType
   claim : @multi.ClaimKind
   body : String
@@ -205,49 +205,49 @@ pub struct Message {
 pub struct Notebook {
   findings : Array[Finding]
 }
-pub fn Notebook::add(Self, Finding) -> Int
-pub fn Notebook::current(Self, Int) -> Finding?
-pub fn Notebook::find(Self, Int) -> Finding?
-pub fn Notebook::history(Self, Int) -> Array[Int]
-pub fn Notebook::mark(Self, Int, FindingStatus) -> Unit
+pub fn Notebook::add(Self, Finding) -> Int32
+pub fn Notebook::current(Self, Int32) -> Finding?
+pub fn Notebook::find(Self, Int32) -> Finding?
+pub fn Notebook::history(Self, Int32) -> Array[Int32]
+pub fn Notebook::mark(Self, Int32, FindingStatus) -> Unit
 pub fn Notebook::new() -> Self
 pub fn Notebook::serialize(Self) -> String
 
 pub struct Plan {
-  order : Array[Int]
-  assigned : Array[(Int, Int)]
+  order : Array[Int32]
+  assigned : Array[(Int32, Int32)]
   feasible : Bool
   notes : Array[String]
 }
 
 pub struct Question {
-  id : Int
+  id : Int32
   text : String
   discourse : @multi.DiscourseType
 }
 
 pub struct Replication {
-  id : Int
-  result : Int
-  dataset : Int
-  effect : Int
-  ci_low : Int
-  ci_high : Int
+  id : Int32
+  result : Int32
+  dataset : Int32
+  effect : Int32
+  ci_low : Int32
+  ci_high : Int32
   agrees : Bool
 }
 
 pub struct Result {
-  id : Int
-  task : Int
-  question : Int
+  id : Int32
+  task : Int32
+  question : Int32
   claim : @multi.ClaimKind
   phase : @multi.ClaimPhase
   summary : String
-  dataset : Int
-  effect : Int
-  ci_low : Int
-  ci_high : Int
-  replicas : Int
+  dataset : Int32
+  effect : Int32
+  ci_low : Int32
+  ci_high : Int32
+  replicas : Int32
 }
 pub fn Result::is_bound(Self) -> Bool
 
@@ -264,9 +264,9 @@ pub fn Role::label(Self) -> String
 pub fn Role::not_equal(Self, Self) -> Bool
 
 pub struct Runtime {
-  mut clock : Int
+  mut clock : Int32
   log : Array[Message]
-  done : Array[Int]
+  done : Array[Int32]
   notebook : Notebook
   results : Array[Result]
   artifacts : Array[Artifact]
@@ -277,23 +277,23 @@ pub fn Runtime::round_trips(Self) -> Bool
 pub fn Runtime::step(Self, Array[Task], Array[Question], Array[Worker], Array[Dataset], Array[@evolution.Opponent], @evolution.Genome, @evolution.Genome) -> StepReport?
 
 pub struct StepReport {
-  at : Int
-  task : Int
-  agent : Int
+  at : Int32
+  task : Int32
+  agent : Int32
   discourse : String
   verdict : String
-  result : Int
-  finding : Int
+  result : Int32
+  finding : Int32
 }
 
 pub struct Task {
-  id : Int
-  question : Int
+  id : Int32
+  question : Int32
   title : String
-  deps : Array[Int]
-  needs : Array[Int]
-  budget : Int
-  deadline : Int
+  deps : Array[Int32]
+  needs : Array[Int32]
+  budget : Int32
+  deadline : Int32
 }
 
 pub(all) enum Warrant {
@@ -306,12 +306,12 @@ pub fn Warrant::label(Self) -> String
 pub fn Warrant::not_equal(Self, Self) -> Bool
 
 pub struct Worker {
-  id : Int
+  id : Int32
   name : String
   regime : @multi.TruthRegime
-  reason : Int
-  cheng : Int
-  budget : Int
+  reason : Int32
+  cheng : Int32
+  budget : Int32
 }
 
 // Type aliases

@@ -11,17 +11,17 @@ import {
 // Values
 pub fn all_regimes() -> Array[@multi.TruthRegime]
 
-pub fn association_consistent(Int, Int, @src.Outcome) -> Bool?
+pub fn association_consistent(Int32, Int32, @src.Outcome) -> Bool?
 
 pub fn association_entropy(Array[Double]) -> Double
 
-pub fn association_probs(Int, Int, @src.Outcome) -> Array[Double]
+pub fn association_probs(Int32, Int32, @src.Outcome) -> Array[Double]
 
-pub fn breed(Genome, Int, Array[Opponent], Criterion) -> Array[Offer]
+pub fn breed(Genome, Int32, Array[Opponent], Criterion) -> Array[Offer]
 
-pub fn causal_criterion(Int) -> Criterion
+pub fn causal_criterion(Int32) -> Criterion
 
-pub fn causal_effect(Genome, Genome, Array[Opponent], Int, @ml.DmlConfig) -> CausalVerdict
+pub fn causal_effect(Genome, Genome, Array[Opponent], Int32, @ml.DmlConfig) -> CausalVerdict
 
 pub fn causal_verdict(Genome, Genome, Array[Opponent]) -> CausalVerdict
 
@@ -43,17 +43,17 @@ pub fn demo_cycle() -> SubjectCycle
 
 pub fn descend(Genome, Candidate) -> Genome
 
-pub fn diff_count(Genome, Genome) -> Int
+pub fn diff_count(Genome, Genome) -> Int32
 
 pub fn evaluate(Genome, Array[Opponent]) -> Fitness
 
-pub fn evolve(Genome, Array[Opponent], Criterion, Int) -> Ledger
+pub fn evolve(Genome, Array[Opponent], Criterion, Int32) -> Ledger
 
-pub fn genome(Voice, @multi.TruthRegime, Int, Int, Int, Int) -> Genome
+pub fn genome(Voice, @multi.TruthRegime, Int32, Int32, Int32, Int32) -> Genome
 
 pub fn group_lean(Genome) -> @group.GroupLean
 
-pub fn group_lean_of(Int, Int) -> @group.GroupLean
+pub fn group_lean_of(Int32, Int32) -> @group.GroupLean
 
 pub fn group_step(@group.GroupState, @group.GroupTrigger, Genome) -> @group.GroupOutcome
 
@@ -61,17 +61,17 @@ pub fn intuition_disciplines() -> Array[(String, String)]
 
 pub fn intuition_principle() -> String
 
-pub fn judge(Genome, Int, Candidate, Array[Opponent], Criterion) -> Decision
+pub fn judge(Genome, Int32, Candidate, Array[Opponent], Criterion) -> Decision
 
-pub fn make_episodes(Genome, Genome, Array[Opponent], Int, UInt64) -> Episodes
+pub fn make_episodes(Genome, Genome, Array[Opponent], Int32, UInt64) -> Episodes
 
 pub fn mutations(Genome) -> Array[Candidate]
 
-pub fn opponent(String, @multi.TruthRegime, Int, Int, Int, Int) -> Opponent
+pub fn opponent(String, @multi.TruthRegime, Int32, Int32, Int32, Int32) -> Opponent
 
 pub fn parse(String) -> Ledger
 
-pub fn permille(Double) -> Int
+pub fn permille(Double) -> Int32
 
 pub fn quality(Genome, Array[Opponent]) -> Double
 
@@ -91,11 +91,11 @@ pub fn render_tree(Ledger) -> String
 
 pub fn render_variation() -> String
 
-pub fn run_cycle(CycleState, Array[Opponent], Criterion, Int) -> SubjectCycle
+pub fn run_cycle(CycleState, Array[Opponent], Criterion, Int32) -> SubjectCycle
 
-pub fn score(Fitness, Objective) -> Int
+pub fn score(Fitness, Objective) -> Int32
 
-pub fn show_pm(Int) -> String
+pub fn show_pm(Int32) -> String
 
 pub fn thrifty_objective() -> Objective
 
@@ -112,7 +112,7 @@ pub struct Candidate {
 
 pub struct CausalPlan {
   objective : Objective
-  episodes : Int
+  episodes : Int32
   config : @ml.DmlConfig
 }
 
@@ -123,7 +123,7 @@ pub struct CausalVerdict {
   ci_high : Double
   naive : Double
   truth : Double
-  n : Int
+  n : Int32
 }
 
 pub(all) enum Criterion {
@@ -132,7 +132,7 @@ pub(all) enum Criterion {
 }
 
 pub struct CycleEvent {
-  round : Int
+  round : Int32
   state_before : @src.SubjectState
   slot : @src.Slot
   outcome : @src.Outcome
@@ -155,9 +155,9 @@ pub struct Decision {
   verdict : Judgement
   reason : String
   fitness : Fitness
-  score : Int
-  effect : Int
-  effect_lo : Int
+  score : Int32
+  effect : Int32
+  effect_lo : Int32
 }
 
 pub struct Episodes {
@@ -165,14 +165,14 @@ pub struct Episodes {
   t : Array[Double]
   x : Array[Array[Double]]
   theta_true : Double
-  n : Int
+  n : Int32
 }
 
 pub struct Fitness {
-  consensus : Int
-  stability : Int
-  residue : Int
-  cost : Int
+  consensus : Int32
+  stability : Int32
+  residue : Int32
+  cost : Int32
 } derive(Eq)
 pub fn Fitness::equal(Self, Self) -> Bool
 pub fn Fitness::not_equal(Self, Self) -> Bool
@@ -180,10 +180,10 @@ pub fn Fitness::not_equal(Self, Self) -> Bool
 pub struct Genome {
   voice : Voice
   regime : @multi.TruthRegime
-  toward_other : Int
-  toward_self : Int
-  carry : Int
-  reason : Int
+  toward_other : Int32
+  toward_self : Int32
+  carry : Int32
+  reason : Int32
 } derive(Eq)
 pub fn Genome::decode(String) -> Self
 pub fn Genome::encode(Self) -> String
@@ -205,19 +205,19 @@ pub struct Ledger {
   objective : String
   trails : Array[Trail]
 }
-pub fn Ledger::accepted_count(Self) -> Int
-pub fn Ledger::ancestry(Self, Int) -> Array[Int]
-pub fn Ledger::children(Self, Int) -> Array[Int]
+pub fn Ledger::accepted_count(Self) -> Int32
+pub fn Ledger::ancestry(Self, Int32) -> Array[Int32]
+pub fn Ledger::children(Self, Int32) -> Array[Int32]
 pub fn Ledger::current(Self) -> Genome
-pub fn Ledger::depth(Self, Int) -> Int
+pub fn Ledger::depth(Self, Int32) -> Int32
 pub fn Ledger::descent_faults(Self) -> Array[String]
 pub fn Ledger::descent_ok(Self) -> Bool
-pub fn Ledger::height(Self) -> Int
-pub fn Ledger::leaves(Self) -> Array[Int]
-pub fn Ledger::lineage(Self, Int) -> String
-pub fn Ledger::rejected_count(Self) -> Int
+pub fn Ledger::height(Self) -> Int32
+pub fn Ledger::leaves(Self) -> Array[Int32]
+pub fn Ledger::lineage(Self, Int32) -> String
+pub fn Ledger::rejected_count(Self) -> Int32
 pub fn Ledger::rejected_example(Self) -> String?
-pub fn Ledger::roots(Self) -> Array[Int]
+pub fn Ledger::roots(Self) -> Array[Int32]
 pub fn Ledger::serialize(Self) -> String
 pub fn Ledger::tree_faults(Self) -> Array[String]
 pub fn Ledger::tree_ok(Self) -> Bool
@@ -234,10 +234,10 @@ pub fn Locus::not_equal(Self, Self) -> Bool
 
 pub struct Objective {
   name : String
-  w_consensus : Int
-  w_stability : Int
-  w_residue : Int
-  w_cost : Int
+  w_consensus : Int32
+  w_stability : Int32
+  w_residue : Int32
+  w_cost : Int32
 }
 
 pub struct Offer {
@@ -248,10 +248,10 @@ pub struct Offer {
 pub struct Opponent {
   name : String
   regime : @multi.TruthRegime
-  toward_other : Int
-  toward_self : Int
-  reason : Int
-  residue : Int
+  toward_other : Int32
+  toward_self : Int32
+  reason : Int32
+  residue : Int32
 }
 
 pub struct SubjectCycle {
@@ -265,16 +265,16 @@ pub fn SubjectCycle::legal(Self) -> Bool
 pub fn SubjectCycle::never_closed(Self) -> Bool
 
 pub struct Trail {
-  generation : Int
-  step : Int
-  parent : Int?
+  generation : Int32
+  step : Int32
+  parent : Int32?
   locus : Locus
   what : String
   why : String
   verdict : Judgement
-  score : Int
-  effect : Int
-  effect_lo : Int
+  score : Int32
+  effect : Int32
+  effect_lo : Int32
   fitness : Fitness
   genome : Genome
 }

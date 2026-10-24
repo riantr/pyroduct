@@ -7,19 +7,19 @@ import {
 }
 
 // Values
-pub fn compare_matched(Array[Double], Array[Double], Array[Array[Double]], Double, Int, Double) -> Compare
+pub fn compare_matched(Array[Double], Array[Double], Array[Array[Double]], Double, Int32, Double) -> Compare
 
-pub fn compare_rich(Array[Double], Array[Double], Array[Array[Double]], Double, Int, Double) -> Compare
+pub fn compare_rich(Array[Double], Array[Double], Array[Array[Double]], Double, Int32, Double) -> Compare
 
-pub fn compare_with(String, Array[Double], Array[Double], Array[Array[Double]], Double, Int, Int, Double, Double) -> Compare
+pub fn compare_with(String, Array[Double], Array[Double], Array[Array[Double]], Double, Int32, Int32, Double, Double) -> Compare
 
 pub fn demo_dataset() -> (Array[Double], Array[Double], Array[Array[Double]], Double)
 
-pub fn external_plr(Int, Int, Double, Int, Int, Double) -> Compare
+pub fn external_plr(Int32, Int32, Double, Int32, Int32, Double) -> Compare
 
-pub fn fit_ours(Array[Double], Array[Double], Array[Array[Double]], Int, Int, Double) -> @ml.DmlResult
+pub fn fit_ours(Array[Double], Array[Double], Array[Array[Double]], Int32, Int32, Double) -> @ml.DmlResult
 
-pub fn fit_reference(Array[Double], Array[Double], Array[Array[Double]], Int) -> RefFit
+pub fn fit_reference(Array[Double], Array[Double], Array[Array[Double]], Int32) -> RefFit
 
 pub fn render_report() -> String
 
@@ -30,8 +30,8 @@ pub fn rows_of(@moonbit_doubleML.Matrix) -> Array[Array[Double]]
 // Types and methods
 pub struct Compare {
   label : String
-  n : Int
-  folds : Int
+  n : Int32
+  folds : Int32
   theta_ref : Double
   theta_ours : Double
   se_ref : Double
@@ -49,8 +49,8 @@ pub struct RefFit {
   se : Double
   ci_low : Double
   ci_high : Double
-  n : Int
-  folds : Int
+  n : Int32
+  folds : Int32
 }
 
 // Type aliases

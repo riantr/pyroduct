@@ -6,7 +6,7 @@ import {
 }
 
 // Values
-pub fn after_open(SubjectState, Slot, Int) -> Array[(SubjectState, Int)]
+pub fn after_open(SubjectState, Slot, Int32) -> Array[(SubjectState, Int32)]
 
 pub fn aho_build(Array[String]) -> AhoAutomaton
 
@@ -34,7 +34,7 @@ pub fn candidates(SubjectState, Slot) -> Array[(Trigger, SubjectState)]
 
 pub fn course() -> Array[SubjectState]
 
-pub fn distance_to(SubjectState) -> Array[(SubjectState, Int?)]
+pub fn distance_to(SubjectState) -> Array[(SubjectState, Int32?)]
 
 pub fn durability_manifest() -> Array[(String, String, String)]
 
@@ -44,9 +44,9 @@ pub fn every_phase_has_non_act_of(Array[Phase], Array[Phase]) -> Bool
 
 pub fn exitable(SubjectState, Slot) -> Bool
 
-pub fn expand(SubjectState, Array[Slot], Int) -> Expansion
+pub fn expand(SubjectState, Array[Slot], Int32) -> Expansion
 
-pub fn freedom_text(Int) -> String
+pub fn freedom_text(Int32) -> String
 
 pub fn gaps() -> Array[(SubjectState, Slot)]
 
@@ -60,9 +60,9 @@ pub fn is_deterministic() -> Bool
 
 pub fn is_minimal() -> Bool
 
-pub fn min_steps(SubjectState, SubjectState) -> Int?
+pub fn min_steps(SubjectState, SubjectState) -> Int32?
 
-pub fn minimal_quotient() -> (Int, Array[String])
+pub fn minimal_quotient() -> (Int32, Array[String])
 
 pub fn one_edge_each(Array[(SubjectState, Trigger)]) -> Bool
 
@@ -70,7 +70,7 @@ pub fn one_edge_per_trigger() -> Bool
 
 pub fn only_act_exits() -> Array[SubjectState]
 
-pub fn open_points() -> Array[(SubjectState, Slot, Int)]
+pub fn open_points() -> Array[(SubjectState, Slot, Int32)]
 
 pub fn petri_coloring_status() -> String
 
@@ -122,7 +122,7 @@ pub fn revision_principle() -> String
 
 pub fn same_target_pairs() -> Array[(SubjectState, Slot, Array[Trigger], SubjectState)]
 
-pub fn slot_tally() -> Array[(Slot, Int)]
+pub fn slot_tally() -> Array[(Slot, Int32)]
 
 pub fn spec_json() -> String
 
@@ -144,25 +144,25 @@ pub fn walk(SubjectState, Array[Slot]) -> Trace
 
 // Types and methods
 pub(all) struct AhoAutomaton {
-  children : Array[Map[Char, Int]]
-  fail : Array[Int]
-  output : Array[Array[Int]]
-  depth : Array[Int]
+  children : Array[Map[Char, Int32]]
+  fail : Array[Int32]
+  output : Array[Array[Int32]]
+  depth : Array[Int32]
   path : Array[String]
   words : Array[String]
 }
-pub fn AhoAutomaton::scan(Self, String) -> Array[(Int, Int)]
+pub fn AhoAutomaton::scan(Self, String) -> Array[(Int32, Int32)]
 pub fn AhoAutomaton::stats(Self) -> AhoStats
 
 pub(all) struct AhoStats {
-  nodes : Int
-  links : Int
-  longest_word : Int
-  fail_links : Int
-  deepest_fail : Int
+  nodes : Int32
+  links : Int32
+  longest_word : Int32
+  fail_links : Int32
+  deepest_fail : Int32
   deepest_fail_path : String
   deepest_fail_target : String
-  deepest_branch : Int
+  deepest_branch : Int32
   deepest_branch_path : String
 }
 
@@ -197,15 +197,15 @@ pub fn PetriEffect::equal(Self, Self) -> Bool
 pub fn PetriEffect::not_equal(Self, Self) -> Bool
 
 pub(all) struct PetriMarking {
-  counts : Map[String, Int]
+  counts : Map[String, Int32]
 } derive(Eq)
-pub fn PetriMarking::at(Self, SubjectState) -> Int
+pub fn PetriMarking::at(Self, SubjectState) -> Int32
 pub fn PetriMarking::enabled(Self) -> Array[PetriTransition]
 pub fn PetriMarking::equal(Self, Self) -> Bool
 pub fn PetriMarking::fire(Self, PetriTransition) -> (Array[PetriEffect], Self)?
 pub fn PetriMarking::fire_by(Self, SubjectState, Trigger) -> (Array[PetriEffect], Self)?
 pub fn PetriMarking::not_equal(Self, Self) -> Bool
-pub fn PetriMarking::total(Self) -> Int
+pub fn PetriMarking::total(Self) -> Int32
 
 pub(all) struct PetriTransition {
   from : SubjectState
@@ -261,7 +261,7 @@ pub struct StateInfo {
   state : SubjectState
   label : String
   phase : Phase
-  freedom : Int
+  freedom : Int32
   gloss : String
 }
 
@@ -314,7 +314,7 @@ pub fn SubjectState::designation(Self) -> String
 pub fn SubjectState::en_gloss(Self) -> String
 pub fn SubjectState::en_label(Self) -> String
 pub fn SubjectState::equal(Self, Self) -> Bool
-pub fn SubjectState::freedom(Self) -> Int
+pub fn SubjectState::freedom(Self) -> Int32
 pub fn SubjectState::gloss(Self) -> String
 pub fn SubjectState::info(Self) -> StateInfo
 pub fn SubjectState::label(Self) -> String

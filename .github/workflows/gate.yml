@@ -41,6 +41,25 @@ jobs:
         # The trailing version check is not decoration: without it a silently
         # failed install surfaces three steps later as a confusing
         # "moon: command not found" inside `moon check`.
+        #
+        # MOON_VERSION is the toolchain this tree was measured on. The install
+        # CANNOT name a version: every versioned path under
+        # cli.moonbitlang.com/binaries/<version>/ answers 403 (measured
+        # 2026-10-24 for 0.1.20261016 and 0.1.20261023, with and without the
+        # build hash), while `binaries/latest` and `cores/core-latest` answer
+        # 206. So the script always installs whatever is newest, and the tree
+        # would be measured on a moving toolchain -- which is exactly how
+        # 0.1.20261012's `Int` -> `Int32` rewrite turned a green run into a
+        # red one with no edit of our own.
+        #
+        # What the install can do is SAY which version this release was measured
+        # on, and fail when the runner disagrees. A toolchain that moved under
+        # the release then turns the gate red with a message naming both
+        # versions, instead of silently changing what "the gate passed" means.
+        # The local toolchain on the day of this measurement was
+        # moon 0.1.20261023 (build 3778465) with moonc v0.10.17+d971670cd.
+        env:
+          MOON_VERSION: "0.1.20261023"
         run: |
           set -euo pipefail
           curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
@@ -51,6 +70,13 @@ jobs:
             exit 1
           }
           moon version --all
+          got="$(moon version --all | sed -n 's/^moon \([^ ]*\) .*/\1/p')"
+          if [ "$got" != "$MOON_VERSION" ]; then
+            echo "::error::this tree was measured on moon $MOON_VERSION; the runner has $got"
+            echo "::error::re-measure on $got and bump MOON_VERSION in this workflow, or install $MOON_VERSION by hand"
+            exit 1
+          fi
+          echo "ok  toolchain  moon=$got"
 
       - name: Resolve the registry index
         run: moon update

@@ -3,7 +3,7 @@
 // Date: 2026-10-11
 // Scenario: If src (主体机) changes, what is affected?
 
-// model-version: 0.1.32
+// model-version: 0.1.33
 digraph pyroduct_impact_src {
     rankdir=TB;
     node [shape=box, style=filled, fontname="Arial", fontsize=10];

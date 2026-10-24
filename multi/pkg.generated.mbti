@@ -6,7 +6,7 @@ import {
 }
 
 // Values
-pub fn cheng_gap(Subject, Subject) -> Int
+pub fn cheng_gap(Subject, Subject) -> Int32
 
 pub fn citation_of(String) -> String
 
@@ -46,18 +46,18 @@ pub fn rules() -> Array[Rule]
 
 pub fn scenarios() -> Array[(String, EncounterOutcome)]
 
-pub fn subject(Int, @src.SubjectState, TruthRegime, Int, Int, Int) -> Subject
+pub fn subject(Int32, @src.SubjectState, TruthRegime, Int32, Int32, Int32) -> Subject
 
 pub fn vertical_ready(Array[Subject]) -> Bool
 
-pub fn with_reason(Subject, Int) -> Subject
+pub fn with_reason(Subject, Int32) -> Subject
 
 // Errors
 
 // Types and methods
 pub struct Cheng {
-  toward_other : Int
-  toward_self : Int
+  toward_other : Int32
+  toward_self : Int32
 }
 pub fn Cheng::is_complete(Self) -> Bool
 
@@ -106,12 +106,12 @@ pub struct GenealogyEntry {
 }
 
 pub struct NetworkReport {
-  peer_edges : Int
-  norm_edges : Int
-  clashing_pairs : Int
+  peer_edges : Int32
+  norm_edges : Int32
+  clashing_pairs : Int32
   consensus_possible : Bool
   vertical_ok : Bool
-  min_reason : Int
+  min_reason : Int32
 }
 
 pub struct OpenProblem {
@@ -127,12 +127,12 @@ pub struct Rule {
 }
 
 pub struct Subject {
-  id : Int
+  id : Int32
   state : @src.SubjectState
   regime : TruthRegime
   cheng : Cheng
-  reason : Int
-  residue : Int
+  reason : Int32
+  residue : Int32
 }
 
 pub(all) enum TruthRegime {

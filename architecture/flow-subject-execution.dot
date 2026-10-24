@@ -4,7 +4,7 @@
 // Trigger: step(position, slot) or step_by_trigger(position, trigger)
 // Outcome: Moved / Held / Open / Same / Block
 
-// model-version: 0.1.32
+// model-version: 0.1.33
 digraph subject_execution_flow {
     rankdir=TB;
     node [shape=box, style=filled, fontname="Arial", fontsize=10];

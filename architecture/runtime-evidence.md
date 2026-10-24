@@ -166,10 +166,10 @@
 | Dependency | Version | Consumer | Target | Source |
 |------------|---------|----------|--------|--------|
 | `moonbitlang/async` | `0.22.5` | `cmd/coord`, `tools/ifacescan`, `cmd/ifacescan` | native | `moon.mod:39` |
-| `riantr/moonbit_doubleML` | `0.163.3` | `dmlref`, `causal` | wasm + native | `moon.mod:40` |
-| `riantr/snn_mbt` | `0.155.0` | `snnref`, `examples/sediment` | native only | `moon.mod:41` |
-| `riantr/moonbit_image` | `0.3.4` | (via snn_mbt) | native only | `AGENTS.md` |
-| `riantr/moonbit_static_analysis` | `0.4.29` | `audit` | wasm + native | `moon.mod:42` |
+| `riantr/moonbit_doubleML` | `0.164.34` | `dmlref`, `causal` | wasm + native | `moon.mod:40` |
+| `riantr/snn_mbt` | `0.166.2` | `snnref`, `examples/sediment` | native only | `moon.mod:41` |
+| `riantr/moonbit_image` | `0.3.9` | (via snn_mbt) | native only | `AGENTS.md` |
+| `riantr/moonbit_static_analysis` | `0.4.33` | `audit` | wasm + native | `moon.mod:42` |
 
 **Dependency isolation**: Each third-party dep is confined to specific consumers. `src` (the base package) has zero imports. `ml` is fully self-contained (no numerics library).
 

@@ -96,7 +96,7 @@ pub fn State::equal(Self, Self) -> Bool
 pub fn State::gloss(Self) -> String
 pub fn State::not_equal(Self, Self) -> Bool
 pub fn State::phase(Self) -> Phase
-pub fn State::residue(Self) -> Int
+pub fn State::residue(Self) -> Int32
 
 pub struct Trace {
   start : State

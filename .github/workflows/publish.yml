@@ -91,6 +91,17 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Install moon
+        # The toolchain this release was measured on. The install CANNOT name
+        # a version -- every versioned path under
+        # cli.moonbitlang.com/binaries/<version>/ answers 403 (measured
+        # 2026-10-24) while `binaries/latest` answers 206 -- so the script
+        # always installs the newest, and the release would be published from
+        # a toolchain nobody measured it on. Asserting the version turns that
+        # silent drift into a red run that names both versions.
+        # The local toolchain on the day of this measurement was
+        # moon 0.1.20261023 (build 3778465) with moonc v0.10.17+d971670cd.
+        env:
+          MOON_VERSION: "0.1.20261023"
         run: |
           set -euo pipefail
           curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
@@ -101,6 +112,13 @@ jobs:
             exit 1
           }
           moon version --all
+          got="$(moon version --all | sed -n 's/^moon \([^ ]*\) .*/\1/p')"
+          if [ "$got" != "$MOON_VERSION" ]; then
+            echo "::error::this release was measured on moon $MOON_VERSION; the runner has $got"
+            echo "::error::re-measure on $got and bump MOON_VERSION in this workflow, or install $MOON_VERSION by hand"
+            exit 1
+          fi
+          echo "ok  toolchain  moon=$got"
 
       - name: Resolve the registry index
         run: moon update

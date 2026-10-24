@@ -1,7 +1,7 @@
 ///|
 /// 与外部参考实现的对照层。
 ///
-/// 引入 `riantr/moonbit_doubleML@0.163.3`（`doubleml-for-py` 的纯 MoonBit 移植，
+/// 引入 `riantr/moonbit_doubleML@0.164.34`（`doubleml-for-py` 的纯 MoonBit 移植，
 /// 22 个估计器、554+ 测试、23 项 Python 交叉验证）。这里只做一件事：**用它的 `DoubleMLPLR` 复核我们自研的
 /// `ml.dml_plr`**——同一份数据、同一种 nuisance（最小二乘），两个独立实现应当给出同一个
 /// θ̂。容差内一致，就说明我们的交叉拟合、正交分数与方差公式没有写错。
@@ -168,7 +168,7 @@ pub fn render_report() -> String {
   let lines : Array[String] = [
     "# 与外部参考实现对照",
     "",
-    "依赖：`riantr/moonbit_doubleML@0.163.3`（doubleml-for-py 的纯 MoonBit 移植）。",
+    "依赖：`riantr/moonbit_doubleML@0.164.34`（doubleml-for-py 的纯 MoonBit 移植）。",
     "数据：状态机生成，n = 400，真值 θ = \{fmt3(data.theta_true)}，4 个协变量。",
     "",
     "对照 | 参考 θ̂ | 自研 θ̂ | 两者之差 | 参考距真值 | 自研距真值 | se(参考／自研)",

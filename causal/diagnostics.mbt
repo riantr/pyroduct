@@ -1,7 +1,7 @@
 ///|
 /// 因果诊断层（`causal`，模型整理）。
 ///
-/// 把 `riantr/moonbit_doubleML@0.163.3` 的三个新模块真正用起来，全部作用于
+/// 把 `riantr/moonbit_doubleML@0.164.34` 的三个新模块真正用起来，全部作用于
 /// **状态机生成的同一份数据**（`ml.make_dataset(400, 1.5, 7)`，n = 400，真值
 /// θ = 1.5，4 个协变量）：
 ///
@@ -157,7 +157,7 @@ pub fn render_report() -> String raise {
   let lines : Array[String] = [
     "# 因果诊断（0.163.3 深用）：敏感性／多重检验／异质性",
     "",
-    "依赖：`riantr/moonbit_doubleML@0.163.3`。数据：状态机生成，n = 400，真值 θ = 1.5。",
+    "依赖：`riantr/moonbit_doubleML@0.164.34`。数据：状态机生成，n = 400，真值 θ = 1.5。",
     "出处层：模型整理——分析的**对象**是模型事实，分析的**工具**是外部库。",
     "",
     "## 1. 敏感性（Cinelli & Hazlett 2020）",

@@ -4,7 +4,7 @@
 // Trigger: moon run cmd/main -- <subcommand>
 // Outcome: Printed report to stdout
 
-// model-version: 0.1.32
+// model-version: 0.1.33
 digraph cli_request_flow {
     rankdir=TB;
     node [shape=box, style=filled, fontname="Arial", fontsize=10];

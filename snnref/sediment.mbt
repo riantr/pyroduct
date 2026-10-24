@@ -1,7 +1,7 @@
 ///|
 /// 脉冲沉淀实验（`snnref`，模型整理）。
 ///
-/// 引入 `riantr/snn_mbt@0.155.0`（SpikingNeuralNetworks.jl 的 bit-exact 移植，
+/// 引入 `riantr/snn_mbt@0.166.2`（SpikingNeuralNetworks.jl 的 bit-exact 移植，
 /// 固定种子）。实验只做一件事：把驱动槽的 49 个触发各编成一个通道，同一情境的
 /// 槽内触发以高率放电（Poisson，库自带 `poisson_input_single`，全部随机性只走
 /// 固定种子），其余通道保持低背景率；49×49 全连接突触按 CSR 布局交给 Gerstner
@@ -56,7 +56,7 @@ pub fn SedimentConfig::new() -> Self {
 ///|
 /// 跑一次沉淀实验：编码 → STDP 仿真 → 与驱动槽八分对照。
 pub fn run_sediment(config : SedimentConfig) -> Sediment {
-  let rng = @snn.Xoshiro::new(config.seed)
+  let rng = @snncore.Xoshiro::new(config.seed)
   let triggers = @src.all_triggers()
   let slots = @src.all_slots()
   let n = triggers.length()
@@ -85,11 +85,11 @@ pub fn run_sediment(config : SedimentConfig) -> Sediment {
   }
   // 初始权重：小随机（同一种子），让跨槽也有非零值、最强伙伴有意义。
   let w : Array[Float] = []
-  for v in @snn.rand_f32(rng, n * n) {
+  for v in @snncore.rand_f32(rng, n * n) {
     w.push(v * 0.001F)
   }
-  let vars = @snn.STDPVariables::new(n, n)
-  let rule = @snn.STDPGerstner::new()
+  let vars = @snnsynapse.STDPVariables::new(n, n)
+  let rule = @snnsynapse.STDPGerstner::new()
   // 编码：每情境块每通道一条 spike train（Poisson，固定种子）。
   let n_blocks = config.episodes * k
   let n_step_block = (config.block_ms / config.dt).to_int()
@@ -104,7 +104,7 @@ pub fn run_sediment(config : SedimentConfig) -> Sediment {
         config.rate_low
       }
       block.push(
-        @snn.poisson_input_single(rate, config.block_ms, config.dt, rng),
+        @snnanalysis.poisson_input_single(rate, config.block_ms, config.dt, rng),
       )
     }
     trains.push(block)
@@ -118,7 +118,7 @@ pub fn run_sediment(config : SedimentConfig) -> Sediment {
       for j in 0..<n {
         fire.push(trains[b][j][s])
       }
-      @snn.stdp_step(
+      @snnsynapse.stdp_step(
         w,
         fire,
         fire,
@@ -223,7 +223,7 @@ pub fn render_report() -> String {
   let lines : Array[String] = [
     "# 脉冲沉淀实验：触发 → spike trains → STDP → 驱动槽八分",
     "",
-    "依赖：`riantr/snn_mbt@0.155.0`（SpikingNeuralNetworks.jl 的 bit-exact 移植，固定种子）。",
+    "依赖：`riantr/snn_mbt@0.166.2`（SpikingNeuralNetworks.jl 的 bit-exact 移植，固定种子）。",
     "出处层：模型整理——机制词汇来自神经科学，对照的真值划分是驱动槽八分。",
     "",
     "编码：\{r.n_triggers} 个触发各成一通道；\{c.episodes} 轮 × \{r.n_slots} 情境 × \{c.block_ms}ms；",

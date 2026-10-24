@@ -29,7 +29,7 @@
 | Node ID | Label | Type | Confidence | Source Refs | Notes |
 |---------|-------|------|------------|-------------|-------|
 | `ml` | 自研DoubleML | module | high | `ml/moon.pkg`, `ml/*.mbt` | PLR/交叉拟合/正交分数；完全自包含 |
-| `dmlref` | 外部交叉验证 | module | high | `dmlref/moon.pkg` | 与moonbit_doubleML@0.163.3互校 |
+| `dmlref` | 外部交叉验证 | module | high | `dmlref/moon.pkg` | 与moonbit_doubleML@0.164.34互校 |
 | `causal` | 因果诊断 | module | high | `causal/moon.pkg` | 敏感性/多重检验/异质性；只读 |
 | `audit` | 三鉴审计 | module | high | `audit/moon.pkg` | 结构鉴/类型鉴/行为鉴；参考消费者 |
 | `snnref` | 脉冲沉淀实验 | module | high | `snnref/moon.pkg` | native only；49触发→泊松→STDP |
@@ -56,9 +56,9 @@
 |---------|-------|------|------------|-------------|-------|
 | `moonbitlang/core` | 官方标准库 | external | high | `moon.mod` | 所有包可用 |
 | `moonbitlang/async@0.22.5` | 异步库 | external | high | `moon.mod` | 仅cmd/coord, tools/ifacescan, cmd/ifacescan |
-| `riantr/moonbit_doubleML@0.163.3` | 外部DoubleML | external | high | `moon.mod` | 仅dmlref, causal |
-| `riantr/snn_mbt@0.155.0` | 脉冲神经网络 | external | high | `moon.mod` | 仅snnref；native only |
-| `riantr/moonbit_static_analysis@0.4.29` | 静态分析库 | external | high | `moon.mod` | 仅audit |
+| `riantr/moonbit_doubleML@0.164.34` | 外部DoubleML | external | high | `moon.mod` | 仅dmlref, causal |
+| `riantr/snn_mbt@0.166.2` | 脉冲神经网络 | external | high | `moon.mod` | 仅snnref；native only |
+| `riantr/moonbit_static_analysis@0.4.33` | 静态分析库 | external | high | `moon.mod` | 仅audit |
 | `MiniMax Code Desktop` | 插件宿主 | external | high | `AGENTS.md` | 加载本地插件 |
 
 ---

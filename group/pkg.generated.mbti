@@ -12,7 +12,7 @@ pub fn all_phases() -> Array[GroupPhase]
 
 pub fn all_states() -> Array[GroupState]
 
-pub fn clashing_pairs(Array[@multi.Subject]) -> Int
+pub fn clashing_pairs(Array[@multi.Subject]) -> Int32
 
 pub fn course() -> Array[GroupState]
 

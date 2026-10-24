@@ -35,7 +35,7 @@ digraph cli_main_path {
 
     all_cmd [label="all\n组合报告:\nreport + course + genesis + mermaid", fillcolor="#E1BEE7"];
 
-    default_cmd [label="_ (默认)\n未知子命令 → report", fillcolor="#EF9A9A"];
+    default_cmd [label="_ (未知子命令)\n报错 + 非零退出", fillcolor="#EF9A9A"];
 
     render [label="调用渲染函数\n@pkg.render_xxx()\n返回 String", fillcolor="#FFE0B2"];
 

@@ -98,6 +98,21 @@ jobs:
       - name: The resolved dependency tree must match the pins
         run: python tools/validate_resolved_deps.py
 
+      # The pins are also stated, in prose, all over the repository: 53
+      # `package@version` literals across the READMEs, AGENTS.md, the
+      # architecture files, the package doc comments, the rendered face text,
+      # the plugin's face catalog and both skill copies. Every one of those is
+      # a second copy of the pin, and nothing bound them to it -- so bumping a
+      # pin (which the release policy does on every release) left the
+      # repository still saying the old version, with a green gate.
+      #
+      # This asserts each of those literals against the pin it copies. For a
+      # transitive dependency (riantr/moonbit_image, pulled in by
+      # riantr/snn_mbt) the literal is asserted against the RESOLVED tree
+      # instead, since we do not pin it ourselves.
+      - name: Every dependency version literal must match the pin it copies
+        run: python tools/validate_pin_copies.py
+
       # --deny-warn per the official package-configuration guidance: without it
       # this gate passes on a warning regression while the docs claim zero.
       - name: moon check
@@ -159,7 +174,10 @@ jobs:
 
       - name: native · cmd/coord (checkpoint must round-trip)
         # Writes .openseek/coordinator-state.txt (gitignored); a non-zero exit
-        # here means the replayable runtime failed to restore its own checkpoint.
+        # here means the checkpoint did not survive serialize -> deserialize.
+        # The step used to be unable to fail at all -- it printed the verdict
+        # and always exited 0, while this comment claimed otherwise -- so the
+        # runtime now aborts when the round-trip breaks.
         run: moon run --target native cmd/coord
 
       - name: native · examples/sediment (the snnref experiment, end to end)
@@ -192,6 +210,15 @@ jobs:
         # against the ground truth extracted from source code. Catches drift
         # when model enums change but documentation doesn't.
         run: python tools/validate_readme_facts.py
+
+      - name: architecture · the CLI's face list must match the bridge's
+        # Three copies of the same names live in two files: the bridge's
+        # faces() (returned in every reply, read by both plugins), the CLI's
+        # match arms, and the CLI's usage header. Nothing compared them, so a
+        # face added to one and forgotten in another was invisible until
+        # someone typed the missing spelling. This asserts all three agree,
+        # and that the count the CLI's own error message publishes is real.
+        run: python tools/validate_cli_faces.py
 
       - name: plugin · anti-drift (faces, versions, test count, model facts, invariants)
         # The harness prints its own check count; do not transcribe it here.

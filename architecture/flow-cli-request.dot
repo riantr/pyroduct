@@ -144,7 +144,7 @@ digraph cli_request_flow {
     all [label="all\n组合报告:\nreport + course + genesis + mermaid", fillcolor="#E1BEE7", penwidth=2];
 
     // === Default ===
-    default [label="_ (默认)\n@sm.render_report()\n\"report\" 与未知子命令\n均走此分支", fillcolor="#EF9A9A"];
+    default [label="_ (未知子命令)\neprintln + abort\n非零退出", fillcolor="#EF9A9A"];
 
     // === Output ===
     output [label="println(result)\n输出到 stdout", fillcolor="#90CAF9", penwidth=3];

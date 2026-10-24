@@ -132,6 +132,12 @@ delete childEnv.PYRODUCT_PROJECT_DIR
 const child = spawn('node', [SERVER], { stdio: ['pipe', 'pipe', 'pipe'], env: childEnv })
 let buf = ''
 const pending = new Map()
+// Count the reply lines the server actually wrote. A reply with no `id` has
+// no pending entry, so the dispatcher below drops it SILENTLY -- which is
+// exactly why a server that answered a notification used to look fine to
+// this harness. Counting the lines is what lets a check say "no reply was
+// sent" rather than "no reply was matched".
+let replyLines = 0
 child.stdout.setEncoding('utf8')
 child.stdout.on('data', (chunk) => {
   buf += chunk
@@ -140,6 +146,7 @@ child.stdout.on('data', (chunk) => {
     const line = buf.slice(0, i).trim()
     buf = buf.slice(i + 1)
     if (!line) continue
+    replyLines += 1
     const msg = JSON.parse(line)
     const resolver = pending.get(msg.id)
     if (resolver) {
@@ -266,13 +273,20 @@ check('plugin.json description states the real face count',
   pluginDescCount === FACES.length,
   `plugin.json says ${Number.isNaN(pluginDescCount) ? '(no count found)' : pluginDescCount}, catalog has ${FACES.length}`)
 // And once more inside the package's own shipped prose: the plugin README, the
-// SKILL doc an agent reads, and the tools reference each publish the face count
-// ("31 faces") as something a reader can act on. A count that four documents
-// publish is four chances to rot, so every number they state is held to FACES.
+// SKILL doc an agent reads, the tools reference, and the MCP manifest each
+// publish the face count ("31 faces") as something a reader can act on. A
+// count that four documents publish is four chances to rot, so every number
+// they state is held to FACES.
+//
+// The manifest is the fourth copy and it rotted last: it said "28-face
+// analysis catalog" while the catalog rendered 31, and no check read it --
+// the harness only covered the tool description, then plugin.json, then the
+// prose. Each pass found one more copy that nobody was watching.
 const shippedDocs = [
   path.join(PLUGIN, 'README.md'),
   path.join(PLUGIN, 'skills', 'pyroduct-model', 'SKILL.md'),
   path.join(PLUGIN, 'skills', 'pyroduct-model', 'references', 'tools.md'),
+  path.join(PLUGIN, 'pyroduct.mcp.json'),
 ]
 {
   const { readFileSync: rf, existsSync: es } = await import('node:fs')
@@ -281,8 +295,11 @@ const shippedDocs = [
   for (const p of shippedDocs) {
     if (!es(p)) continue
     scanned += 1
-    for (const m of rf(p, 'utf8').matchAll(/(\d+)\s*(?:个|条)?\s*(?:分析)?面/g)) {
-      if (Number(m[1]) !== FACES.length) {
+    // "31 面" / "31 个面" / "31 分析面" in the Chinese docs, "31-face" in the
+    // English manifest.
+    for (const m of rf(p, 'utf8').matchAll(/(\d+)\s*(?:个|条)?\s*(?:分析)?面|(\d+)-face/g)) {
+      const stated = Number(m[1] ?? m[2])
+      if (stated !== FACES.length) {
         offenders.push(`${path.basename(p)}: "${m[0]}"`)
       }
     }
@@ -313,6 +330,35 @@ const badKind = await request('tools/call', {
 check('bad kind -> isError + legal list', badKind.result?.isError === true && textOf(badKind).includes('report'))
 const noKind = await request('tools/call', { name: 'pyroduct_face', arguments: {} })
 check('missing kind -> isError', noKind.result?.isError === true)
+// "missing" and "wrong type" are different mistakes. A caller that sent
+// `kind: 123` and is told the argument is missing goes off to add the
+// argument it already added.
+const wrongType = await request('tools/call', { name: 'pyroduct_face', arguments: { kind: 123 } })
+check('wrong-typed kind -> isError and says the TYPE is wrong',
+  wrongType.result?.isError === true && textOf(wrongType).includes('must be a string'),
+  textOf(wrongType).slice(0, 80))
+// An error message must not repeat the caller's whole input back: the caller
+// controls its length, and echoing 100 KB is an amplifier.
+const hugeKind = await request('tools/call', { name: 'pyroduct_face', arguments: { kind: 'x'.repeat(100000) } })
+const hugeText = textOf(hugeKind)
+check('an unknown kind is not echoed back in full',
+  hugeText.length < 2000 && hugeText.includes('chars)'),
+  `${hugeText.length} chars in the reply`)
+// A request with no `id` is a JSON-RPC notification and must not be
+// answered. The server used to answer it, and `JSON.stringify` drops the
+// undefined id, so the frame was `{"jsonrpc":"2.0","result":{}}` -- a
+// response with no id, which is not legal JSON-RPC. The reply has no
+// pending entry, so it was dropped SILENTLY by the dispatcher above: this
+// check counts the lines the server wrote instead.
+{
+  const before = replyLines
+  child.stdin.write(`${JSON.stringify({ jsonrpc: '2.0', method: 'ping' })}\n`)
+  await new Promise((resolve) => setTimeout(resolve, 400))
+  const answered = replyLines - before
+  check('a request without an id gets no reply (it is a notification)',
+    answered === 0,
+    `${answered} reply line(s) for a notification`)
+}
 
 let empty = []
 let tiny = []
@@ -634,6 +680,30 @@ check('naming row no longer claims a provenance layer',
       `expected ${expected}, got ${actual}`)
   } else {
     check('petri description contains model facts', false, 'pattern not found')
+  }
+
+  // Check multi: the rule range the plugin quotes, in BOTH places it appears
+  // (the face catalog AND the tool description), must be the range the module
+  // prints. No pin for this one -- the module is the source, so when a rule is
+  // added the module moves first and this goes red until the plugin's two
+  // copies are updated. It has already drifted once: the catalog said R1-R12
+  // while the module printed R1-R14, and nothing noticed.
+  const RULE_RANGE = /R1[-\u2013]R(\d+)/
+  const multiDesc = faceDescMap.get('multi') || ''
+  const multiDescRange = multiDesc.match(RULE_RANGE)
+  const multiBodyRange = (bodies.multi || '').match(RULE_RANGE)
+  const faceToolDesc = tools.find((t) => t.name === 'pyroduct_face')?.description ?? ''
+  const multiToolRange = faceToolDesc.match(RULE_RANGE)
+  if (multiDescRange && multiBodyRange && multiToolRange) {
+    const inModule = Number(multiBodyRange[1])
+    const inCatalog = Number(multiDescRange[1])
+    const inTool = Number(multiToolRange[1])
+    check('multi rule range agrees across the module, the catalog, and the tool description',
+      inCatalog === inModule && inTool === inModule,
+      `module prints R1-R${inModule}, catalog says R1-R${inCatalog}, tool description says R1-R${inTool}`)
+  } else {
+    check('multi rule range is present in all three places', false,
+      `catalog: ${multiDescRange ? 'found' : 'MISSING'}, module: ${multiBodyRange ? 'found' : 'MISSING'}, tool description: ${multiToolRange ? 'found' : 'MISSING'}`)
   }
 }
 

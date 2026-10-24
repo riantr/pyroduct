@@ -28,7 +28,7 @@ const BRIDGE_RELATIVE = path.join('_build', 'js', 'debug', 'build', 'cmd', 'json
 const PROVENANCE_FILE = path.join(PLUGIN_ROOT, 'vendor', 'BUILD.json')
 
 const SERVER_NAME = 'pyroduct-model'
-const SERVER_VERSION = '0.3.2'
+const SERVER_VERSION = '0.3.3'
 const DEFAULT_TIMEOUT_MS = 120_000
 const GATE_TIMEOUT_MS = 900_000
 
@@ -300,13 +300,29 @@ async function callTool(name, args, signal) {
       return textResult(renderCatalog(probe.source, probe.warning))
     }
     case 'pyroduct_face': {
-      const kind = typeof args.kind === 'string' ? args.kind.trim() : ''
+      // "missing" and "wrong type" are different mistakes, and telling a
+      // caller that an argument it DID send is missing sends it off to add
+      // the argument it already added.
+      if (typeof args.kind === 'undefined' || args.kind === null) {
+        return toolResult(`missing kind. One of: ${FACE_KINDS.join(', ')}`, true)
+      }
+      if (typeof args.kind !== 'string') {
+        return toolResult(
+          `kind must be a string, got ${typeof args.kind}. One of: ${FACE_KINDS.join(', ')}`,
+          true,
+        )
+      }
+      const kind = args.kind.trim()
       if (kind.length === 0) {
         return toolResult(`missing kind. One of: ${FACE_KINDS.join(', ')}`, true)
       }
       if (!FACE_KINDS.includes(kind)) {
+        // Do not echo the whole thing back: the caller controls its length,
+        // and an error message that repeats 100 KB of input is an amplifier.
+        const shown =
+          kind.length > 80 ? `${kind.slice(0, 80)}… (${kind.length} chars)` : kind
         return toolResult(
-          `unknown kind '${kind}'. One of: ${FACE_KINDS.join(', ')}`,
+          `unknown kind '${shown}'. One of: ${FACE_KINDS.join(', ')}`,
           true,
         )
       }
@@ -443,7 +459,16 @@ process.stdin.on('data', (chunk) => {
     }
     handle(message)
       .then((response) => {
-        if (response !== null) process.stdout.write(`${JSON.stringify(response)}\n`)
+        // A request with no `id` is a JSON-RPC NOTIFICATION and must not be
+        // answered. The known-method branches used to answer it anyway, and
+        // `JSON.stringify` drops an undefined `id`, so the wire frame was
+        // `{"jsonrpc":"2.0","result":{}}` -- a response with no id, which is
+        // not legal JSON-RPC and leaves the client unable to match it.
+        // The unknown-method branch already refused to answer; this makes
+        // every method behave the same way, in one place.
+        if (response !== null && typeof message.id !== 'undefined') {
+          process.stdout.write(`${JSON.stringify(response)}\n`)
+        }
       })
       .catch((error) => {
         process.stderr.write(`pyroduct-model: ${String(error?.stack ?? error)}\n`)

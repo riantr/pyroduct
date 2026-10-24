@@ -2,6 +2,7 @@
 /// 命令行入口：打印《通往宁静之路》的主体状态机。
 ///
 ///   moon run cmd/main              文字报告（默认）
+///   moon run cmd/main -- report   主体状态机全表（默认面；不带子命令时同此）
 ///   moon run cmd/main -- mermaid   Mermaid 状态图
 ///   moon run cmd/main -- dot       Graphviz DOT
 ///   moon run cmd/main -- genesis   主线（原文顺序）
@@ -29,6 +30,7 @@
 ///   moon run cmd/main -- audit    自审计（三鉴）：主体机当程序读，已知设计 vs 未预期
 ///   moon run cmd/main -- fleet    自审计（三鉴）：群体机与社会机当程序读（无槽无终点）
 ///   moon run cmd/main -- mutants  迁移表变异网：三鉴有没有牙齿（只读压力测试）
+///   moon run cmd/main -- mbti     接口面自审计：审本仓库自己的 .mbti（模型整理）
 ///   moon run cmd/main -- spec     规格导出：主体机即 JSON 数据（词汇表防漂移，模型整理）
 ///   moon run cmd/main -- association 未定的软关联（JPDA 面镜像）：β 权重 + 歧义度 + 一致性核对（模型整理）
 ///   moon run cmd/main -- pathsum   泛半环路径和：最短路（tropical）+ 机器性质谓词（模型整理）
@@ -41,6 +43,7 @@ fn main raise {
   let args = @env.args()
   let format = if args.length() > 1 { args[1] } else { "report" }
   match format {
+    "report" => println(@sm.render_report())
     "mermaid" => println(@sm.render_mermaid())
     "dot" => println(@sm.render_dot())
     "genesis" => println(@sm.render_genesis())
@@ -91,6 +94,17 @@ fn main raise {
       println("")
       println(@sm.render_mermaid())
     }
-    _ => println(@sm.render_report())
+    // 未知子命令**不再**回退到 report。回退过一次，是本机实测出来的坏处：
+    // `moon run cmd/main -- audti`（拼错）会打印整份默认报告并以 0 退出——一个
+    // 打错的子命令与一次成功的调用在输出上长得一模一样，而 `.dsh` 的技能文档
+    // 正是教 agent 用这个 CLI 取事实的。桥（`cmd/jsoncli`）早就是对未知 kind
+    // 报错的（`ok:false` + 合法清单），两个门面不该对同一张面目录给出不同答案。
+    // 未知就是未知：报错、非零退出、把合法清单指出来。
+    _ => {
+      eprintln(
+        "未知子命令：\{format}。可用子命令见本文件顶部的用法清单（report／slots／loop／audit／… 共 37 个），或跑 `moon run cmd/main -- report` 取默认报告。",
+      )
+      @abort.abort("unknown subcommand")
+    }
   }
 }

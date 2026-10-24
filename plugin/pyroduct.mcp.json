@@ -6,7 +6,7 @@
       "command": "node",
       "args": ["./server.mjs"],
       "env": {},
-      "description": "Runs the riantr/pyroduct philosophy state machines as plain tools: the 28-face analysis catalog and one face report per call.",
+      "description": "Runs the riantr/pyroduct philosophy state machines as plain tools: the 31-face analysis catalog and one face report per call.",
       "timeout": 60000
     }
   }

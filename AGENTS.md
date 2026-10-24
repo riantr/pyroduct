@@ -85,10 +85,26 @@ python tools/validate_resolved_deps.py # asserts the RESOLVED dependency tree
                                        # names). Exit 0 if they match, 1 if a pin
                                        # drifted or could not be resolved.
                                        # Transitive deps are listed, not asserted.
+python tools/validate_readme_facts.py # README numerical claims (states, transitions,
+                                       # phases, triggers, slots) vs source.
+python tools/validate_cli_faces.py    # asserts the three copies of the face
+                                       # list agree: the bridge's faces(), the
+                                       # CLI's match arms, and the CLI's usage
+                                       # header -- plus the count the CLI's own
+                                       # error message publishes. Exit 0 if they
+                                       # agree, 1 if they drift.
+python tools/validate_pin_copies.py   # asserts every `package@version` literal
+                                       # in the tracked tree equals the pin it
+                                       # copies (moon.mod for a pinned package,
+                                       # the resolved tree for a transitive
+                                       # one). 53 literals, 19 files. Exit 0 if
+                                       # they agree, 1 if any copy is stale.
 node plugin/tools/validate-plugin.mjs  # plugin anti-drift (the harness prints
                                        # its own count — do not transcribe it:
-                                       # one check is skipped when run outside a
-                                       # checkout): pin SHA-256,
+                                       # TWO checks are skipped when run outside
+                                       # a checkout, the two that count the wasm
+                                       # test functions in the module tree): pin
+                                       # SHA-256,
                                        # MCP handshake, 31 faces, face-count anti-drift,
                                        # test-count anti-drift (gates description must
                                        # state real wasm test count), version consistency
@@ -160,7 +176,7 @@ models (Structurizr DSL), dependency graphs (Graphviz DOT), flow diagrams, deplo
 topology, health reports, and evolution plans. `LIVING_ARCHITECTURE.md` is the contract —
 it declares which invariants are CI-enforced and how to extend the system.
 
-Four drift detectors run in CI on every push and PR:
+Six drift detectors run in CI on every push and PR:
 
 - **`python tools/validate_dependencies.py`** — parses every `moon.pkg` import block,
   compares against `architecture/module-dependencies.dot` and
@@ -175,6 +191,22 @@ Four drift detectors run in CI on every push and PR:
   nothing else in the build checks the pins were honoured: `moon update` only refreshes the
   registry index, and `moon upgrade` is not a dependency command at all (see the Toolchain
   section). A pin that cannot be resolved makes this fail loudly rather than skip.
+- **`python tools/validate_cli_faces.py`** — asserts the three copies of the same names agree:
+  the bridge's `faces()` (returned in every reply, read by both plugins), the CLI's `match` arms,
+  and the CLI's usage header — plus the subcommand count the CLI's own error message publishes.
+  Nothing compared them, so a face added to one and forgotten in another was invisible until
+  someone typed the missing spelling. It found two real gaps on its first run: the `mbti`
+  subcommand was missing from the usage header, and the CLI could not dispatch a face the
+  bridge knew about.
+- **`python tools/validate_pin_copies.py`** — asserts every `package@version` literal in the
+  tracked tree equals the version it copies: the pin in `moon.mod` for a pinned package, the
+  resolved tree for a transitive one (`riantr/moonbit_image`, which `riantr/snn_mbt` pulls in).
+  There are 53 such literals across 19 files — both READMEs, `AGENTS.md`, the architecture DOT
+  and DSL files, the package doc comments, the rendered face text, the plugin's face catalog and
+  both skill copies — and nothing bound them to the pin. So bumping a pin, which the release
+  policy does on every release, left the repository still saying the old version with a green
+  gate. A version mentioned in words (`0.163.3 深用`, a deliberate feature-depth marker) is not
+  a copy and is left alone.
 - **`python tools/validate_readme_facts.py`** — parses both READMEs for numerical claims
   about states, transitions, phases, triggers and slots, and compares them against the
   ground truth extracted from source. Catches the drift where the model enums moved and
@@ -193,7 +225,7 @@ Four drift detectors run in CI on every push and PR:
   the real wasm test count), model-fact anti-drift, version consistency (`plugin.json` =
   `server.mjs` SERVER_VERSION), content invariants, and a page-citation anti-drift rule.
 
-All four are in `gate.yml` (every push/PR) and `publish.yml` (before release). A drift
+All six are in `gate.yml` (every push/PR) and `publish.yml` (before release). A drift
 failure is a CI failure — it cannot merge.
 
 When you change a `moon.pkg` import, update the DOT diagrams. When you change the test
@@ -261,8 +293,22 @@ node plugin\tools\sync-install.mjs push <checkout> # install, then rebuild + re-
   checkout guard. The plugin's SemVer in `.minimax-plugin/plugin.json` is independent of the
   module's `moon.mod` version — bump it by hand, **and bump `SERVER_VERSION` in
   `plugin/server.mjs` with it**: a check asserts the two agree.
-- The plugin holds **no model facts**: every fact comes from the module through
-  `cmd/jsoncli`. If you add a fact to the plugin, it belongs in the module instead.
+- The plugin holds **no authoritative model facts**: every fact it *reports* comes from
+  the module through `cmd/jsoncli`. It does, however, *quote* facts — in the face
+  catalog, in the tool description, and in the dependency versions it names — and a
+  quote is a copy that can go stale. Three mechanisms hold them:
+  - **model facts** (34 位置 · 53 迁移 · 11 阶段, 49 触发 → 8 槽, 272/228 组合,
+    31 块): the harness checks the catalog against the recorded facts, *and* the
+    content invariants require the module's own output to still print them.
+  - **the `multi` rule range** (`R1–R14`): no pin — the harness derives it from the
+    module's output and compares it against the catalog **and** the tool description.
+    It had already drifted once (catalog said `R1–R12`, module printed `R1–R14`).
+  - **dependency versions** (`riantr/moonbit_doubleML@0.164.34`): every
+    `package@version` literal in the tree is held against the pin by
+    `tools/validate_pin_copies.py`.
+  So the rule is: a fact the plugin *quotes* must first exist in the module (change
+  the module, then the quote); a fact the plugin *reports* must come from the bridge,
+  never from a copy pasted into the plugin.
 - A live MCP server keeps the old code until it restarts, so a description fix shows up in the
   next session, not the current one.
 

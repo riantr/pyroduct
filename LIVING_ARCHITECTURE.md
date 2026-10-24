@@ -65,7 +65,7 @@
 
 **Validator**: `node plugin/tools/validate-plugin.mjs`
 **CI**: `gate.yml` step "plugin · anti-drift (faces, versions, test count, model facts, invariants)"
-**What it checks** (the harness prints its own count — one check is skipped when it cannot see a MoonBit module, which is not the same as that check passing):
+**What it checks** (the harness prints its own count — TWO checks are skipped when it cannot see a MoonBit module, the two that count the wasm test functions in the module tree, which is not the same as those checks passing):
 
 | Check | What it catches |
 |-------|-----------------|
@@ -96,6 +96,59 @@
 
 ---
 
+### 4. Resolved Pins, Face Lists, and Pin Copies
+
+Three validators added after the three above. They close the gaps where a
+*promise* — what the release builds, what names the faces, what version the
+repository says — had no check behind it.
+
+#### 4a. Resolved dependency tree vs. the pins
+
+**Validator**: `python tools/validate_resolved_deps.py`
+**CI**: `gate.yml` step "The resolved dependency tree must match the pins"
+
+- Every pin in `moon.mod` must resolve to exactly the version `moon.mod` names
+- The root module must resolve at the version `moon.mod` declares
+- Transitive dependencies are listed, not asserted — we do not pin them
+- A pin that cannot be resolved fails loudly rather than skipping
+
+**Why**: `moon update` only refreshes the registry index and `moon upgrade`
+upgrades the toolchain, not a dependency. Nothing else in the build asserted
+that the resolved tree was the tree the release names.
+
+#### 4b. The CLI's face list vs. the bridge's
+
+**Validator**: `python tools/validate_cli_faces.py`
+**CI**: `gate.yml` step "architecture · the CLI's face list must match the bridge's"
+
+- The bridge's `faces()` (31), the CLI's `match` arms (37), the CLI's usage
+  header (37), and the count the CLI's own error message publishes must agree
+- The 6 CLI-only faces (`society-mermaid`, `group-mermaid`, `nested-mermaid`,
+  `journey`, `viz`, `all`) are the documented difference between the two lists
+
+**Why**: three copies of the same names lived in two files with nothing
+comparing them. It found two real gaps on its first run: `mbti` was missing
+from the usage header, and the CLI could not dispatch a face the bridge knew.
+
+#### 4c. Every version literal vs. the pin it copies
+
+**Validator**: `python tools/validate_pin_copies.py`
+**CI**: `gate.yml` step "Every dependency version literal must match the pin it copies"
+
+- Every `package@version` literal in a tracked file must equal the version it
+  copies: the pin in `moon.mod` for a pinned package, the resolved tree for a
+  transitive one (`riantr/moonbit_image`)
+- 53 literals across 19 files: both READMEs, `AGENTS.md`, the architecture DOT
+  and DSL files, the package doc comments, the rendered face text, the plugin's
+  face catalog, and both skill copies
+- A version mentioned in words (`0.163.3 深用`, a deliberate feature-depth
+  marker) is not a copy and is left alone
+
+**Why**: the release policy bumps the dependencies on every release, and every
+bump left 53 restatements of the old version behind with a green gate.
+
+---
+
 ## Architecture Artifacts
 
 All files in `architecture/` are version-controlled. They fall into three categories:
@@ -117,7 +170,7 @@ All files in `architecture/` are version-controlled. They fall into three catego
 - `flow-subject-*.dot/.md` — Subject state machine execution flow (step function)
 - `flow-evolution-*.dot/.md` — Evolution layer cycle flow (run_cycle)
 - `flow-coordinator-*.dot/.md` — Coordinator runtime flow (runtime.step)
-- `flow-cli-*.dot/.md` — CLI request routing (cmd/main, 36 subcommands)
+- `flow-cli-*.dot/.md` — CLI request routing (cmd/main, 37 subcommands)
 - `flow-plugin-*.dot/.md` — Plugin bridge flow (MCP → jsoncli → model)
 
 ### Deployment Topology (Graphviz DOT)
@@ -144,6 +197,9 @@ All files in `architecture/` are version-controlled. They fall into three catego
 | DOT file version pins | **HIGH** | CI-enforced by `validate_dependencies.py` |
 | README model facts | **HIGH** | CI-enforced by `validate_readme_facts.py` |
 | Face count & list | **HIGH** | CI-enforced by `validate-plugin.mjs` |
+| CLI face list & count | **HIGH** | CI-enforced by `validate_cli_faces.py` |
+| Dependency version literals | **HIGH** | CI-enforced by `validate_pin_copies.py` |
+| Resolved dependency tree | **HIGH** | CI-enforced by `validate_resolved_deps.py` |
 | Test count in descriptions | **HIGH** | CI-enforced by `validate-plugin.mjs` |
 | Model facts in descriptions | **HIGH** | CI-enforced by `validate-plugin.mjs` |
 | Version consistency | **HIGH** | CI-enforced by `validate-plugin.mjs` |

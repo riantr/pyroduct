@@ -140,8 +140,9 @@ match format {
 "mermaid" => println(@sm.render_mermaid())
 "cycle" => println(@evolution.render_cycle_report(@evolution.demo_cycle()))
 "ml" => println(@ml.render_ml_report(@ml.default_ml_plan()))
-// ... 共 36 个命名分支
-_ => println(@sm.render_report())  // "report" 与未知子命令均走此默认分支
+// ... 共 37 个命名分支
+"report" => println(@sm.render_report())
+_ => { eprintln("未知子命令：..."); @abort.abort("unknown subcommand") }  // 未知即报错，非零退出
 ```
 
 **特殊案例**：
@@ -356,7 +357,7 @@ moon run cmd/main -- mermaid
 moon run cmd/main -- cycle
 moon run cmd/main -- all
 
-# 未知子命令（应回退到 report）
+# 未知子命令（应报错并以非零退出）
 moon run cmd/main -- unknown
 ```
 

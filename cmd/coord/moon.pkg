@@ -3,6 +3,7 @@ import {
   "riantr/pyroduct/coordinator",
   "moonbitlang/async",
   "moonbitlang/async/fs",
+  "moonbitlang/core/abort",
 }
 
 supported_targets = "+native"

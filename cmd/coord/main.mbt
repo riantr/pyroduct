@@ -24,11 +24,26 @@ async fn main {
   @fs.mkdir(".openseek", recursive=true, allow_exist=true)
   @fs.write_file(path, rt.checkpoint())
   let back = @coordinator.restore(@fs.read_file(path).text())
+  let same = back.checkpoint() == rt.checkpoint()
   println(
     "步数 \{steps}｜时钟 \{rt.clock}｜发现 \{rt.notebook.findings.length()} 条",
   )
   println("已落盘：\{path}")
   println(
-    "读回：时钟 \{back.clock}｜往返一致 \{back.round_trips()}｜与写前一致 \{back.checkpoint() == rt.checkpoint()}",
+    "读回：时钟 \{back.clock}｜往返一致 \{back.round_trips()}｜与写前一致 \{same}",
   )
+  // 这一步在 CI 里是**判据**，所以它必须能红。原来它只打印判决、永远以 0 退出，
+  // 于是「检查点往返坏了」在门禁上与「往返正常」在输出上长得一模一样——判据不能
+  // 失败就不是判据，而门禁的注释还写着「非零退出意味着运行时没能恢复自己的
+  // 检查点」，那句话此前是不可达的。
+  //
+  // 口径要说清楚：这里读回的是**刚写出去**的那份，所以它证明的是
+  // 「序列化→反序列化无损」，不是「上一个进程留下的检查点能被恢复」。后者需要
+  // 另一个进程写、这一个进程读，CLI 目前不做那件事。
+  if !same || !back.round_trips() {
+    eprintln(
+      "协调器检查点往返失败：写出去的检查点读回来不一样（round_trips=\{back.round_trips()}，与写前一致=\{same}）。检查点的序列化或恢复坏了。",
+    )
+    @abort.abort("coordinator checkpoint round-trip failed")
+  }
 }

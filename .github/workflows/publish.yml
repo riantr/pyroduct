@@ -191,6 +191,8 @@ jobs:
           moon build --target wasm
           python tools/validate_dependencies.py
           python tools/validate_readme_facts.py
+          python tools/validate_cli_faces.py
+          python tools/validate_pin_copies.py
           bash tools/ci_plugin_gate.sh
 
       - name: Publish to Mooncakes

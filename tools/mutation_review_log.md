@@ -86,7 +86,7 @@
 | P11 社会两相震荡只剩单向（超体上不再冒出有效性主张） | CAUGHT | Total tests: 211, passed: 206, failed: 5 |
 | P12 社会两相震荡边接反（超体与间体倒置） | CAUGHT | Total tests: 211, passed: 207, failed: 4 |
 | P13 society::ambiguous 恒假（并列永远看不见） | CAUGHT | Total tests: 211, passed: 210, failed: 1 |
-| RESTORED src/loop.mbt | OK | 3314357ab70f5b79 |
+| RESTORED src/loop.mbt | OK | 7e4eecac8d8f517f |
 | RESTORED group/loop.mbt | OK | 0aaad459c0a9fe3f |
 | RESTORED society/loop.mbt | OK | 531318c2eda055b9 |
 | RESTORED src/spec.mbt | OK | 9a2fd03641fccd42 |

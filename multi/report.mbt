@@ -62,8 +62,13 @@ pub fn open_problems() -> Array[OpenProblem] {
 }
 
 ///|
-/// 场景演示：一小组遭遇，展示规则如何落成决断。
-pub fn scenarios() -> Array[(String, EncounterOutcome)] {
+/// 场景演示的**输入**：一组遭遇的完整参数。
+///
+/// 场景表与推导链都从这里投影出去——**一份清单，两个投影**。若各自写一份，
+/// 场景表演的那个遭遇与推导链讲的那个遭遇就会是两个遭遇，而谁也发现不了。
+pub fn scenario_inputs() -> Array[
+  (String, Subject, Subject, DiscourseType, ValidityClaim),
+] {
   let mid = ValidityClaim::{ kind: Truthfulness, phase: During, }
   let before = ValidityClaim::{ kind: Sincerity, phase: Before, }
   let after = ValidityClaim::{ kind: Legitimacy, phase: After, }
@@ -72,86 +77,78 @@ pub fn scenarios() -> Array[(String, EncounterOutcome)] {
   [
     (
       "超主体性 × 主体间性（理论商谈·事中真实性）",
-      encounter(
-        subject(1, here, SuperSubjective, 70, 70, 9),
-        subject(2, here, InterSubjective, 70, 70, 9),
-        Theoretical,
-        mid,
-      ),
+      subject(1, here, SuperSubjective, 70, 70, 9),
+      subject(2, here, InterSubjective, 70, 70, 9),
+      Theoretical,
+      mid,
     ),
     (
       "超主体性 × 超主体性（理论商谈·事中真实性）",
-      encounter(
-        subject(1, here, SuperSubjective, 70, 70, 9),
-        subject(2, here, SuperSubjective, 65, 75, 9),
-        Theoretical,
-        mid,
-      ),
+      subject(1, here, SuperSubjective, 70, 70, 9),
+      subject(2, here, SuperSubjective, 65, 75, 9),
+      Theoretical,
+      mid,
     ),
     (
       "主体间性 × 主体间性（实践商谈·事后正当性）",
-      encounter(
-        subject(1, here, InterSubjective, 70, 70, 9),
-        subject(2, here, InterSubjective, 60, 60, 9),
-        Practical,
-        after,
-      ),
+      subject(1, here, InterSubjective, 70, 70, 9),
+      subject(2, here, InterSubjective, 60, 60, 9),
+      Practical,
+      after,
     ),
     (
       "诚然 × 诚然，双诚俱足（表达性商谈·事前真诚性）",
-      encounter(
-        subject(1, here, ChengRan, 80, 80, 9),
-        subject(2, here, ChengRan, 75, 85, 9),
-        Aesthetic,
-        before,
-      ),
+      subject(1, here, ChengRan, 80, 80, 9),
+      subject(2, here, ChengRan, 75, 85, 9),
+      Aesthetic,
+      before,
     ),
     (
       "诚然 × 诚然，诚未具足",
-      encounter(
-        subject(1, here, ChengRan, 80, 80, 9),
-        subject(2, here, ChengRan, 40, 90, 9),
-        Aesthetic,
-        before,
-      ),
+      subject(1, here, ChengRan, 80, 80, 9),
+      subject(2, here, ChengRan, 40, 90, 9),
+      Aesthetic,
+      before,
     ),
     (
       "逻各斯 × 逻各斯，诚差很大",
-      encounter(
-        subject(1, here, Logos, 90, 90, 9),
-        subject(2, here, Logos, 30, 30, 9),
-        Theoretical,
-        mid,
-      ),
+      subject(1, here, Logos, 90, 90, 9),
+      subject(2, here, Logos, 30, 30, 9),
+      Theoretical,
+      mid,
     ),
     (
       "内在秩序 × 逻各斯",
-      encounter(
-        subject(1, here, Immanent, 70, 70, 9),
-        subject(2, here, Logos, 70, 70, 9),
-        Theoretical,
-        mid,
-      ),
+      subject(1, here, Immanent, 70, 70, 9),
+      subject(2, here, Logos, 70, 70, 9),
+      Theoretical,
+      mid,
     ),
     (
       "相位错置：以事中位置提出事前真诚性",
-      encounter(
-        subject(1, here, InterSubjective, 70, 70, 9),
-        subject(2, here, InterSubjective, 70, 70, 9),
-        Aesthetic,
-        mistimed,
-      ),
+      subject(1, here, InterSubjective, 70, 70, 9),
+      subject(2, here, InterSubjective, 70, 70, 9),
+      Aesthetic,
+      mistimed,
     ),
     (
       "体制相左，但走信仰商谈（作者构想）",
-      encounter(
-        subject(1, here, SuperSubjective, 70, 70, 9),
-        subject(2, here, InterSubjective, 70, 70, 9),
-        Faith,
-        mid,
-      ),
+      subject(1, here, SuperSubjective, 70, 70, 9),
+      subject(2, here, InterSubjective, 70, 70, 9),
+      Faith,
+      mid,
     ),
   ]
+}
+
+///|
+/// 场景演示：一小组遭遇，展示规则如何落成决断。
+pub fn scenarios() -> Array[(String, EncounterOutcome)] {
+  let out : Array[(String, EncounterOutcome)] = []
+  for s in scenario_inputs() {
+    out.push((s.0, encounter(s.1, s.2, s.3, s.4)))
+  }
+  out
 }
 
 ///|
@@ -177,6 +174,47 @@ pub fn render_scenarios() -> String {
     lines.push(
       "\{name} | \{o.verdict.label()} | \{o.a.state.designation()} | \{o.b.state.designation()}",
     )
+  }
+  lines.join("\n")
+}
+
+///|
+/// 推导链文本：每个场景的裁决是怎么来的。
+///
+/// 两种冲突解决**分开记账**，因为它们的形状不同：
+///
+/// - **击败（硬）**：被击败者**退出**推演。「R1 压住 R4，**除非** R4 的条件成立」
+///   这句话写不成优先序——优先序只说「两条都成立时谁赢」，不说「某条是否成立」。
+/// - **让位（软）**：被压过者**仍然成立**，只是结论让位了。原文「除非」不是排序。
+///
+/// 这一层是**模型整理**：遭遇层的判词才是模型，这里是它的独立读法，两边必须
+/// 给出同一个判词（由 `agrees_with_encounter` 盯着）。
+pub fn render_derivations() -> String {
+  let lines : Array[String] = []
+  for s in scenario_inputs() {
+    lines.push("### \{s.0}")
+    match derive_chain(s.1, s.2, s.3, s.4) {
+      Some(d) => {
+        lines.push("判词：\{d.verdict.label()}（由 \{d.winner} 决出）")
+        for x in d.defeated {
+          lines.push(
+            "- 击败（硬）：\{x.target} 被 \{x.by} 击败——退出推演",
+          )
+        }
+        for x in d.outranked {
+          lines.push(
+            "- 让位（软）：\{x.loser}（\{x.loser_verdict.label()}）让位于 \{x.winner}——它仍然成立，只是结论让位",
+          )
+        }
+        lines.push("接受：\{d.accepted.join("、")}")
+        lines.push("理由：\{d.note}")
+      }
+      None =>
+        lines.push(
+          "判词：规则库判不了这件事（没有一条规范前提齐备）",
+        )
+    }
+    lines.push("")
   }
   lines.join("\n")
 }
@@ -236,6 +274,22 @@ pub fn render_multi_report() -> String {
     "## 场景演示（每个主体从单一状态机的「相遇」出发）",
   )
   lines.push(render_scenarios())
+  lines.push("")
+  lines.push("## 推导链（规范推理的形式化；模型整理）")
+  lines.push(
+    "R1–R14 由散文变成可推的规则库：每条规范写明**前提**与**强度**，冲突的解决",
+  )
+  lines.push(
+    "分两种——**击败**（硬，被击败者退出推演）与**优先**（软，被压过者仍然成立，",
+  )
+  lines.push(
+    "只是结论让位）。R9「信仰商谈可纳入共识真理」对 R1／R8 就是「除非」关系，",
+  )
+  lines.push(
+    "所以它写成**击败**而不是排序：优先序表达不了「除非」。",
+  )
+  lines.push("")
+  lines.push(render_derivations())
   lines.push("")
   lines.push("## 真理谱系（作者自建）")
   lines.push(render_genealogy())

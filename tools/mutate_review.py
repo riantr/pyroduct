@@ -520,6 +520,182 @@ LOOP6 = [
     ),
 ]
 
+# 闸门审计组。审的是「重裁出来的判词」这一层：账本记了判词，记了尺子的指纹，
+# 审计时重裁一遍并比对。这一层如果没牙齿，闸门就是「记了一句话」而不是「跑过一次」。
+#
+# 锚点一律打在**有牙齿的那一层**：打在 `audit_summary` 这种只读字段的包装层没用，
+# 恒真变异会活着。所以下面五条分别冲：指纹本身、尺子比较、判词比对、失败闭合、
+# 以及最终那个 `ok` 判定。
+AUDIT = [
+    (
+        "A1 闸门指纹恒定（两条不同的尺子算出同一串）",
+        "evolution/audit.mbt",
+        '    Weighted(o) =>\n      "W|\\{o.name}|\\{o.w_consensus}|\\{o.w_stability}|\\{o.w_residue}|\\{o.w_cost}"',
+        '    Weighted(o) =>\n      "W|constant"',
+    ),
+    (
+        "A2 尺子比较恒不成立（尺子动过也看不见）",
+        "evolution/audit.mbt",
+        "    } else if t.gate != bar {\n      moved += 1",
+        "    } else if false {\n      moved += 1",
+    ),
+    (
+        "A3 重裁不比对判词（重裁结果从不与账本对照）",
+        "evolution/audit.mbt",
+        "    if again.verdict == t.verdict {\n      agreed += 1",
+        "    if true {\n      agreed += 1",
+    ),
+    (
+        "A4 没记尺子不算失败（缺输入按通过处理）",
+        "evolution/audit.mbt",
+        "    if t.gate.length() == 0 {\n      unbarred += 1",
+        "    if false {\n      unbarred += 1",
+    ),
+    (
+        "A5 审计结论恒真（永远判通过）",
+        "evolution/audit.mbt",
+        "pub fn GateAudit::ok(self : GateAudit) -> Bool {\n"
+        "  self.disagreed == 0 && self.moved_bar == 0 && self.unbarred == 0\n}",
+        "pub fn GateAudit::ok(self : GateAudit) -> Bool {\n  true\n}",
+    ),
+]
+
+# 规范推理层。审的是「优先 ≠ 击败」这条区分，以及规则库与遭遇层这两份副本
+# 是否还对得上。五条分别冲：优先序、击败关系、让位关系、两者的记账口径、以及
+# 「十四条 R 编号每一条都被归了类」这条完整性。
+DEONTIC = [
+    (
+        "N1 优先序反了（相位越界那条被排到最后）",
+        "multi/deontic.mbt",
+        '  ["D1", "D2", "D3", "D7", "D8", "D5", "D4", "D6"]',
+        '  ["D2", "D3", "D7", "D8", "D5", "D4", "D6", "D1"]',
+    ),
+    (
+        "N2 击败关系被抹掉（例外退化成普通优先）",
+        "multi/deontic.mbt",
+        "  [{ by: \"D5\", target: \"D4\", when: FaithDiscourse, }]",
+        "  []",
+    ),
+    (
+        "N3 让位关系被抹掉（被压过的规范不再让位）",
+        "multi/deontic.mbt",
+        "      outranked.push({ loser: id, winner, loser_verdict: n.verdict, })",
+        "      ()",
+    ),
+    (
+        "N4 击败被记成让位（硬关系与软关系混成一笔账）",
+        "multi/deontic.mbt",
+        "      defeated.push({ target: d.target, by: d.by, })",
+        "      ()",
+    ),
+    (
+        "N5 少一条背景规则（有一条 R 编号没被归类）",
+        "multi/deontic.mbt",
+        '    (\n      "R14", "共识即建议：共识只能以建议形式发布，不得替对方作结",\n    ),\n',
+        "",
+    ),
+]
+
+# 契约层。审的是「契约有没有牙齿」：恒真、恒假、以及把判据取料与判定分开之后
+# 那些纯函数版的判据是不是还在真的判。
+CONTRACT = [
+    (
+        "C1 回执核验恒真（回执说什么都算相符）",
+        "src/contract.mbt",
+        "pub fn receipt_matches(\n"
+        "  state : SubjectState,\n"
+        "  slot : Slot,\n"
+        "  out : Outcome,\n"
+        ") -> Bool {\n"
+        "  same_edges(receipt_edges(out), candidates(state, slot))\n"
+        "}",
+        "pub fn receipt_matches(\n"
+        "  state : SubjectState,\n"
+        "  slot : Slot,\n"
+        "  out : Outcome,\n"
+        ") -> Bool {\n"
+        "  true\n"
+        "}",
+    ),
+    (
+        "C2 回执核验恒假（一切回执都被判违约）",
+        "src/contract.mbt",
+        "pub fn receipt_matches(\n"
+        "  state : SubjectState,\n"
+        "  slot : Slot,\n"
+        "  out : Outcome,\n"
+        ") -> Bool {\n"
+        "  same_edges(receipt_edges(out), candidates(state, slot))\n"
+        "}",
+        "pub fn receipt_matches(\n"
+        "  state : SubjectState,\n"
+        "  slot : Slot,\n"
+        "  out : Outcome,\n"
+        ") -> Bool {\n"
+        "  false\n"
+        "}",
+    ),
+    (
+        "C3 孤立位置判据恒空（有来路却到不了，不再被点出来）",
+        "src/contract.mbt",
+        "  for d in sources {\n    if !reachable.contains(d) {\n      out.push(d)\n    }\n  }\n  out\n}",
+        "  for d in sources {\n    if false {\n      out.push(d)\n    }\n  }\n  out\n}",
+    ),
+    (
+        "C4 覆盖统计把走过的行算少一行",
+        "src/contract.mbt",
+        "  { total: transitions().length(), exercised, missing, }",
+        "  { total: transitions().length(), exercised: exercised - 1, missing, }",
+    ),
+    (
+        "C5 契约表少一条（判据清单与契约表不再吻合）",
+        "src/contract.mbt",
+        "    {\n      kind: AfterStep,\n      check: ReceiptExact,\n      text: \"回执点名的边与迁移表完全相符：多一条、少一条、把缺口说成出路，都是违约\",\n    },\n",
+        "",
+    ),
+]
+
+# 确定性回放层。审的是「恢复失败时会不会说自己失败」：指纹、指纹核验、降级账的
+# 三处记账，任何一处被吞掉，恢复就又变成无声的。
+REPLAY = [
+    (
+        "Y1 指纹不读内容（只按长度变化）",
+        "coordinator/replay.mbt",
+        "    h = h ^ ch.to_int().to_uint64()\n    h = h * 0x100000001b3",
+        "    h = h ^ (ch.to_int().to_uint64() & 0)\n    h = h * 0x100000001b3",
+    ),
+    (
+        "Y2 指纹核验被去掉（内容被改过也看不出来）",
+        "coordinator/runtime.mbt",
+        "  } else if claimed != rebuilt {\n    repairs.push(\n      \"指纹对不上：记的是「\\{claimed}」，重建出来的是「\\{rebuilt}」——内容在恢复途中变了\",\n    )\n  }",
+        "  } else if false {\n    repairs.push(\n      \"指纹对不上：记的是「\\{claimed}」，重建出来的是「\\{rebuilt}」——内容在恢复途中变了\",\n    )\n  }",
+    ),
+    (
+        "Y3 坏数字不记降级（猜出来的值悄悄留下）",
+        "coordinator/runtime.mbt",
+        "      repairs.push(\"无法解析成数字：「\\{s.to_owned()}」→ 记为 0\")\n      0",
+        "      0",
+    ),
+    (
+        "Y4 未知的商谈类型码不记降级",
+        "coordinator/runtime.mbt",
+        "    repairs.push(\"未知的商谈类型码：「\\{t}」→ 记为理论商谈\")\n    @multi.Theoretical",
+        "    @multi.Theoretical",
+    ),
+    (
+        "Y5 被整行丢掉的发现不再说话",
+        "coordinator/memory.mbt",
+        "      repairs.push(\n        \"字段不足的发现行（\\{f.length()} 列），被整行丢掉\",\n      )\n      continue",
+        "      continue",
+    ),
+    (
+        "Y6 重放闸门恒真（内容不同也判为一致）",
+        "coordinator/replay.mbt",
+        "pub fn replay_agrees(a : Runtime, b : Runtime) -> Bool {\n  a.digest() == b.digest() && a.body() == b.body()\n}",
+        "pub fn replay_agrees(a : Runtime, b : Runtime) -> Bool {\n  true\n}",
+    ),
+]
+
 GROUPS = {
     "loop1": LOOP1,
     "loop2": LOOP2,
@@ -528,12 +704,28 @@ GROUPS = {
     "loop5": LOOP5,
     "loop6": LOOP6,
     "props": PROPS,
+    "audit": AUDIT,
+    "deontic": DEONTIC,
+    "contract": CONTRACT,
+    "replay": REPLAY,
     # 单条复查用的别名，**不进默认跑**：它与 loop5 里的一条重复，默认跑带上
     # 就会在留档里出现两行同名的判定，看起来像跑了两次。
     "l3": [LOOP5[2]],
 }
 # 默认跑只取真正的一组一 Loop，别名要显式点名。
-DEFAULT_GROUPS = ["loop1", "loop2", "loop3", "loop4", "loop5", "loop6", "props"]
+DEFAULT_GROUPS = [
+    "loop1",
+    "loop2",
+    "loop3",
+    "loop4",
+    "loop5",
+    "loop6",
+    "props",
+    "audit",
+    "deontic",
+    "contract",
+    "replay",
+]
 
 # 变异条数**由表算出来**，不写死。我在这份头部里写死过「30 条」，而表里其实
 # 是 34 条（A5+B5+M9+S6+L9）——写死的数字在表增长时不会跟着动，漂了也没人知道。
@@ -620,6 +812,37 @@ def write_log(report, full_run, groups):
         )
 
 
+def generated_interfaces():
+    """The tracked `pkg.generated.mbti` files, as repo-relative paths.
+
+    `moon test` **rewrites** these in the source tree.  That is invisible until it
+    bites: a mutation changes a source file, the build regenerates the interface
+    to match the *mutated* source, and the harness restores the source — leaving
+    the interface describing code that no longer exists.  The next mutation then
+    fails to *build* (rc=1, no summary line), and the harness reports it as
+    COMPILE-ERROR — a compile error is explicitly NOT a catch, so the mutation
+    looks uncaught when in fact the criteria were never reached.
+
+    It happened for real: the `replay` group's Y4 and Y6 both reported
+    COMPILE-ERROR after the `contract` group had touched `src/contract.mbt`.
+    Run alone, the very same mutations are CAUGHT.
+
+    So the generated interfaces are snapshotted with the sources and restored
+    after every mutation, so each mutation starts from a consistent tree.
+    """
+    out = []
+    for dirpath, dirnames, filenames in os.walk(ROOT):
+        dirnames[:] = [
+            d for d in dirnames if d not in ("_build", ".git", ".mooncakes")
+        ]
+        for name in filenames:
+            if name == "pkg.generated.mbti":
+                full = os.path.join(dirpath, name)
+                out.append(os.path.relpath(full, ROOT).replace("\\", "/"))
+    out.sort()
+    return out
+
+
 def run_tests():
     proc = subprocess.run(["moon", "test"], cwd=ROOT, capture_output=True)
     text = (proc.stdout + proc.stderr).decode("utf-8", errors="replace")
@@ -640,8 +863,17 @@ def main():
             with open(path, "rb") as fh:
                 originals[rel] = fh.read()
             hashes[rel] = hashlib.sha256(originals[rel]).hexdigest()
+    # 生成出来的接口文件同样入账：moon 会就地重写它们，不还原就等于给下一条
+    # 变异留下一个「接口描述着已经不存在的代码」的树。
+    for rel in generated_interfaces():
+        if rel not in originals:
+            path = os.path.join(ROOT, rel)
+            with open(path, "rb") as fh:
+                originals[rel] = fh.read()
+            hashes[rel] = hashlib.sha256(originals[rel]).hexdigest()
 
     report = []
+    interfaces_ok = True
 
     def restore_all():
         for rel, blob in originals.items():
@@ -695,26 +927,64 @@ def main():
             try:
                 rc, text = run_tests()
                 m = SUMMARY.search(text)
+                if not m and rc != 0:
+                    # 构建偶发失败时**重跑一次**再判定。变异引起的编译错两次都会错；
+                    # 而与变异无关的构建抖动（moon 会就地重写生成出来的接口文件，
+                    # 还原与重写撞车时可能读到半写的文件）只该抖动一次。
+                    # 不重跑的话，一条本来能抓住的变异会被记成 COMPILE-ERROR——
+                    # 而编译错**不算**抓住，于是它看起来像「没抓住」。
+                    rc, text = run_tests()
+                    m = SUMMARY.search(text)
                 if m:
                     verdict = "CAUGHT" if int(m.group(3)) > 0 else "SURVIVED"
                     detail = m.group(0)
                 else:
                     # 编译错**不算**抓住：它证明的是语法，不是判据有牙齿。留成
                     # ANCHOR/COMPILE 两态让人看见，而不是并进 CAUGHT 里好看。
+                    # 记下**第一条**错误行：只说「编译错」而不说错在哪，等于把
+                    # 「没查到的」和「查了但坏了」混成一类。
+                    first = ""
+                    for line in text.splitlines():
+                        if "rror" in line and "Error" not in line[:1]:
+                            pass
+                        if "Error" in line:
+                            first = line.strip()
+                            break
                     verdict = "COMPILE-ERROR" if rc != 0 else "SURVIVED"
-                    detail = "compile error rc=%d (NOT a catch)" % rc
+                    detail = "compile error rc=%d (NOT a catch)%s" % (
+                        rc,
+                        (" | " + first) if first else "",
+                    )
                 report.append((name, verdict, detail))
             finally:
-                # 立刻还原，让下一条从干净状态起跑。
+                # 立刻还原，让下一条从干净状态起跑。**生成出来的接口文件也要还原**：
+                # moon 在测试期间就地重写了它们，不还原的话，下一条变异会在一棵
+                # 「接口描述着旧代码」的树上构建，构建失败被记成 COMPILE-ERROR——
+                # 而编译错不算抓住，于是判据其实从没被跑到。
                 with open(os.path.join(ROOT, rel), "wb") as fh:
                     fh.write(src)
+                for gen in generated_interfaces():
+                    with open(os.path.join(ROOT, gen), "wb") as fh:
+                        fh.write(originals[gen])
     finally:
         restore_all()
 
     for rel, digest in hashes.items():
         with open(os.path.join(ROOT, rel), "rb") as fh:
             same = hashlib.sha256(fh.read()).hexdigest() == digest
+        # 生成出来的接口文件归总成一行：它们有二十几份，逐条列出来只是噪声，
+        # 而「接口也被还原了」这件事必须说出来——它正是上面那个坑的封口。
+        if rel.endswith("pkg.generated.mbti"):
+            interfaces_ok = interfaces_ok and same
+            continue
         report.append(("RESTORED " + rel, "OK" if same else "HASH-MISMATCH", digest[:16]))
+    report.append(
+        (
+            "RESTORED generated interfaces",
+            "OK" if interfaces_ok else "HASH-MISMATCH",
+            "%d files" % len(generated_interfaces()),
+        )
+    )
 
     # 「全量」= 没点名任何组。传了组名就是部分跑，留档另写，不覆盖全量记录。
     write_log(report, not sys.argv[1:], wanted)

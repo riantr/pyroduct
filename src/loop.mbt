@@ -699,6 +699,22 @@ pub fn render_loop_report() -> String {
     lines.push("- \{s.designation()}　\{s.gloss()}")
   }
   lines.push("")
+  lines.push("## 契约核验（DbC：求值点精确）")
+  lines.push(
+    "契约挂在状态与迁移上，求值点写死：整机不变式求值一次、阶段不变式在每个阶段上求值一次、迁移后置在每个位置 × 槽的求值点上求值一次。",
+  )
+  lines.push(
+    "「事前」这一段**空着**：本模型没有守卫，迁移表本身就是许可结构，没有可失败的判据可查——硬凑一条就是空判据。",
+  )
+  lines.push("契约表：")
+  for c in contracts() {
+    lines.push("- \{c.kind.label()}｜\{c.check.label()}：\{c.text}")
+  }
+  lines.push(render_contract_report(check_contracts()))
+  lines.push("")
+  lines.push("## 轨迹覆盖（主线走过了迁移表的多少行）")
+  lines.push(render_coverage(course_coverage()))
+  lines.push("")
   lines.push("## 同归：去处确定，来处不名")
   lines.push(
     "槽粒度认不出是哪一句——下列组合在同一个位置挂着多条触发句且同归一个目标，",

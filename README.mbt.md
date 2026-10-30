@@ -121,6 +121,32 @@ same way on a machine with no MoonBit toolchain. Point `PYRODUCT_PROJECT_DIR`
 at a checkout and the same tool reads *that* tree instead, and
 `pyroduct_gates` runs the gate there.
 
+### Four layers that check the machine itself
+
+Describing a machine is the easy half. Four layers below check it — each one
+borrowed from a project that had to solve the same problem in another language.
+
+| Layer | What it pins down | Borrowed from |
+|---|---|---|
+| `@src.check_contracts()` | the receipt must name **exactly** the edges the transition table has — a `Block` claims a gap that really is one — evaluated at every position × slot | Sismic (design-by-contract) |
+| `@multi.derive_chain(...)` | R1–R14 as a rule base, with **precedence (soft) and defeat (hard) kept apart**, and a machine-readable derivation chain for every verdict | defeasible logic / ASPIC+ |
+| `@evolution.replay_gate(...)` | the *ruler* a verdict was cut with, and a re-judgement from the ledger's sealed inputs | @metaharness/flywheel |
+| `@coordinator.restore(...)` | a content fingerprint for the whole runtime, and a **degradation ledger** naming every forced guess | SDYJ_Multi_Agents |
+
+Two of these exist because the earlier version was *quietly* wrong, and quiet
+was the problem. The coordinator's `restore` used to parse a damaged checkpoint
+into a runtime that looked fine and was wrong everywhere — an unparseable
+number became `0`, an unknown discourse type became "theoretical". It now keeps
+a ledger of every forced guess and fails closed. The evolution ledger used to
+record *what* was judged but not *with which ruler*; since one of the two
+rulers is DoubleML-based (where the seed decides the data, and the data
+decides the ruler), two runs could use two different rulers and the ledger
+would look identical either way.
+
+The results are printed live by the faces that own them: `loop` prints the
+contract verdict and the trace coverage, `multi` prints the derivation chain,
+`coordinator` prints the repeat gate and the degradation ledger.
+
 ## How this plugs into a running agent
 
 The state machine is not a simulation of an agent; it is a **judgement layer
@@ -225,6 +251,10 @@ Measured against the upstream sources (2026-10-30).
 | `pathsum` | FiniteStateTransducers.jl | weighted automata over a semiring; `shortest_distance` and `properties` | general weighted-automaton machinery, arbitrary semirings | tropical shortest path **on this machine** — the road-to-tranquility ladder — plus machine properties (determinism per trigger, acyclicity by design) |
 | `buchi` | Büchi / ω-automata | ω-automata acceptance, emptiness, liveness | general ω-automata | the machine read as ω-automaton: non-emptiness via lasso, liveness potential, and 11 stall self-loops — 10 rejecting (structure does not enforce liveness) and 宁静's own accepted stall |
 | `dmlref` / `causal` | doubleml-for-py | 20 estimator classes (PLR, LPLR, PLPR, PLIV, IRM, IIVM, the DID family, SSM, PQ, QTE, LPQ, APO(S), CVAR, BLP, PolicyTree; RDD appears in this checkout as `RDFlex`) over 91 files / ~32k lines of library, 359 / ~74k with its test suite, built on numpy / pandas / scikit-learn / scipy / statsmodels / optuna | the whole estimator family, panel data, plotting, hyperparameter tuning | **zero third-party dependencies** for the estimator (linear algebra, cross-fitting, orthogonal scores and RNG written from scratch — 1,335 lines for the whole `ml` package) and a *cross-check* against the MoonBit port `riantr/moonbit_doubleML` (22 estimators) — the repo checks itself against an independent implementation rather than shipping one |
+| `loop` (contracts) | Sismic | a Python statechart interpreter/checker: macro/micro steps, before/after/always contracts attached to states and transitions, trace coverage | builds **and** runs arbitrary statecharts from YAML/JSON definitions; resolves nondeterminism by explicit priority | checks **this** machine's receipts against **this** table — the receipt must name exactly the edges the table has — evaluated at every position × slot, and reports which table rows no walk ever touched |
+| `multi` (derivation chain) | defeasible logic / ASPIC+ | strict vs defeasible rules, explicit defeaters, priority over rules, argumentation semantics with extensions | general rule bases and proof search | R1–R14 as a rule base with **precedence (soft) and defeat (hard) kept apart** — the faith-discourse exception is a *defeater*, not an ordering, because priority cannot say 「除非」 — and a derivation chain per verdict, cross-checked against the encounter layer |
+| `evolution` (gate audit) | @metaharness/flywheel | generations of candidates, promotion gates, a lineage bundle, gate fingerprints, and the rule that the gate is re-run rather than its logged verdict trusted | a persistent bundle, arbitrary policy strings, e-process sequential testing | the **ruler** (the weights, or the DoubleML config *including its seed*) is pinned per verdict and the gate is re-run from sealed inputs — a moved ruler, a disagreeing verdict, or an unrecorded ruler all fail closed |
+| `coordinator` (replay) | SDYJ_Multi_Agents | record-and-replay: a hash-keyed cache of LLM and tool responses, prompt-hash matching, partial state written on crash, resume from a checkpoint | caching LLM responses across processes; a human-review node | a **content fingerprint** over the whole runtime, a repeat gate that runs the same plan twice, and a **degradation ledger** naming every forced guess during restore — a damaged checkpoint fails closed instead of restoring into a plausible-but-wrong runtime |
 
 Two asymmetries are worth stating plainly. First, **pyroduct's `ml` is one
 estimator (PLR) and a cross-check**, not a doubleml-for-py replacement — the
@@ -548,7 +578,7 @@ Add the module, then run the suite:
 
 ```
 moon add riantr/pyroduct
-moon test             # Total tests: 211, passed: 211, failed: 0.
+moon test             # Total tests: 247, passed: 247, failed: 0.
 ```
 
 From this repository, every layer prints a report:
@@ -599,7 +629,7 @@ let same : Bool = restored.round_trips()
 
 ## Gates and drift detectors
 
-`moon check`, `moon fmt --check`, `moon test` (211 wasm tests) plus the two
+`moon check`, `moon fmt --check`, `moon test` (247 wasm tests) plus the two
 native-only suites (`snnref`, `tools/ifacescan`) are the baseline. Six
 detectors run on top, because a green suite says nothing about a claim written
 in prose:

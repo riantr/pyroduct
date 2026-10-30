@@ -33,22 +33,23 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FMT = os.path.join(ROOT, "_build", "wasm-gc", "release", "format")
 
-FILES = [
-    "src/petri.mbt",
-    "ml/design.mbt",
-    "src/spec_roundtrip_test.mbt",
-    "audit/mutants.mbt",
-    "audit/fleet.mbt",
-    "src/loop.mbt",
-    "src/loop_test.mbt",
-    "src/spec.mbt",
-    "ml/ml_test.mbt",
-    "src/petri_test.mbt",
-    "audit/fleet_test.mbt",
-    "cmd/main/main.mbt",
-    "audit/audit.mbt",
-    "cmd/jsoncli/main.mbt",
-]
+
+def formatted_copies():
+    """Every formatted copy moon fmt produced, as repo-relative paths.
+
+    Discovered, not listed.  The list used to be hard-coded, and it went stale the
+    moment a package added a file — the tool then reported "nothing to do" while
+    `moon fmt --check` was still red, which is the worst combination: a tool that
+    says it is fine and the gate that says it is not.  A list of file names is
+    another copy to keep in sync; the directory listing cannot go stale.
+    """
+    out = []
+    for dirpath, _dirnames, filenames in os.walk(FMT):
+        for name in filenames:
+            full = os.path.join(dirpath, name)
+            out.append(os.path.relpath(full, FMT).replace("\\", "/"))
+    out.sort()
+    return out
 
 
 def test_count():
@@ -66,7 +67,7 @@ def main():
     before = test_count()
     copied = []
     skipped = []
-    for rel in FILES:
+    for rel in formatted_copies():
         src = os.path.join(FMT, *rel.split("/"))
         dst = os.path.join(ROOT, *rel.split("/"))
         if not os.path.exists(src):

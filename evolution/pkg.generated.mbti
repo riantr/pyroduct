@@ -17,11 +17,15 @@ pub fn association_entropy(Array[Double]) -> Double
 
 pub fn association_probs(Int32, Int32, @src.Outcome) -> Array[Double]
 
+pub fn audit_summary(GateAudit) -> String
+
 pub fn breed(Genome, Int32, Array[Opponent], Criterion) -> Array[Offer]
 
 pub fn causal_criterion(Int32) -> Criterion
 
 pub fn causal_effect(Genome, Genome, Array[Opponent], Int32, @ml.DmlConfig) -> CausalVerdict
+
+pub fn causal_plan(Objective, Int32, @ml.DmlConfig) -> CausalPlan
 
 pub fn causal_verdict(Genome, Genome, Array[Opponent]) -> CausalVerdict
 
@@ -30,6 +34,8 @@ pub fn constitution() -> Array[(String, String)]
 pub fn constitution_violations(Genome) -> Array[String]
 
 pub fn constitutional(Genome) -> Bool
+
+pub fn criterion_objective(Criterion) -> Objective
 
 pub fn cycle_state(@src.SubjectState, Genome) -> CycleState
 
@@ -48,6 +54,8 @@ pub fn diff_count(Genome, Genome) -> Int32
 pub fn evaluate(Genome, Array[Opponent]) -> Fitness
 
 pub fn evolve(Genome, Array[Opponent], Criterion, Int32) -> Ledger
+
+pub fn gate_fingerprint(Criterion) -> String
 
 pub fn genome(Voice, @multi.TruthRegime, Int32, Int32, Int32, Int32) -> Genome
 
@@ -81,6 +89,8 @@ pub fn render_causal() -> String
 
 pub fn render_cycle_report(SubjectCycle) -> String
 
+pub fn render_gate_audit(GateAudit) -> String
+
 pub fn render_ledger(Ledger) -> String
 
 pub fn render_objectives() -> String
@@ -90,6 +100,8 @@ pub fn render_report() -> String
 pub fn render_tree(Ledger) -> String
 
 pub fn render_variation() -> String
+
+pub fn replay_gate(Ledger, Array[Opponent], Criterion) -> GateAudit
 
 pub fn run_cycle(CycleState, Array[Opponent], Criterion, Int32) -> SubjectCycle
 
@@ -177,6 +189,16 @@ pub struct Fitness {
 pub fn Fitness::equal(Self, Self) -> Bool
 pub fn Fitness::not_equal(Self, Self) -> Bool
 
+pub struct GateAudit {
+  checked : Int32
+  agreed : Int32
+  disagreed : Int32
+  moved_bar : Int32
+  unbarred : Int32
+  faults : Array[String]
+}
+pub fn GateAudit::ok(Self) -> Bool
+
 pub struct Genome {
   voice : Voice
   regime : @multi.TruthRegime
@@ -257,6 +279,7 @@ pub struct Opponent {
 pub struct SubjectCycle {
   seed : CycleState
   objective : String
+  gate : String
   events : Array[CycleEvent]
 }
 pub fn SubjectCycle::finished(Self) -> CycleState
@@ -277,6 +300,7 @@ pub struct Trail {
   effect_lo : Int32
   fitness : Fitness
   genome : Genome
+  gate : String
 }
 
 pub(all) enum Voice {

@@ -161,6 +161,35 @@ bump left 53 restatements of the old version behind with a green gate.
 
 ---
 
+### 5. The Model Checks Itself (four layers)
+
+**Validator**: `moon test` — plus `python tools/mutate_review.py` for the mutation review
+**CI**: `gate.yml` runs the suite; the mutation table is the review record (`tools/mutation_review_log.md`)
+
+The layers above check that the *repository's claims* match the *code*. These four check
+that the **model** matches its own table — a different question, and the one that matters
+once an agent starts editing the model.
+
+| Layer | Claim it pins down | Mirrors |
+|---|---|---|
+| `src/contract.mbt` | a receipt names **exactly** the edges the transition table has, evaluated at every position × slot | Sismic (design-by-contract) |
+| `multi/deontic.mbt` | R1–R14 as a rule base, with precedence (soft) and defeat (hard) kept apart; the derivation chain agrees with `encounter` | defeasible logic / ASPIC+ |
+| `evolution/audit.mbt` | the **ruler** each verdict was cut with is pinned, and the gate is re-run from sealed inputs | @metaharness/flywheel |
+| `coordinator/replay.mbt` | a content fingerprint over the runtime, and a **degradation ledger** naming every forced guess during restore | SDYJ_Multi_Agents |
+
+**What it fires on**:
+- A receipt that names an edge the table does not have, or claims a gap that is not one
+- A rule-base change that no longer reproduces the encounter layer's verdicts
+- A verdict whose ruler moved (a changed weight, or a changed DoubleML seed), or whose ruler was never recorded
+- A checkpoint that no longer matches its fingerprint, or a restore that had to guess
+
+**Why the mutation review matters here**: each layer is only worth what its criteria can
+detect. `tools/mutate_review.py` reverts each construct to its wrong shape and requires a
+criterion to go **red** — a compile error is explicitly *not* a catch, and a criterion that
+cannot fail is not a criterion.
+
+---
+
 ## Architecture Artifacts
 
 All files in `architecture/` are version-controlled. They fall into three categories:
@@ -216,6 +245,10 @@ All files in `architecture/` are version-controlled. They fall into three catego
 | Test count in descriptions | **HIGH** | CI-enforced by `validate-plugin.mjs` |
 | Model facts in descriptions | **HIGH** | CI-enforced by `validate-plugin.mjs` |
 | Version consistency | **HIGH** | CI-enforced by `validate-plugin.mjs` |
+| Execution contracts (receipt ↔ table) | **HIGH** | `moon test` + mutation-reviewed (`mutate_review.py contract`) |
+| Rule-base derivation chain | **HIGH** | `moon test` + mutation-reviewed (`mutate_review.py deontic`) |
+| Gate audit (ruler pinned, gate re-run) | **HIGH** | `moon test` + mutation-reviewed (`mutate_review.py audit`) |
+| Replay determinism & degradation ledger | **HIGH** | `moon test` + mutation-reviewed (`mutate_review.py replay`) |
 | State/transition/phase counts | **HIGH** | Verified by health check; embedded in tested code |
 | Flow diagram logic | **HIGH** | Verified by health check against source code |
 | Deployment topology | **MEDIUM** | Verified by health check; no CI enforcement (changes rarely) |

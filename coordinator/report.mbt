@@ -54,6 +54,50 @@ pub fn demo_datasets() -> Array[Dataset] {
 }
 
 ///|
+/// 示例运行：按演示数据走三步，返回运行时与逐步回执。
+///
+/// 单独抽出来，好让「重放闸门」能**跑两遍比指纹**。报告里演示的那次运行与闸门
+/// 里跑的那次必须走同一条代码路径，否则闸门验的不是报告里的东西。
+pub fn demo_run() -> (Runtime, Array[StepReport]) {
+  let qs = demo_questions()
+  let ts = demo_tasks()
+  let ws = demo_workers()
+  let dss = demo_datasets()
+  let world = @evolution.default_world()
+  let parent = @evolution.default_agent()
+  let candidate = @evolution.genome(
+    parent.voice,
+    @multi.ChengRan,
+    parent.toward_other,
+    parent.toward_self,
+    parent.carry,
+    parent.reason,
+  )
+  let rt = Runtime::new()
+  let reports : Array[StepReport] = []
+  for i = 0; i < 3; i = i + 1 {
+    match rt.step(ts, qs, ws, dss, world, parent, candidate) {
+      Some(rep) => reports.push(rep)
+      None => ()
+    }
+  }
+  (rt, reports)
+}
+
+///|
+/// 重放闸门：同一份计划跑两遍，两遍的**内容指纹**必须一致。
+///
+/// 判的不是「跑完了吗」，而是「跑出来的是不是同一个东西」。不一致就说明运行里
+/// 混进了不确定的东西——时钟、随机源、字典序、共享可变状态。
+pub fn repeat_gate() -> (Bool, String, String) {
+  let (a, _) = demo_run()
+  let (b, _) = demo_run()
+  let da = a.digest()
+  let db = b.digest()
+  (replay_agrees(a, b), da, db)
+}
+
+///|
 /// 总报告。
 pub fn render_report() -> String {
   let qs = demo_questions()
@@ -133,14 +177,7 @@ pub fn render_report() -> String {
   )
   lines.push("")
   // ── 运行时
-  let rt = Runtime::new()
-  let reports : Array[StepReport] = []
-  for i = 0; i < 3; i = i + 1 {
-    match rt.step(ts, qs, ws, dss, world, parent, candidate) {
-      Some(rep) => reports.push(rep)
-      None => ()
-    }
-  }
+  let (rt, reports) = demo_run()
   lines.push("## 四、运行时（消息总线 + 可重放）")
   lines.push("")
   lines.push(
@@ -238,6 +275,30 @@ pub fn render_report() -> String {
   for i = 0; i < 5 && i < head.length(); i = i + 1 {
     lines.push("    \{head[i]}")
   }
+  lines.push("")
+  // ── 确定性回放
+  lines.push("## 九、确定性回放（内容指纹 ＋ 降级账）")
+  lines.push("")
+  lines.push(
+    "一次运行的状态有一枚 64 位指纹；检查点里记一枚，**重建出来的运行时另算一枚**——",
+  )
+  lines.push(
+    "两枚对不上，说明恢复途中内容变了（被篡改，或解析时猜了值）。字节级往返只证明",
+  )
+  lines.push("序列化没坏，不证明恢复没猜值。")
+  lines.push("")
+  let (same_run, d1, d2) = repeat_gate()
+  lines.push(
+    "- 重放闸门（同一份计划跑两遍，内容指纹一致）：\{same_run}",
+  )
+  lines.push("- 第一遍指纹：\{d1}")
+  lines.push("- 第二遍指纹：\{d2}")
+  lines.push("- 本次运行的指纹：\{rt.digest()}")
+  lines.push("- 检查点里的指纹：\{claimed_digest(ck)}")
+  lines.push("")
+  let back = restore(ck)
+  lines.push("读回后的降级账：")
+  lines.push("    \{back.repair_summary()}")
   lines.join("\n")
 }
 

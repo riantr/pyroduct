@@ -6,11 +6,27 @@ import {
 }
 
 // Values
+pub fn agrees_with_encounter(Subject, Subject, DiscourseType, ValidityClaim) -> Bool
+
+pub fn background() -> Array[(String, String)]
+
 pub fn cheng_gap(Subject, Subject) -> Int32
 
 pub fn citation_of(String) -> String
 
 pub fn citations() -> Array[(String, String)]
+
+pub fn classification_complete() -> Bool
+
+pub fn classification_disjoint() -> Bool
+
+pub fn classified(String) -> Bool
+
+pub fn defeaters() -> Array[Defeater]
+
+pub fn defeaters_acyclic() -> Bool
+
+pub fn derive_chain(Subject, Subject, DiscourseType, ValidityClaim) -> Derivation?
 
 pub fn encounter(Subject, Subject, DiscourseType, ValidityClaim) -> EncounterOutcome
 
@@ -22,9 +38,21 @@ pub fn is_coherent(EncounterOutcome) -> Bool
 
 pub fn network(Array[Subject]) -> NetworkReport
 
+pub fn norm_of(String) -> Norm?
+
+pub fn norms() -> Array[Norm]
+
 pub fn open_problems() -> Array[OpenProblem]
 
 pub fn phase_of(ClaimKind) -> ClaimPhase
+
+pub fn precedence() -> Array[String]
+
+pub fn precedence_is_total() -> Bool
+
+pub fn render_derivation(Derivation) -> String
+
+pub fn render_derivations() -> String
 
 pub fn render_genealogy() -> String
 
@@ -43,6 +71,8 @@ pub fn requires_joint_review(ClaimKind) -> Bool
 pub fn rule(String) -> Rule?
 
 pub fn rules() -> Array[Rule]
+
+pub fn scenario_inputs() -> Array[(String, Subject, Subject, DiscourseType, ValidityClaim)]
 
 pub fn scenarios() -> Array[(String, EncounterOutcome)]
 
@@ -80,6 +110,31 @@ pub fn ClaimPhase::equal(Self, Self) -> Bool
 pub fn ClaimPhase::label(Self) -> String
 pub fn ClaimPhase::not_equal(Self, Self) -> Bool
 
+pub(all) struct Defeated {
+  target : String
+  by : String
+} derive(Eq)
+pub fn Defeated::equal(Self, Self) -> Bool
+pub fn Defeated::not_equal(Self, Self) -> Bool
+
+pub(all) struct Defeater {
+  by : String
+  target : String
+  when : Premise
+}
+
+pub(all) struct Derivation {
+  fired : Array[String]
+  defeated : Array[Defeated]
+  outranked : Array[Outranked]
+  accepted : Array[String]
+  verdict : Verdict
+  winner : String
+  note : String
+} derive(Eq)
+pub fn Derivation::equal(Self, Self) -> Bool
+pub fn Derivation::not_equal(Self, Self) -> Bool
+
 pub(all) enum DiscourseType {
   Theoretical
   Practical
@@ -114,10 +169,49 @@ pub struct NetworkReport {
   min_reason : Int32
 }
 
+pub(all) struct Norm {
+  id : String
+  basis : Array[String]
+  strength : NormStrength
+  premises : Array[Premise]
+  verdict : Verdict
+  effect : String
+}
+
+pub(all) enum NormStrength {
+  Strict
+  Defeasible
+} derive(Eq)
+pub fn NormStrength::equal(Self, Self) -> Bool
+pub fn NormStrength::label(Self) -> String
+pub fn NormStrength::not_equal(Self, Self) -> Bool
+
 pub struct OpenProblem {
   question : String
   note : String
 }
+
+pub(all) struct Outranked {
+  loser : String
+  winner : String
+  loser_verdict : Verdict
+} derive(Eq)
+pub fn Outranked::equal(Self, Self) -> Bool
+pub fn Outranked::not_equal(Self, Self) -> Bool
+
+pub(all) enum Premise {
+  ClaimOutOfPhase
+  ClaimNotJointReview
+  ImmanentRegime
+  RegimesDiffer
+  FaithDiscourse
+  MonologicGap
+  BothChengComplete
+  SeekingConsensus
+} derive(Eq)
+pub fn Premise::equal(Self, Self) -> Bool
+pub fn Premise::label(Self) -> String
+pub fn Premise::not_equal(Self, Self) -> Bool
 
 pub struct Rule {
   code : String

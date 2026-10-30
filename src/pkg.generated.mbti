@@ -10,9 +10,13 @@ pub fn after_open(SubjectState, Slot, Int32) -> Array[(SubjectState, Int32)]
 
 pub fn aho_build(Array[String]) -> AhoAutomaton
 
+pub fn all_checks() -> Array[Check]
+
 pub fn all_covered(Array[SubjectState], Array[SubjectState]) -> Bool
 
 pub fn all_phases() -> Array[Phase]
+
+pub fn all_points() -> Array[Point]
 
 pub fn all_slots() -> Array[Slot]
 
@@ -32,7 +36,21 @@ pub fn buchi_stalls() -> Array[SubjectState]
 
 pub fn candidates(SubjectState, Slot) -> Array[(Trigger, SubjectState)]
 
+pub fn check_contracts() -> ContractReport
+
+pub fn contracts() -> Array[Contract]
+
+pub fn contracts_cover_all_checks() -> Bool
+
+pub fn contracts_well_formed() -> Bool
+
 pub fn course() -> Array[SubjectState]
+
+pub fn course_coverage() -> CoverageReport
+
+pub fn course_trace() -> Trace
+
+pub fn course_trace_steps() -> Int32
 
 pub fn distance_to(SubjectState) -> Array[(SubjectState, Int32?)]
 
@@ -52,6 +70,12 @@ pub fn gaps() -> Array[(SubjectState, Slot)]
 
 pub fn genesis_path() -> Array[SubjectState]
 
+pub fn has_incoming(SubjectState) -> Bool
+
+pub fn inbound_designations() -> Array[String]
+
+pub fn incomingless_of(Array[String], Array[String], String) -> Array[String]
+
 pub fn initial() -> SubjectState
 
 pub fn is_acyclic() -> Bool
@@ -59,6 +83,8 @@ pub fn is_acyclic() -> Bool
 pub fn is_deterministic() -> Bool
 
 pub fn is_minimal() -> Bool
+
+pub fn kind_of_check(Check) -> ContractKind
 
 pub fn min_steps(SubjectState, SubjectState) -> Int32?
 
@@ -78,11 +104,21 @@ pub fn petri_marking_of(Array[SubjectState]) -> PetriMarking
 
 pub fn petri_transitions() -> Array[PetriTransition]
 
+pub fn phases_with_non_act() -> Array[Phase]
+
+pub fn phases_without_non_act() -> Array[Phase]
+
 pub fn positions_reachable_by(Slot) -> Array[SubjectState]
 
 pub fn predecessors(SubjectState) -> Array[(SubjectState, Trigger)]
 
 pub fn reachable(SubjectState, SubjectState) -> Bool
+
+pub fn reachable_designations() -> Array[String]
+
+pub fn receipt_edges(Outcome) -> Array[(Trigger, SubjectState)]
+
+pub fn receipt_matches(SubjectState, Slot, Outcome) -> Bool
 
 pub fn render_aho_report() -> String
 
@@ -90,7 +126,11 @@ pub fn render_algebra_report() -> String
 
 pub fn render_buchi_report() -> String
 
+pub fn render_contract_report(ContractReport) -> String
+
 pub fn render_course() -> String
+
+pub fn render_coverage(CoverageReport) -> String
 
 pub fn render_dot() -> String
 
@@ -120,6 +160,8 @@ pub fn resolve_hits(SubjectState, Trigger, Array[SubjectState]) -> Outcome
 
 pub fn revision_principle() -> String
 
+pub fn row_coverage(Array[Trace]) -> CoverageReport
+
 pub fn same_target_pairs() -> Array[(SubjectState, Slot, Array[Trigger], SubjectState)]
 
 pub fn slot_tally() -> Array[(Slot, Int32)]
@@ -137,6 +179,8 @@ pub fn successors(SubjectState) -> Array[(Trigger, SubjectState)]
 pub fn terminal() -> SubjectState
 
 pub fn transitions() -> Array[Transition]
+
+pub fn unreachable_of(Array[String], Array[String]) -> Array[String]
 
 pub fn walk(SubjectState, Array[Slot]) -> Trace
 
@@ -165,6 +209,46 @@ pub(all) struct AhoStats {
   deepest_branch : Int32
   deepest_branch_path : String
 }
+
+pub(all) enum Check {
+  Reachable
+  HasIncoming
+  PhaseHasNonAct
+  ReceiptExact
+} derive(Eq)
+pub fn Check::equal(Self, Self) -> Bool
+pub fn Check::label(Self) -> String
+pub fn Check::not_equal(Self, Self) -> Bool
+
+pub(all) struct Contract {
+  kind : ContractKind
+  check : Check
+  text : String
+}
+
+pub(all) enum ContractKind {
+  AlwaysMachine
+  AlwaysPhase
+  AfterStep
+} derive(Eq)
+pub fn ContractKind::equal(Self, Self) -> Bool
+pub fn ContractKind::label(Self) -> String
+pub fn ContractKind::not_equal(Self, Self) -> Bool
+
+pub(all) struct ContractReport {
+  checked : Int32
+  held : Int32
+  broken : Int32
+  faults : Array[String]
+}
+pub fn ContractReport::ok(Self) -> Bool
+
+pub(all) struct CoverageReport {
+  total : Int32
+  exercised : Int32
+  missing : Array[(SubjectState, Trigger, SubjectState)]
+}
+pub fn CoverageReport::ok(Self) -> Bool
 
 pub(all) struct Expansion {
   leaves : Array[Trace]
@@ -235,6 +319,12 @@ pub fn Phase::label(Self) -> String
 pub fn Phase::not_equal(Self, Self) -> Bool
 pub fn Phase::qualified(Self) -> String
 pub fn Phase::to_repr(Self) -> @debug.Repr
+
+pub(all) struct Point {
+  at : SubjectState
+  slot : Slot
+  out : Outcome
+}
 
 pub(all) enum Slot {
   Occasion

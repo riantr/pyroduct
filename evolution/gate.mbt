@@ -80,6 +80,19 @@ pub struct CausalPlan {
 }
 
 ///|
+/// 造一个因果判据的计划。
+///
+/// 没有它，判据里「用哪把尺子」就只能是 `causal_criterion` 里写死的那一把——而
+/// 尺子是要能被指名道姓地换掉的（`audit.mbt` 的指纹正是靠它区分两次裁决）。
+pub fn causal_plan(
+  objective : Objective,
+  episodes : Int32,
+  config : @ml.DmlConfig,
+) -> CausalPlan {
+  { objective, episodes, config, }
+}
+
+///|
 /// 判据：用哪一种「更好」。
 pub(all) enum Criterion {
   Weighted(Objective) // 手写权重

@@ -7,6 +7,9 @@
 
 ///|
 /// 一条记录：哪一代、第几个候选、父代是谁、改了哪里、判了什么、得分多少、基因组是什么。
+///
+/// `gate` 是**裁它的那把尺子的指纹**（`audit.mbt`）：没有它，一行判词就不知道自己
+/// 是按哪把尺子裁出来的——尺子一动（权重改了、种子换了），账本看上去却一样。
 pub struct Trail {
   generation : Int32
   step : Int32
@@ -20,6 +23,7 @@ pub struct Trail {
   effect_lo : Int32 // 置信下界千分位
   fitness : Fitness
   genome : Genome
+  gate : String // 裁它时那把尺子的指纹
 }
 
 ///|
@@ -481,6 +485,7 @@ pub fn Ledger::serialize(self : Ledger) -> String {
         t.genome.encode(),
         t.what,
         t.why,
+        t.gate,
       ].join("\t"),
     )
   }
@@ -530,6 +535,13 @@ pub fn parse(text : String) -> Ledger {
         genome: Genome::decode(f[10].to_owned()),
         what: f[11].to_owned(),
         why: f[12].to_owned(),
+        // 尺子指纹是后加的列：**旧账本没有这一列**。缺列不等于「尺子没动」——
+        // 它等于「没记」，审计时按失败闭合算（见 `audit.mbt`）。
+        gate: if f.length() >= 14 {
+          f[13].to_owned()
+        } else {
+          ""
+        },
       })
     }
   }

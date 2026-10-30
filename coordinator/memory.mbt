@@ -138,7 +138,7 @@ fn claim_code(c : @multi.ClaimKind) -> String {
 }
 
 ///|
-fn claim_of(s : StringView) -> @multi.ClaimKind {
+fn claim_of(s : StringView, repairs : Array[String]) -> @multi.ClaimKind {
   let t = s.to_owned()
   if t == "legit" {
     @multi.Legitimacy
@@ -146,7 +146,10 @@ fn claim_of(s : StringView) -> @multi.ClaimKind {
     @multi.Authenticity
   } else if t == "sinc" {
     @multi.Sincerity
+  } else if t == "truth" {
+    @multi.Truthfulness
   } else {
+    repairs.push("未知的有效性主张码：「\{t}」→ 记为真实性")
     @multi.Truthfulness
   }
 }
@@ -161,13 +164,16 @@ fn phase_code(p : @multi.ClaimPhase) -> String {
 }
 
 ///|
-fn phase_of(s : StringView) -> @multi.ClaimPhase {
+fn phase_of(s : StringView, repairs : Array[String]) -> @multi.ClaimPhase {
   let t = s.to_owned()
   if t == "before" {
     @multi.Before
   } else if t == "after" {
     @multi.After
+  } else if t == "during" {
+    @multi.During
   } else {
+    repairs.push("未知的时间位置码：「\{t}」→ 记为事中")
     @multi.During
   }
 }
@@ -184,7 +190,7 @@ fn status_code(s : FindingStatus) -> String {
 }
 
 ///|
-fn status_of(s : StringView) -> FindingStatus {
+fn status_of(s : StringView, repairs : Array[String]) -> FindingStatus {
   let t = s.to_owned()
   if t == "supp" {
     Established
@@ -194,15 +200,21 @@ fn status_of(s : StringView) -> FindingStatus {
     Replaced
   } else if t == "withd" {
     Retracted
+  } else if t == "open" {
+    Pending
   } else {
+    repairs.push("未知的发现状态码：「\{t}」→ 记为待定")
     Pending
   }
 }
 
 ///|
-fn int_of(s : StringView) -> Int32 {
+fn int_of(s : StringView, repairs : Array[String]) -> Int32 {
   @string.from_str(s.to_owned()) catch {
-    _ => 0
+    _ => {
+      repairs.push("无法解析成数字：「\{s.to_owned()}」→ 记为 0")
+      0
+    }
   }
 }
 
@@ -238,30 +250,58 @@ pub fn Notebook::serialize(self : Notebook) -> String {
 ///|
 /// 文本 → 笔记本。
 pub fn parse_notebook(text : String) -> Notebook {
+  let (nb, _repairs) = parse_notebook_checked(text)
+  nb
+}
+
+///|
+/// 文本 → 笔记本，**并**把每一处「只能猜」与「被整行丢掉」记下来。
+///
+/// 此前这一层是**无声的**：字段不足的行被整行跳过（`continue`），于是笔记本可能
+/// 少了一条发现，而读回来的人看不见少了什么。「看不见」不等于「没问题」——被丢掉
+/// 的行必须说出来。
+pub fn parse_notebook_checked(text : String) -> (Notebook, Array[String]) {
   let nb = Notebook::new()
+  let repairs : Array[String] = []
   for line in text.split("\n") {
     if line.length() == 0 {
       continue
     }
     let f = line.split("\t").collect()
-    if f.length() < 11 || f[0].to_owned() != "finding" {
+    if f.length() == 0 {
       continue
     }
-    let sup = if f[8].to_owned() == "-" { None } else { Some(int_of(f[8])) }
+    if f[0].to_owned() != "finding" {
+      repairs.push(
+        "不是发现行，被整行丢掉：「\{f[0].to_owned()}」",
+      )
+      continue
+    }
+    if f.length() < 11 {
+      repairs.push(
+        "字段不足的发现行（\{f.length()} 列），被整行丢掉",
+      )
+      continue
+    }
+    let sup = if f[8].to_owned() == "-" {
+      None
+    } else {
+      Some(int_of(f[8], repairs))
+    }
     let text_field = if f.length() >= 12 { f[11].to_owned() } else { "" }
     nb.findings.push({
-      id: int_of(f[1]),
-      question: int_of(f[2]),
-      claim: claim_of(f[3]),
-      phase: phase_of(f[4]),
-      result: int_of(f[5]),
-      residual: int_of(f[6]),
-      status: status_of(f[7]),
+      id: int_of(f[1], repairs),
+      question: int_of(f[2], repairs),
+      claim: claim_of(f[3], repairs),
+      phase: phase_of(f[4], repairs),
+      result: int_of(f[5], repairs),
+      residual: int_of(f[6], repairs),
+      status: status_of(f[7], repairs),
       supersedes: sup,
-      author: int_of(f[9]),
-      at: int_of(f[10]),
+      author: int_of(f[9], repairs),
+      at: int_of(f[10], repairs),
       text: text_field,
     })
   }
-  nb
+  (nb, repairs)
 }

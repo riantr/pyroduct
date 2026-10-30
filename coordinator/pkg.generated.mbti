@@ -13,6 +13,8 @@ pub fn assign(Question, Array[Worker]) -> Int32?
 
 pub fn author_order(Array[Contribution]) -> Array[Int32]
 
+pub fn claimed_digest(String) -> String
+
 pub fn contribution(Int32, Int32, Role, Int32) -> Contribution
 
 pub fn credit_of_task(Array[Contribution], Int32) -> Array[Int32]
@@ -31,11 +33,15 @@ pub fn demo_parent() -> @evolution.Genome
 
 pub fn demo_questions() -> Array[Question]
 
+pub fn demo_run() -> (Runtime, Array[StepReport])
+
 pub fn demo_tasks() -> Array[Task]
 
 pub fn demo_workers() -> Array[Worker]
 
 pub fn demo_world() -> Array[@evolution.Opponent]
+
+pub fn digest_of(String) -> String
 
 pub fn evidence_verdict(Binding) -> EvidenceVerdict
 
@@ -44,6 +50,8 @@ pub fn experiment(String, Dataset, @evolution.Genome, @evolution.Genome, Array[@
 pub fn new_runtime() -> Runtime
 
 pub fn parse_notebook(String) -> Notebook
+
+pub fn parse_notebook_checked(String) -> (Notebook, Array[String])
 
 pub fn question(Int32, String, @multi.DiscourseType) -> Question
 
@@ -58,6 +66,10 @@ pub fn render_report() -> String
 pub fn render_statement(Array[Contribution]) -> String
 
 pub fn reopen(Decision, Int32) -> Deliberation
+
+pub fn repeat_gate() -> (Bool, String, String)
+
+pub fn replay_agrees(Runtime, Runtime) -> Bool
 
 pub fn replicate(Binding, Dataset, @evolution.Genome, @evolution.Genome, Array[@evolution.Opponent]) -> Binding
 
@@ -270,9 +282,14 @@ pub struct Runtime {
   notebook : Notebook
   results : Array[Result]
   artifacts : Array[Artifact]
+  repairs : Array[String]
 }
+pub fn Runtime::body(Self) -> String
 pub fn Runtime::checkpoint(Self) -> String
+pub fn Runtime::digest(Self) -> String
+pub fn Runtime::is_faithful(Self) -> Bool
 pub fn Runtime::new() -> Self
+pub fn Runtime::repair_summary(Self) -> String
 pub fn Runtime::round_trips(Self) -> Bool
 pub fn Runtime::step(Self, Array[Task], Array[Question], Array[Worker], Array[Dataset], Array[@evolution.Opponent], @evolution.Genome, @evolution.Genome) -> StepReport?
 

@@ -58,6 +58,7 @@ pub struct CycleEvent {
 pub struct SubjectCycle {
   seed : CycleState
   objective : String
+  gate : String // 裁每一回合的那把尺子的指纹
   events : Array[CycleEvent]
 }
 
@@ -271,7 +272,12 @@ pub fn run_cycle(
     })
     cur = { state: moved_to, genome: next_genome, }
   }
-  { seed, objective: objective.name, events, }
+  {
+    seed,
+    objective: objective.name,
+    gate: gate_fingerprint(criterion),
+    events,
+  }
 }
 
 ///|
@@ -327,6 +333,7 @@ pub fn SubjectCycle::ledger(self : SubjectCycle) -> Ledger {
       effect_lo: d.effect_lo,
       fitness: d.fitness,
       genome: e.practice.candidate.genome,
+      gate: self.gate,
     })
     i += 1
   }

@@ -89,6 +89,8 @@ pub fn evolve(
         effect_lo: offer.decision.effect_lo,
         fitness: offer.decision.fitness,
         genome: offer.candidate.genome,
+        // 记下裁它的那把尺子：审计时要能问「这一行是按哪把尺子裁的」。
+        gate: gate_fingerprint(criterion),
       })
       if offer.decision.verdict == Accepted {
         let better = match best {

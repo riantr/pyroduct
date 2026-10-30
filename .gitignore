@@ -20,6 +20,11 @@ tools/mutation_review_log.*.md
 # <plugin>\tools\update-bundle.mjs 重建。哈希钉记在 plugin/vendor/BUILD.json。
 plugin/vendor/jsoncli.js
 
+# 项目申报书：一份**面向评审的文档**，不是模块的一部分。
+# 它不进版本库，也不进 mooncakes 包——`git add -A` 曾会把它一起扫进去，
+# 而发布出去的包不该夹带一份申报书。要入库的话，删掉下面这一行即可。
+项目申报书.md
+
 # OS noise
 .DS_Store
 Thumbs.db

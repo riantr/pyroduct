@@ -1,6 +1,6 @@
 name = "riantr/pyroduct"
 
-version = "0.1.33"
+version = "0.1.34"
 
 readme = "README.mbt.md"
 
@@ -36,8 +36,8 @@ description = "把《伽达默尔与哈贝马斯真理观比较》与《通往�
 // 见 https://moonbitlang.com 了解 moon.mod。
 
 import {
-  "moonbitlang/async@0.22.5",
-  "riantr/moonbit_doubleML@0.164.34",
+  "moonbitlang/async@0.22.7",
+  "riantr/moonbit_doubleML@0.164.56",
   "riantr/snn_mbt@0.166.2",
-  "riantr/moonbit_static_analysis@0.4.33",
+  "riantr/moonbit_static_analysis@0.4.39",
 }

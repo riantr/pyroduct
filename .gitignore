@@ -5,6 +5,10 @@ target/
 # local dependency cache
 .mooncakes/
 
+# `moon fetch` drops a fetched dependency here (used to compare two versions
+# of the audit library file by file). Not ours, not tracked.
+.repos/
+
 # tool / session artifacts
 .openseek/
 .worktrees/

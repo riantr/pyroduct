@@ -12,9 +12,12 @@
  * - `pull` data dir -> repo. Use after editing files inside the data dir (the
  *   runtime never writes there, so this only captures your own edits).
  *
- * `vendor/jsoncli.js` never travels: it is a 1.1 MB build artifact, it is
- * gitignored, and its SHA-256 is pinned in vendor/BUILD.json. `push` refuses to
- * leave the repo without that pin in place, and with a checkout argument it
+ * `vendor/jsoncli.js` DOES travel on a plain `push`: the installed package is
+ * what the runtime loads, and a runtime whose bridge is older than the pin in
+ * vendor/BUILD.json answers from a model that no longer exists. It is exempt
+ * from the *cleanup* pass only -- a source that has never been built must not
+ * uninstall a working bridge. `push` refuses to install a package whose
+ * recorded hash disagrees with the file, and with a checkout argument it
  * chains into <data dir>\tools\update-bundle.mjs to rebuild the artifact and
  * re-run the package's own regression net.
  *

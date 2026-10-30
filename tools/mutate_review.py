@@ -829,11 +829,22 @@ def generated_interfaces():
 
     So the generated interfaces are snapshotted with the sources and restored
     after every mutation, so each mutation starts from a consistent tree.
+
+    Which files count is decided here, not by the caller.  The walk used to
+    take any `pkg.generated.mbti` it could see, and that is how a fetched
+    dependency broke the review: `moon fetch` of an OLDER version of the audit
+    library drops a tree under `.repos/`, that tree has `pkg.generated.mbti`
+    files of its own, and the restore pass -- which walks again at the end of
+    every mutation -- tried to write back a snapshot it never took.  KeyError,
+    and the whole review died after 80 mutations' work, with the log never
+    written.  So: anything under a dotted directory or `_build/` is somebody
+    else's tree, not ours.
     """
     out = []
     for dirpath, dirnames, filenames in os.walk(ROOT):
         dirnames[:] = [
-            d for d in dirnames if d not in ("_build", ".git", ".mooncakes")
+            d for d in dirnames
+            if d != "_build" and not d.startswith(".")
         ]
         for name in filenames:
             if name == "pkg.generated.mbti":
@@ -874,6 +885,7 @@ def main():
 
     report = []
     interfaces_ok = True
+    interface_count = 0
 
     def restore_all():
         for rel, blob in originals.items():
@@ -964,8 +976,14 @@ def main():
                 with open(os.path.join(ROOT, rel), "wb") as fh:
                     fh.write(src)
                 for gen in generated_interfaces():
+                    # 只还原**开跑前就入过账的**接口文件。还原一份没拍过照的
+                    # 文件，等于用空快照覆盖别人的树；而抛 KeyError 则更糟——
+                    # 它让整轮 review 在最后一刻死掉，留下一份从没写出的记录。
+                    blob = originals.get(gen)
+                    if blob is None:
+                        continue
                     with open(os.path.join(ROOT, gen), "wb") as fh:
-                        fh.write(originals[gen])
+                        fh.write(blob)
     finally:
         restore_all()
 
@@ -976,13 +994,14 @@ def main():
         # 而「接口也被还原了」这件事必须说出来——它正是上面那个坑的封口。
         if rel.endswith("pkg.generated.mbti"):
             interfaces_ok = interfaces_ok and same
+            interface_count += 1
             continue
         report.append(("RESTORED " + rel, "OK" if same else "HASH-MISMATCH", digest[:16]))
     report.append(
         (
             "RESTORED generated interfaces",
             "OK" if interfaces_ok else "HASH-MISMATCH",
-            "%d files" % len(generated_interfaces()),
+            "%d files" % interface_count,
         )
     )
 

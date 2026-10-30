@@ -45,6 +45,10 @@
 - Numerical claims in `README.mbt.md` and `README.zh.mbt.md` match source code
 - Checks: subject/group/society states, transitions, phases, triggers, slots
 - Checks: combinations (272 total, 228 no-way)
+- Reads prose as **logical lines**, not physical ones — a hard-wrapped sentence
+  straddled two lines in the English README, so its numbers were never checked
+- Reports a README that carries no such claim at all ("cannot see it" is not
+  "it matches")
 - Extracts ground truth from source code via `tools/extract_model_facts.py`
 
 **Scope**:
@@ -54,10 +58,15 @@
 **When it fires**:
 - Adding/removing a state, transition, phase, or trigger without updating READMEs
 - Changing model facts in code but not in documentation
+- Re-wrapping a paragraph that carries a checked number
 
 **How to fix a failure**:
 - Update the README files to match the source code
 - Or revert the source code change if the README was correct
+
+**Positive control**: `python tools/readme_control.py` breaks one number per case
+and requires the criterion to go red, name the line, and leave the tree
+byte-for-byte.
 
 ---
 
@@ -123,6 +132,9 @@ that the resolved tree was the tree the release names.
 
 - The bridge's `faces()` (31), the CLI's `match` arms (37), the CLI's usage
   header (37), and the count the CLI's own error message publishes must agree
+- The counts **both READMEs quote** (31 faces / 37 subcommands) must equal the
+  same two numbers — a quoted count is a copy, and a copy with nothing watching
+  it rots. A README quoting neither is reported, not passed over
 - The 6 CLI-only faces (`society-mermaid`, `group-mermaid`, `nested-mermaid`,
   `journey`, `viz`, `all`) are the documented difference between the two lists
 
@@ -196,6 +208,7 @@ All files in `architecture/` are version-controlled. They fall into three catego
 | Module dependency edges | **HIGH** | CI-enforced by `validate_dependencies.py` |
 | DOT file version pins | **HIGH** | CI-enforced by `validate_dependencies.py` |
 | README model facts | **HIGH** | CI-enforced by `validate_readme_facts.py` |
+| README face / subcommand counts | **HIGH** | CI-enforced by `validate_cli_faces.py` |
 | Face count & list | **HIGH** | CI-enforced by `validate-plugin.mjs` |
 | CLI face list & count | **HIGH** | CI-enforced by `validate_cli_faces.py` |
 | Dependency version literals | **HIGH** | CI-enforced by `validate_pin_copies.py` |

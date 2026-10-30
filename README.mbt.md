@@ -85,6 +85,156 @@ One society: 13 · 28 · 8. Two subjects: 14 normative rules.
   `riantr/snn_mbt@0.166.2` → `snnref` (native); `riantr/moonbit_static_analysis@0.4.33`
   → `audit`. Every other package uses official `moonbitlang/*` only.
 
+## What you get
+
+The module is a library, so "what you get" is a set of **data structures and
+reports**, not a running service. Concretely:
+
+| You call | You get back | Shape |
+|---|---|---|
+| `@src.step(position, slot)` | one of five receipts | `Moved` / `Held` / `Open` / `Same` / `Block` |
+| `@src.step_by_trigger(position, sentence)` | the same five, but the trigger is named | enum |
+| `@multi.encounter(me, other, discourse, claim)` | a verdict for one exchange | `Verdict` (6 values) |
+| `@src.spec_json()` | the whole machine as one document | a ~10 KB JSON string |
+| `@src.render_report()` / `render_mermaid()` / `render_dot()` | human-readable renderings | `String` |
+| `@evolution.evolve(genome, world, criterion, rounds)` | a ledger of accepted changes | `Ledger` (a tree) |
+| `@coordinator.runtime.step(...)` | a replayable checkpoint | `String` (tab-separated) |
+
+Every one of those is a **pure function or an explicit data value**. There is
+no hidden global state, no clock, no network: the same inputs give the same
+bytes, which is why `moon test` can assert on them and why the gate can check
+the repository's own claims.
+
+Two delivery surfaces sit on top:
+
+- **CLI** — `moon run cmd/main -- <face>` prints any layer as a report.
+  37 subcommands; an unknown one exits non-zero rather than printing the
+  default report.
+- **JSON bridge** — `cmd/jsoncli` takes one JSON request and returns one JSON
+  reply `{ok, kind, rendered, faces}`. This is what the two agent plugins
+  (`plugin/` for MiniMax, `.dsh/` for DeepSeek) spawn; it is the only surface
+  an agent needs.
+
+The bridge ships as a **snapshot**, not a checkout: `plugin/vendor/jsoncli.js`
+is pinned by SHA-256 in `plugin/vendor/BUILD.json`, so the plugin answers the
+same way on a machine with no MoonBit toolchain. Point `PYRODUCT_PROJECT_DIR`
+at a checkout and the same tool reads *that* tree instead, and
+`pyroduct_gates` runs the gate there.
+
+## How this plugs into a running agent
+
+The state machine is not a simulation of an agent; it is a **judgement layer
+that an agent calls**. Three seams, in the order an agent meets them.
+
+**1 · Annotate the behaviour.** When an agent acts, the caller maps the
+observed utterance to a trigger (`@src.step_by_trigger`) and reads a receipt.
+The receipt is the annotation: `Moved` means this sentence actually moved the
+agent, `Held` means it was absorbed in place, `Block` means the machine has
+no road here and the caller must not pretend otherwise. Of the 272 position ×
+slot pairs, 228 answer `Block` — that number is the point. An agent
+that says "your action was blocked" is quoting a table, not improvising.
+
+**2 · Feed the outcome back.** `@evolution` scores a configuration by *asking
+the machine*, not by asking a model: `evaluate(genome, opponents)` returns
+four components — consensus, stability, residue, cost — where the opponents
+are subjects and the response is a real `@multi.encounter` verdict. So
+"this configuration did better" is a report about two characters meeting,
+not a similarity score.
+
+**3 · Gate the self-modification.** A change to the agent's configuration is
+a `Candidate` (prompt / strategy / memory / code, one locus at a time). It
+passes through `judge`:
+
+- **constitutional** — three invariants (R10 residue ≥ 1; R2/R14 no
+  declarative voice; R3 still open to the other) that no score can buy.
+  A violation is rejected outright.
+- **selection** — either hand-written weights, or a **DoubleML causal
+  effect**: accept only if θ̂ > 0 *and* the 95% lower bound > 0.
+
+Then it is written to an append-only `Ledger` that records the reason, and —
+because every trail names the trail it came from — the ledger is also a tree
+whose `lineage` is checked, not asserted: a non-root's parent must be a root
+or an accepted change, and must differ from it by exactly one mutation.
+
+So the loop is: **act → annotate → score → propose → gate → record**, and the
+record survives the process (`cmd/coord` round-trips a checkpoint through real
+disk I/O and asserts it comes back identical). What is *not* here is a model:
+the "think" step is a deterministic stand-in. This layer decides what counts
+as an improvement and what may not be changed; the model that does the
+thinking plugs in above it.
+
+### What the causal claim assumes
+
+The DoubleML gate is the one place where a statistical promise is made, so
+its preconditions are stated here rather than left implicit.
+
+**What is actually estimated.** `@ml.dml_plr` fits the partially linear model
+`Y = θ·T + g(X) + ε` with `E[ε | X, T] = 0`, `T = m(X) + v`, using
+Neyman-orthogonal scores and K-fold cross-fitting. It is a *nuisance-adjusted*
+effect of treatment `T` on outcome `Y` given covariates `X`.
+
+**What must hold for θ̂ to mean what it says.**
+
+1. **No unmeasured confounding given X** (`E[ε | X, T] = 0`). This is the
+   assumption that "find all confounders" cannot deliver — confounders are
+   not *discovered* by the estimator, they are *assumed away* by the
+   conditioning set. If a confounder is not in `X`, no amount of machine
+   learning inside the estimator removes it.
+2. **Overlap / positivity** — both treatment states must occur at every
+   `X`. The repo's data satisfies it by construction (treatment is a
+   continuous function of `X` plus noise), but **the repo does not implement
+   an overlap diagnostic** — a real deployment must check it.
+3. **A correctly specified or learnable nuisance** `m(X)`. Cross-fitting
+   protects against *overfitting* the nuisance; it does not protect against a
+   nuisance that cannot be learned from the data at hand.
+4. **A well-defined intervention.** `T` must be a manipulable treatment with
+   a coherent counterfactual, not a proxy for something else.
+
+**How the repo stays honest about it.** The sensitivity layer
+(`@causal`, `rv = |θ̂| / max_bias`) reports how strong an *unobserved*
+confounder would have to be to overturn the conclusion — and it reports a
+finite number, not a guarantee. Multiple-testing correction (BH /
+Bonferroni) is applied because running the gate once per trigger would
+inflate the false-positive rate far past 5%. Heterogeneity (BLP) reports
+whether the effect varies across covariates. **The `causal` package is
+read-only**: its numbers go into the report, never into the gate, so no
+diagnostic can quietly change what counts as an accepted change.
+
+**And the honest limit.** The dataset is **synthetic, generated by the state
+machine itself** (`@ml.make_dataset`: covariates from `freedom`, phase index,
+out-degree and distance-to-tranquility; treatment from those plus a random
+walk's 修习 count; truth θ = 1.5 known by construction). So the repo
+demonstrates that *the estimator recovers a known truth under known
+confounding* — a correctness check on the estimator and on the cross-check
+against `riantr/moonbit_doubleML`, **not** evidence that any real-world
+intervention would come out this way. Real data brings the assumptions above;
+this repo brings the machinery that would let you check them.
+
+## Comparison with the libraries this mirrors
+
+Each face below ports the *semantics* of a mature library in another
+language — deliberately not its numbers, and deliberately not its scope.
+Measured against the upstream sources (2026-10-30).
+
+| Face | Mirrors | Upstream | What the upstream does that this does not | What this does that the upstream does not |
+|---|---|---|---|---|
+| `spec` | python-statemachine `io/` | JSON / YAML / SCXML → `StateChartDefinition` → machine class; parser and JSON Schema are asserted equal | **builds** a machine from a document; SCXML conformance; parallel regions and history states; guards, actions, and a callback/listener system; sync + async engines; Django integration | exports **machine → spec** and refuses the reverse direction, because a `spec → machine` constructor would create a second source of truth against its own "data is code" discipline; it carries provenance per construct (原文措辞 vs 模型整理) |
+| `algebra` | Ragel | compiles regular expressions / state charts to executable FSMs in C, C++, Go, Rust, JS…; Hopcroft minimization | **generates code**; accepts a regular language as input; ships a scanner mode | reads an *existing* machine and reports its algebra (operator mapping, main-line decomposition, minimal quotient); the machine stays data |
+| `aho` | pyahocorasick | Aho-Corasick automaton in C: trie + failure links + output merging, dict-like access | a general-purpose multi-pattern matcher over any strings | builds the automaton over the 49 trigger sentences and reads it as **recall structure** — the failure link is the algorithmic form of falling back on the longest shared past |
+| `petri` | CarlAdam | Python Petri nets with immutable (pmap/pset) markings, `enabled_transitions`, an interactive simulator | lets you *author* arbitrary nets, with a browser simulator | reads the subject machine *as* a net (34 places, 53 transitions) and proves token conservation; a colouring boundary is stated, not faked |
+| `pathsum` | FiniteStateTransducers.jl | weighted automata over a semiring; `shortest_distance` and `properties` | general weighted-automaton machinery, arbitrary semirings | tropical shortest path **on this machine** — the road-to-tranquility ladder — plus machine properties (determinism per trigger, acyclicity by design) |
+| `buchi` | Büchi / ω-automata | ω-automata acceptance, emptiness, liveness | general ω-automata | the machine read as ω-automaton: non-emptiness via lasso, liveness potential, and 11 stall self-loops — 10 rejecting (structure does not enforce liveness) and 宁静's own accepted stall |
+| `dmlref` / `causal` | doubleml-for-py | 20 estimator classes (PLR, LPLR, PLPR, PLIV, IRM, IIVM, the DID family, SSM, PQ, QTE, LPQ, APO(S), CVAR, BLP, PolicyTree; RDD appears in this checkout as `RDFlex`) over 91 files / ~32k lines of library, 359 / ~74k with its test suite, built on numpy / pandas / scikit-learn / scipy / statsmodels / optuna | the whole estimator family, panel data, plotting, hyperparameter tuning | **zero third-party dependencies** for the estimator (linear algebra, cross-fitting, orthogonal scores and RNG written from scratch — 1,335 lines for the whole `ml` package) and a *cross-check* against the MoonBit port `riantr/moonbit_doubleML` (22 estimators) — the repo checks itself against an independent implementation rather than shipping one |
+
+Two asymmetries are worth stating plainly. First, **pyroduct's `ml` is one
+estimator (PLR) and a cross-check**, not a doubleml-for-py replacement — the
+22-estimator port is a separate package that this repo consumes. Second,
+the mirrored libraries are *general-purpose* and pyroduct is *not*: they take
+your machine as input and give you machinery back, while pyroduct's faces
+are read-only views of one particular machine. What pyroduct adds is the
+provenance, the discipline that gaps are reported rather than filled, and the
+gate that keeps an agent's self-modification inside constitutional bounds.
+
 ## Terminology
 
 Every construct carries a two-character Chinese designation, an English enum
@@ -450,13 +600,16 @@ let same : Bool = restored.round_trips()
 ## Gates and drift detectors
 
 `moon check`, `moon fmt --check`, `moon test` (211 wasm tests) plus the two
-native-only suites (`snnref`, `tools/ifacescan`) are the baseline. Three
+native-only suites (`snnref`, `tools/ifacescan`) are the baseline. Six
 detectors run on top, because a green suite says nothing about a claim written
 in prose:
 
 | Detector | Catches |
 |---|---|
 | `python tools/validate_dependencies.py` | a dependency edge drawn in `architecture/*.dot` that the code does not have, or one the code has that the diagram omits; also a DOT file whose `model-version` header disagrees with `moon.mod` |
+| `python tools/validate_resolved_deps.py` | a pin in `moon.mod` that does not resolve to the version it names — `moon update` only refreshes the registry index, so nothing else in the build notices that the pin drifted |
+| `python tools/validate_cli_faces.py` | the bridge's `faces()`, the CLI's `match` arms, the CLI's usage header and the count the CLI's own error message publishes disagreeing with each other; it found a subcommand the CLI could dispatch but the bridge did not know |
+| `python tools/validate_pin_copies.py` | a `package@version` literal in the tree that no longer equals the pin it copies — the two READMEs, `AGENTS.md`, the architecture diagrams, the package doc comments, the plugin's face catalog and both skill copies |
 | `python tools/validate_readme_facts.py` | a state / transition / phase / trigger / slot count in these READMEs that no longer matches the source tables, and a wasm test count that disagrees with itself or with the code — published 0.1.31 claimed 205 in one place and 209 in another, and this detector said everything matched, because it had only ever counted model facts |
 | `node plugin/tools/validate-plugin.mjs` | plugin drift: face count, test count, model facts and page citations in the agent-facing descriptions |
 

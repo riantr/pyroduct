@@ -87,6 +87,54 @@ def published_count(text):
     return int(match.group(1)) if match else None
 
 
+# The two READMEs quote both counts. A quoted count is a copy, and a copy with
+# nothing watching it rots -- the same reason this file exists for the code.
+# "cannot see it" is not "it matches": a README that dropped the sentence is
+# reported, not passed over.
+README_FILES = ("README.mbt.md", "README.zh.mbt.md")
+FACE_COUNT_PATTERNS = [re.compile(r'(\d+)\s+faces\b'), re.compile(r'(\d+)\s*个面')]
+SUBCOMMAND_COUNT_PATTERNS = [
+    re.compile(r'(\d+)\s+subcommands?\b'),
+    re.compile(r'(\d+)\s*个子命令'),
+]
+
+
+def readme_count_claims(text, patterns):
+    """Every count a README claims for this list, with the line it sits on."""
+    claims = []
+    for pattern in patterns:
+        for match in pattern.finditer(text):
+            line_no = text[:match.start()].count('\n') + 1
+            claims.append((line_no, int(match.group(1))))
+    return sorted(claims)
+
+
+def check_readme_counts(face_count, arm_count):
+    """Assert the READMEs' quoted counts against the counts measured here."""
+    problems = []
+    for name in README_FILES:
+        path = os.path.join(ROOT, name)
+        if not os.path.exists(path):
+            problems.append(f"{name} is missing")
+            continue
+        text = read(path)
+
+        for label, patterns, expected in (
+            ("faces", FACE_COUNT_PATTERNS, face_count),
+            ("subcommands", SUBCOMMAND_COUNT_PATTERNS, arm_count),
+        ):
+            claims = readme_count_claims(text, patterns)
+            if not claims:
+                problems.append(f"{name} quotes no {label} count -- the check cannot see it")
+                continue
+            for line_no, claimed in claims:
+                if claimed != expected:
+                    problems.append(
+                        f"{name}:{line_no}: claims {claimed} {label}, the code has {expected}"
+                    )
+    return problems
+
+
 def main():
     verbose = "--verbose" in sys.argv
     cmd_text = read(CMD_MAIN)
@@ -134,6 +182,8 @@ def main():
         problems.append(
             f"the CLI's error message says {count} subcommands but it dispatches {len(arms)}"
         )
+
+    problems.extend(check_readme_counts(len(faces), len(arms)))
 
     if verbose:
         print("\nbridge faces:", " ".join(faces))

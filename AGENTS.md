@@ -87,12 +87,21 @@ python tools/validate_resolved_deps.py # asserts the RESOLVED dependency tree
                                        # Transitive deps are listed, not asserted.
 python tools/validate_readme_facts.py # README numerical claims (states, transitions,
                                        # phases, triggers, slots) vs source.
+                                       # Prose is read as LOGICAL lines, not
+                                       # physical ones -- a hard-wrapped
+                                       # sentence used to escape the check.
 python tools/validate_cli_faces.py    # asserts the three copies of the face
                                        # list agree: the bridge's faces(), the
                                        # CLI's match arms, and the CLI's usage
                                        # header -- plus the count the CLI's own
-                                       # error message publishes. Exit 0 if they
+                                       # error message publishes, and the counts
+                                       # both READMEs quote. Exit 0 if they
                                        # agree, 1 if they drift.
+python tools/readme_control.py        # positive control for the two README
+                                       # criteria: breaks one number per case
+                                       # and requires the criterion to go RED
+                                       # and name the line, then restores the
+                                       # file byte-for-byte (sha256).
 python tools/validate_pin_copies.py   # asserts every `package@version` literal
                                        # in the tracked tree equals the pin it
                                        # copies (moon.mod for a pinned package,
@@ -194,6 +203,9 @@ Six drift detectors run in CI on every push and PR:
 - **`python tools/validate_cli_faces.py`** — asserts the three copies of the same names agree:
   the bridge's `faces()` (returned in every reply, read by both plugins), the CLI's `match` arms,
   and the CLI's usage header — plus the subcommand count the CLI's own error message publishes.
+  It also asserts the counts **the two READMEs quote** (31 faces / 37 subcommands): a quoted
+  count is a copy, and a copy with nothing watching it rots. When a README quotes neither, it
+  says so — "cannot see it" is not "it matches".
   Nothing compared them, so a face added to one and forgotten in another was invisible until
   someone typed the missing spelling. It found two real gaps on its first run: the `mbti`
   subcommand was missing from the usage header, and the CLI could not dispatch a face the
@@ -210,7 +222,13 @@ Six drift detectors run in CI on every push and PR:
 - **`python tools/validate_readme_facts.py`** — parses both READMEs for numerical claims
   about states, transitions, phases, triggers and slots, and compares them against the
   ground truth extracted from source. Catches the drift where the model enums moved and
-  the documentation did not. It also counts the wasm test functions the way
+  the documentation did not. **Prose is read as logical lines, not physical ones**: a
+  README hard-wraps its paragraphs, and the position × slot claim straddled two lines in
+  the English copy — so the English README's numbers were never checked at all, while the
+  Chinese copy was, only because it happened to fit on one line. A criterion whose result
+  depends on where the text was wrapped is not a criterion. For the same reason it now
+  reports a README that carries **no** such claim: "cannot see it" is not "it matches".
+  It also counts the wasm test functions the way
   `plugin/tools/validate-plugin.mjs` does (same rule, or the two detectors would drift
   apart) and checks every test-count claim in a README against that — first against the
   other claims **in the same file**, because published 0.1.31 shipped 205 in one place
@@ -262,6 +280,34 @@ auto-bumped pins would test something other than what the tag publishes.
 
 Because nothing in the build checks the pins were honoured, `tools/validate_resolved_deps.py`
 asserts the resolved tree against them (see the drift detectors above).
+
+### moon 0.1.20261028 removed `moonbitlang/core/abort` (measured 2026-10-30)
+
+The toolchain this tree was measured on is **moon 0.1.20261023**. A newer local
+toolchain (0.1.20261028) **silently moved under the repository**, and it removed the
+`moonbitlang/core/abort` package: `abort` is now a compiler builtin (the new
+`lib/core/builtin` calls it unqualified). So on 0.1.20261028 **every `moon` command
+fails before it does anything**:
+
+```
+Error: Failed to calculate build plan
+  1: Cannot find import 'moonbitlang/core/abort' in riantr/pyroduct/cmd/coord@0.1.33
+```
+
+This is a **toolchain migration, not a code defect**, and it is not a local edit away:
+`cmd/main/moon.pkg` and `cmd/coord/moon.pkg` import `moonbitlang/core/abort` and call
+`@abort.abort(...)`. No single import spelling works on both toolchains, so migrating
+means all of: drop the import, call `abort(...)` unqualified, bump `MOON_VERSION` in
+`gate.yml` **and** `publish.yml`, re-measure `moon fmt --check` (the formatter moves too),
+and **re-pin the bridge** (`plugin/vendor/BUILD.json` records the sha256 of the compiled
+`jsoncli.js`, which the new compiler will produce differently) with a plugin version
+bump. That is a release-scale act under the release policy, so it is deliberately **not**
+done as a side effect of unrelated work.
+
+CI is unaffected: both workflows pin `MOON_VERSION: 0.1.20261023` and **fail loudly** if
+the runner disagrees, so the published artifact is built with the toolchain this tree
+targets. Until the migration lands, a local `moon check` / `moon test` on 0.1.20261028
+cannot run at all — measure on the pinned toolchain, or migrate deliberately.
 
 ## MiniMax Code plugin (`plugin/`)
 

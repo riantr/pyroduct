@@ -59,6 +59,102 @@ def find_numbers_in_line(line: str) -> List[int]:
     return [int(x) for x in re.findall(r'\b(\d+)\b', line)]
 
 
+# The position x slot claim, read off a sentence instead of guessed from
+# whatever digits happen to sit nearby. The total is pinned to the word that
+# names the unit ("272 position x slot", "272 个位置 x 槽"), the no-way count to
+# the name of the outcome it answers with ("228 ... No-way", "228 ... 无路").
+COMBINATION_TOTAL_RE = re.compile(r'(\d+)\s*(?:个)?\s*(?:position|位置)', re.IGNORECASE)
+COMBINATION_NOWAY_RE = re.compile(
+    r'(\d+)\s*(?:个)?\s*(?:honestly\s+answer|如实回答|answer|回答)?\s*'
+    r'(?:no-way|无路|`Block`)',
+    re.IGNORECASE,
+)
+
+
+def logical_lines(lines: List[str]) -> List[Tuple[int, str]]:
+    """
+    Join hard-wrapped prose into logical lines.
+
+    A README paragraph is hard-wrapped, so the sentence carrying a claim can
+    straddle two physical lines -- and a line-by-line pattern never sees it.
+    The English README's copy of the position x slot sentence was therefore
+    never checked; the Chinese one was, only because it happened to fit on one
+    line. A criterion whose result depends on where the text was wrapped is
+    not a criterion.
+
+    A logical line is a maximal run of consecutive prose lines that are not
+    blank, not a heading and not a list-item marker; a table row stands alone.
+    Fenced code is skipped entirely.
+    """
+    result: List[Tuple[int, str]] = []
+    in_code = False
+    start: Optional[int] = None
+    parts: List[str] = []
+
+    def flush() -> None:
+        nonlocal start, parts
+        if start is not None:
+            result.append((start, " ".join(parts)))
+        start = None
+        parts = []
+
+    for number, raw in enumerate(lines, start=1):
+        stripped = raw.strip()
+        if stripped.startswith('```'):
+            in_code = not in_code
+            flush()
+            continue
+        if in_code:
+            continue
+        if not stripped:
+            flush()
+            continue
+        if stripped.startswith('#'):
+            flush()
+            continue
+        if stripped.startswith('|'):
+            flush()
+            result.append((number, stripped))
+            continue
+        if re.match(r'^([-*+]\s|\d+\.\s)', stripped):
+            flush()
+            start = number
+            parts = [stripped]
+            continue
+        if start is None:
+            start = number
+            parts = [stripped]
+        else:
+            parts.append(stripped)
+    flush()
+    return result
+
+
+def combination_claims(text: str) -> List[Tuple[int, int]]:
+    """
+    Every `(total, no_way)` pair a logical line claims.
+
+    The total is the number the sentence pins to the word naming the unit; the
+    no-way count is the number it pins to the name of the outcome. Pairing by
+    proximity rather than by order keeps both spellings readable:
+    "of 272 position x slot combinations, 228 honestly answer No-way" and
+    "of 272 position x slot pairs, 228 answer `Block`" say the same thing.
+    """
+    totals = [(m.start(), int(m.group(1))) for m in COMBINATION_TOTAL_RE.finditer(text)]
+    noways = [(m.start(), int(m.group(1))) for m in COMBINATION_NOWAY_RE.finditer(text)]
+    claims: List[Tuple[int, int]] = []
+    for no_way_pos, no_way in noways:
+        before = [t for t in totals if t[0] < no_way_pos]
+        if before:
+            total = max(before, key=lambda t: t[0])[1]
+        elif totals:
+            total = min(totals, key=lambda t: abs(t[0] - no_way_pos))[1]
+        else:
+            continue
+        claims.append((total, no_way))
+    return claims
+
+
 def wasm_test_count(root: Path) -> Optional[int]:
     """
     Count the wasm test functions the way `plugin/tools/validate-plugin.mjs` does.
@@ -250,24 +346,6 @@ def check_readme(readme_path: Path, facts: dict, verbose: bool = False, wasm_tes
             elif verbose:
                 print(f"✓ {readme_path}:{line_num}: slots {actual_slots}, triggers {actual_triggers}")
         
-        # Pattern 6: "272 position × slot combinations, 228 honestly answer No-way"
-        # or "272 个位置 × 槽组合中，228 个如实回答 无路"
-        combinations_match = re.search(r'(\d+).*?(position|位置).*?(\d+).*?(no-way|无路)', line, re.IGNORECASE)
-        if combinations_match:
-            actual_total = int(combinations_match.group(1))
-            actual_no_way = int(combinations_match.group(3))
-            expected_total = combinations['total']
-            expected_no_way = combinations['no_way']
-            
-            if actual_total != expected_total or actual_no_way != expected_no_way:
-                errors.append(
-                    f"{readme_path}:{line_num}: combinations: "
-                    f"expected ({expected_total}, {expected_no_way}), "
-                    f"got ({actual_total}, {actual_no_way})"
-                )
-            elif verbose:
-                print(f"✓ {readme_path}:{line_num}: combinations {actual_total}/{actual_no_way}")
-        
         # Pattern 7: "One group: 20 · 44 · 9" (standalone, not in compact form)
         group_standalone = re.search(r'(group|群体).*?(\d+).*?(\d+).*?(\d+)', line, re.IGNORECASE)
         if group_standalone and '·' in line and 'src' not in line.lower():
@@ -293,6 +371,34 @@ def check_readme(readme_path: Path, facts: dict, verbose: bool = False, wasm_tes
                 )
             elif verbose:
                 print(f"✓ {readme_path}:{line_num}: society standalone {actual}")
+
+    # --- position x slot combinations ------------------------------------
+    # Checked over logical lines, because a README wraps its prose and this
+    # sentence is the one that most often straddles a line break. Reading it
+    # per physical line meant the English copy was never checked at all.
+    expected_total = combinations['total']
+    expected_no_way = combinations['no_way']
+    claims_seen = 0
+    for line_num, logical in logical_lines(lines):
+        for actual_total, actual_no_way in combination_claims(logical):
+            claims_seen += 1
+            if actual_total != expected_total or actual_no_way != expected_no_way:
+                errors.append(
+                    f"{readme_path}:{line_num}: combinations: "
+                    f"expected ({expected_total}, {expected_no_way}), "
+                    f"got ({actual_total}, {actual_no_way})"
+                )
+            elif verbose:
+                print(f"✓ {readme_path}:{line_num}: combinations {actual_total}/{actual_no_way}")
+    if claims_seen == 0:
+        # "cannot see it" is not "it matches": a README that dropped the
+        # sentence entirely would otherwise pass this check by saying nothing.
+        errors.append(
+            f"{readme_path}: no position x slot combination claim found -- "
+            f"the criterion cannot see it, which is not the same as it matching"
+        )
+    elif verbose:
+        print(f"✓ {readme_path}: {claims_seen} position x slot claim(s) checked")
 
     # --- wasm test count ------------------------------------------------
     # Published 0.1.31 shipped a README claiming 205 tests in one place and 209

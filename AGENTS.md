@@ -281,33 +281,48 @@ auto-bumped pins would test something other than what the tag publishes.
 Because nothing in the build checks the pins were honoured, `tools/validate_resolved_deps.py`
 asserts the resolved tree against them (see the drift detectors above).
 
-### moon 0.1.20261028 removed `moonbitlang/core/abort` (measured 2026-10-30)
+### moon 0.1.20261028 removed `moonbitlang/core/abort` (migrated 2026-10-30)
 
-The toolchain this tree was measured on is **moon 0.1.20261023**. A newer local
-toolchain (0.1.20261028) **silently moved under the repository**, and it removed the
-`moonbitlang/core/abort` package: `abort` is now a compiler builtin (the new
-`lib/core/builtin` calls it unqualified). So on 0.1.20261028 **every `moon` command
-fails before it does anything**:
+The tree was measured on **moon 0.1.20261023** until 0.1.20261028 came out — and that
+release **removed the `moonbitlang/core/abort` package**: `abort` is a compiler builtin
+now (the new `lib/core/builtin` calls it unqualified). The tree imported that package in
+`cmd/main/moon.pkg` and `cmd/coord/moon.pkg` and called `@abort.abort(...)`, so on the new
+toolchain **every `moon` command failed before it did anything**:
 
 ```
 Error: Failed to calculate build plan
   1: Cannot find import 'moonbitlang/core/abort' in riantr/pyroduct/cmd/coord@0.1.33
 ```
 
-This is a **toolchain migration, not a code defect**, and it is not a local edit away:
-`cmd/main/moon.pkg` and `cmd/coord/moon.pkg` import `moonbitlang/core/abort` and call
-`@abort.abort(...)`. No single import spelling works on both toolchains, so migrating
-means all of: drop the import, call `abort(...)` unqualified, bump `MOON_VERSION` in
-`gate.yml` **and** `publish.yml`, re-measure `moon fmt --check` (the formatter moves too),
-and **re-pin the bridge** (`plugin/vendor/BUILD.json` records the sha256 of the compiled
-`jsoncli.js`, which the new compiler will produce differently) with a plugin version
-bump. That is a release-scale act under the release policy, so it is deliberately **not**
-done as a side effect of unrelated work.
+**The pinned toolchain could not be kept.** Every versioned install path answers 403 —
+`cli.moonbitlang.com/binaries/<version>/…` and `cores/core-<version>.tar.gz` — including
+for the version being released (measured 2026-10-30). Only `binaries/latest` answers, so
+the tree has to be measured on whatever is newest, and the `MOON_VERSION` assertion in the
+workflows is what turns that into a loud failure instead of a silent one. CI run
+`41071354720` is the measured example: it died at "Install moon" with
+`this tree was measured on moon 0.1.20261023; the runner has 0.1.20261028`, before
+reading a single repository file.
 
-CI is unaffected: both workflows pin `MOON_VERSION: 0.1.20261023` and **fail loudly** if
-the runner disagrees, so the published artifact is built with the toolchain this tree
-targets. Until the migration lands, a local `moon check` / `moon test` on 0.1.20261028
-cannot run at all — measure on the pinned toolchain, or migrate deliberately.
+**What the migration was** — six lines of substance:
+- drop `"moonbitlang/core/abort"` from `cmd/main/moon.pkg` and `cmd/coord/moon.pkg`;
+- call `abort(...)` unqualified instead of `@abort.abort(...)` (both sites already
+  `eprintln` the human-readable message first, so the behaviour is unchanged);
+- bump `MOON_VERSION` to `0.1.20261028` in `gate.yml` **and** `publish.yml`.
+
+**What it did not touch**: the generated interfaces do not move (`moon info` produces no
+diff), so `audit/iface_data.mbt` and the `tools/ifacescan` expectations stay valid;
+`moon fmt --check` stays clean; the suite stays 211/211 and the five native packages stay
+green.
+
+**The bundle was deliberately NOT re-pinned.** `plugin/vendor/BUILD.json` still records the
+0.1.20261023 build and the vendored `jsoncli.js` is still that bundle — correct, because
+`builtWith` is a *provenance* record of the artifact rather than a copy of a pin, and the
+model it embeds did not change (the migration touched `cmd/main` and `cmd/coord`, which
+are not part of `cmd/jsoncli`). CI never asserted those bytes anyway:
+`tools/ci_plugin_gate.sh` builds a fresh bundle and demotes sha/bytes to a warning while
+keeping the behavioural suite fatal — "Do not 'fix' this by re-pinning from CI". The next
+release's `update-bundle.mjs` run will re-pin it and bump the plugin version; that belongs
+to the release, not to a toolchain move.
 
 ## MiniMax Code plugin (`plugin/`)
 

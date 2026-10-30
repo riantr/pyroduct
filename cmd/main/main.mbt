@@ -104,7 +104,7 @@ fn main raise {
       eprintln(
         "未知子命令：\{format}。可用子命令见本文件顶部的用法清单（report／slots／loop／audit／… 共 37 个），或跑 `moon run cmd/main -- report` 取默认报告。",
       )
-      @abort.abort("unknown subcommand")
+      abort("unknown subcommand")
     }
   }
 }

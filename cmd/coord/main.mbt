@@ -44,6 +44,6 @@ async fn main {
     eprintln(
       "协调器检查点往返失败：写出去的检查点读回来不一样（round_trips=\{back.round_trips()}，与写前一致=\{same}）。检查点的序列化或恢复坏了。",
     )
-    @abort.abort("coordinator checkpoint round-trip failed")
+    abort("coordinator checkpoint round-trip failed")
   }
 }

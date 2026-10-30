@@ -99,9 +99,9 @@ jobs:
         # a toolchain nobody measured it on. Asserting the version turns that
         # silent drift into a red run that names both versions.
         # The local toolchain on the day of this measurement was
-        # moon 0.1.20261023 (build 3778465) with moonc v0.10.17+d971670cd.
+        # moon 0.1.20261028 (build e1e1f15) with moonc v0.10.18+6c83a7f62.
         env:
-          MOON_VERSION: "0.1.20261023"
+          MOON_VERSION: "0.1.20261028"
         run: |
           set -euo pipefail
           curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash

@@ -7,15 +7,14 @@ detector that watches the copies of the dependency pins.
 
 Two criteria live in that detector, and both are the kind that rot silently:
 
-  1. every `package@version` literal in the tracked tree matches the pin, and
+  1. every `package@version` literal in the tree matches the pin, and
   2. every claim of HOW MANY literals the tree holds matches the tree.
 
 The second one exists because the first is not enough. A release bumps a pin
 and the copies move with it, but the *count* of those copies is a number
 written in prose somewhere else, and nothing was watching it: three places in
-the tree said 53 literals while the scan measured 55. A detector that watches
-the copies but not the count of the copies is a detector with a hole shaped
-exactly like the drift it was written for.
+the tree said 53 while the scan measured something else, and the drift went
+unnoticed for a whole release.
 
 The first case below also guards a hole that was found in the same file. The
 detector's docstring claimed it caught a literal "that a wrapped line splits
@@ -24,6 +23,28 @@ across two lines was two strings and never matched -- measured: 0 found,
 while the same literal on one line was found once. Case 2 splits a literal
 across two lines and makes it stale; before the fix the detector was green on
 it, which is the shape of a criterion that cannot fail.
+
+Case 3 covers a blind spot the other two could not: a file that is not staged
+yet is not in `git ls-files`, so a detector whose subject is the tracked tree
+cannot see it. The gap is exactly the size of "the file you just wrote" -- the
+local gate was green on a file that CI then found stale, because the file only
+became tracked when it was committed.
+
+WHY THIS FILE BUILDS ITS OWN STRINGS
+-------------------------------------
+Every string this control breaks is assembled at RUN TIME, never written out
+here. Two reasons, both learned the hard way:
+
+  - a version written as `package@version` in this file's source is an
+    attributable literal, and the detector would flag it -- so the control
+    would be the thing breaking the tree it is meant to test;
+  - a phrase like "N literals" in this file's source is a COUNT CLAIM, and
+    the detector checks every count claim in the tree.
+
+So the package name and the versions are kept in separate variables, and the
+count claims are formatted from numbers. A previous version of this file broke
+both rules at once, and the CI run caught it: the control was red before it
+had ever been run.
 
 Each case here breaks ONE thing and requires three things of the detector
 that is supposed to catch it:
@@ -59,8 +80,57 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BACKUP_DIR = os.path.join(ROOT, "_build", "pin_copies_control")
+sys.path.insert(0, os.path.join(ROOT, "tools"))
+
+from validate_resolved_deps import read_moon_mod  # noqa: E402
 
 CRITERION = "tools/validate_pin_copies.py"
+
+# The package whose pin this control breaks. The version is NEVER written
+# next to it in this file -- see the note above the imports.
+PINNED_PACKAGE = "riantr/moonbit_doubleML"
+
+# The tree's own count of its literals, as the tree states it today. A
+# release that moves the count must move this too: the `old` text has to
+# occur exactly once in AGENTS.md, and the control says so out loud when it
+# does not, because a control that quietly does not apply is not a control.
+TREE_LITERALS = 56
+TREE_FILES = 19
+
+
+def pin_version(package):
+    """The version moon.mod pins for `package`, read at run time.
+
+    Read from moon.mod rather than written here, so the control survives a
+    pin bump: the README's copy of the literal moves with the pin, and this
+    file reads whichever version is current.
+    """
+    _, pins = read_moon_mod()
+    return pins[package]
+
+
+GOOD_VERSION = pin_version(PINNED_PACKAGE)
+# A version that cannot be the pin, so the detector must reject it.
+STALE_VERSION = "0.0.1"
+
+GOOD_LITERAL = "%s@%s" % (PINNED_PACKAGE, GOOD_VERSION)
+STALE_LITERAL = "%s@%s" % (PINNED_PACKAGE, STALE_VERSION)
+
+# The count claim under test, and the broken one. Both are formatted from
+# numbers, so this file states no count claim of its own.
+GOOD_COUNT_CLAIM = "%d literals, %d files" % (TREE_LITERALS, TREE_FILES)
+BROKEN_COUNT_CLAIM = "%d literals, %d files" % (TREE_LITERALS - 1, TREE_FILES)
+COUNT_MISMATCH = "claims %d literals, the tree has %d" % (
+    TREE_LITERALS - 1,
+    TREE_LITERALS,
+)
+
+# The README sentence that carries the literal, and the same sentence with the
+# literal broken across two lines and made stale.
+README_OLD = "`%s` → `dmlref`" % GOOD_LITERAL
+README_NEW = "`%s` → `dmlref`" % (
+    "%s@\n  %s" % (PINNED_PACKAGE, STALE_VERSION),
+)
 
 # (description, file, [(old, new), ...], criterion, [required substrings])
 #
@@ -71,23 +141,23 @@ CASES = [
     (
         "the tree's own count of its literals",
         "AGENTS.md",
-        [("56 literals, 19 files", "55 literals, 19 files")],
+        [(GOOD_COUNT_CLAIM, BROKEN_COUNT_CLAIM)],
         CRITERION,
-        ["AGENTS.md:", "claims 55 literals, the tree has 56"],
+        ["AGENTS.md:", COUNT_MISMATCH],
     ),
     (
         "a literal split across two lines -- the wrap the docstring promised to catch",
         "README.mbt.md",
-        [
-            (
-                "`riantr/moonbit_doubleML@0.164.56` → `dmlref`",
-                "`riantr/moonbit_doubleML@\n  0.164.55` → `dmlref`",
-            )
-        ],
+        [(README_OLD, README_NEW)],
         CRITERION,
-        ["README.mbt.md:", "riantr/moonbit_doubleML@0.164.55"],
+        ["README.mbt.md:", STALE_LITERAL],
     ),
 ]
+
+# The probe for the third case: a file that is NOT tracked, holding a stale
+# literal. The detector must see it anyway.
+PROBE_REL = "tools/_pin_copies_probe.txt"
+PROBE_NAME = "pin_copies_probe"
 
 
 def sha256(path):
@@ -135,6 +205,44 @@ def take_backup(name, data):
     with open(path, "wb") as handle:
         handle.write(data)
     return path
+
+
+def run_untracked_case(verbose):
+    """The third case: a stale literal in a file that is not staged yet.
+
+    The probe file is created, the detector must go red and name it, and the
+    file is removed again -- on every exit path, including an exception.
+    """
+    probe = os.path.join(ROOT, PROBE_REL)
+    body = ("a stale literal in a file that is not staged yet: %s\n" % STALE_LITERAL).encode("utf-8")
+    existed = os.path.exists(probe)
+    previous = None
+    if existed:
+        with open(probe, "rb") as handle:
+            previous = handle.read()
+    try:
+        with open(probe, "wb") as handle:
+            handle.write(body)
+        code, out = run_criterion(CRITERION)
+    finally:
+        if existed:
+            with open(probe, "wb") as handle:
+                handle.write(previous)
+        elif os.path.exists(probe):
+            os.remove(probe)
+
+    red = code != 0
+    named = PROBE_NAME in out and STALE_LITERAL in out
+    status = "CAUGHT" if (red and named) else "SURVIVED"
+    print(
+        "[%s] a stale literal in a file that is not staged yet -> %s exit=%d named=%s"
+        % (status, CRITERION, code, named)
+    )
+    if verbose or status != "CAUGHT":
+        for line in out.splitlines():
+            if "FAIL" in line or "claims" in line or "says" in line:
+                print("        " + line.strip())
+    return status == "CAUGHT"
 
 
 def main():
@@ -194,6 +302,9 @@ def main():
                 if "FAIL" in line or "claims" in line or "says" in line:
                     print("        " + line.strip())
 
+    if not run_untracked_case(verbose):
+        failures.append("a stale literal in a file that is not staged yet")
+
     # The tree must be exactly as it was, whatever happened above.
     for name, (_, before) in backups.items():
         now = sha256(os.path.join(ROOT, name))
@@ -204,11 +315,11 @@ def main():
 
     print()
     if failures:
-        print("FAILED: %d of %d control(s): %s" % (len(failures), len(CASES), failures))
+        print("FAILED: %d of %d control(s): %s" % (len(failures), len(CASES) + 1, failures))
         return 1
     print(
         "all %d controls went red, named the place they caught, and left the tree byte-for-byte"
-        % len(CASES)
+        % (len(CASES) + 1)
     )
     return 0
 

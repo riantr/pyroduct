@@ -64,6 +64,38 @@ def fail(message):
     sys.exit(1)
 
 
+def untracked_files():
+    """Return the repo's untracked, NOT-ignored files, as paths relative to ROOT.
+
+    A file that has not been staged yet is not in `git ls-files`, so a
+    detector whose subject is the tracked tree cannot see it -- and that gap
+    is exactly the size of "the file you just wrote". It was not
+    hypothetical: the local gate was green on a file that CI then found
+    stale, because the file only became tracked when it was committed, and
+    the two runs were a day apart.
+
+    So the stale-literal scan also covers these: they are exactly the files
+    that are about to be published. The COUNT does not -- a count that
+    depends on what happens to be lying in the working directory is not a
+    fact about the tree, and the number quoted in the prose would rot with
+    every scratch file.
+    """
+    try:
+        proc = subprocess.run(
+            ["git", "ls-files", "--others", "--exclude-standard", "-z"],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+        if proc.returncode == 0:
+            return [name for name in proc.stdout.split("\0") if name]
+    except OSError:
+        pass
+    return []
+
+
 def tracked_files():
     """Return the repo's tracked files, as paths relative to ROOT."""
     try:
@@ -248,30 +280,52 @@ def main():
         "%s@%s" % (n, v) for n, v in sorted(expected.items()))))
     print("scanning tracked files for `package@version` literals\n")
 
-    for rel_path in tracked_files():
+    def scan_one(rel_path, count_it):
+        """Scan one file for literals; append any mismatch to `problems`.
+
+        count_it: whether this file's literals count towards the tree's
+        total. The total describes the TRACKED tree, so it does not move
+        with whatever happens to be lying in the working directory.
+        """
+        nonlocal checked
         if rel_path.endswith(SKIP_SUFFIXES):
-            continue
+            return
         matches, skipped = scan_file(rel_path, expected)
         if skipped:
-            continue
-        if matches:
+            return
+        if count_it and matches:
             files_with_literals.add(rel_path)
         for package, version, line in matches:
-            checked += 1
-            per_package[package] += 1
+            if count_it:
+                checked += 1
+                per_package[package] += 1
             want = expected[package]
             if version != want:
                 problems.append(
                     "%s:%d says %s@%s but the pin is %s" % (rel_path, line, package, version, want)
                 )
                 print("FAIL  %s:%d  %s@%s  (pin: %s)" % (rel_path, line, package, version, want))
-            elif verbose:
+            elif verbose and count_it:
                 print("ok    %s:%d  %s@%s" % (rel_path, line, package, version))
+
+    tracked = tracked_files()
+    for rel_path in tracked:
+        scan_one(rel_path, True)
+
+    # The files that are not tracked yet are scanned too -- for a STALE
+    # literal only. They are the files that are about to be published, and a
+    # detector that cannot see them says nothing about them.
+    tracked_set = set(tracked)
+    pending = [name for name in untracked_files() if name not in tracked_set]
+    if pending:
+        print("also scanning %d untracked (not yet staged) file(s)" % len(pending))
+        for rel_path in pending:
+            scan_one(rel_path, False)
 
     print("\n--- coverage ---")
     for name in sorted(expected):
         print("  %-36s pin %-12s %d literal(s) checked" % (name, expected[name], per_package[name]))
-    print("  %d literal(s) in total" % checked)
+    print("  %d literal(s) in total (tracked tree)" % checked)
     print("  across %d file(s)" % len(files_with_literals))
 
     if not checked:

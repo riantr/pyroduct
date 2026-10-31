@@ -126,13 +126,20 @@ python tools/readme_control.py        # positive control for the two README
                                        # file byte-for-byte (sha256).
 python tools/pin_copies_control.py    # positive control for the pin-copy
                                        # detector: breaks the tree's own count
-                                       # of its literals, and splits a literal
-                                       # across two lines; both must go RED and
-                                       # name the place they caught, and the
-                                       # files must come back byte-for-byte.
+                                       # of its literals, splits a literal
+                                       # across two lines, and leaves a stale
+                                       # literal in a file that is not
+                                       # staged yet; each must go RED and name
+                                       # the place it caught, and the files
+                                       # must come back byte-for-byte.
                                        # Wired into gate.yml — a detector whose
                                        # pattern is narrowed later would
                                        # otherwise stay green and toothless.
+                                       # Its own source must hold no literal
+                                       # and no count claim: it breaks both
+                                       # kinds on purpose, so a string in the
+                                       # control would be the thing breaking
+                                       # the tree it is testing.
 python tools/validate_pin_copies.py   # asserts every `package@version` literal
                                        # in the tracked tree equals the pin it
                                        # copies (moon.mod for a pinned package,
@@ -259,6 +266,12 @@ Six drift detectors run in CI on every push and PR:
   too. Note what that means for prose: a version named as a *bare number* (`0.163.3 深用`) is
   left alone, but one written as `package@version` is a copy of the pin and must equal it — so
   you cannot even quote an old version in that form.
+  A third thing it does, and the reason the local gate and CI now agree: a **stale** literal is
+  looked for in files that are not staged yet as well. `git ls-files` does not list them, so
+  the blind spot was exactly the size of "the file you just wrote" — the local gate was green
+  on a file that CI then found stale, because the file only became tracked when it was
+  committed. The **count** stays over the tracked tree only: a number that moves with whatever
+  happens to be lying in the working directory is not a fact about the tree.
 - **`python tools/validate_readme_facts.py`** — parses both READMEs for numerical claims
   about states, transitions, phases, triggers and slots, and compares them against the
   ground truth extracted from source. Catches the drift where the model enums moved and

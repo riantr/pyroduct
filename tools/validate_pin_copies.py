@@ -2,8 +2,8 @@
 """Assert every dependency-version literal in the tree matches the pin in moon.mod.
 
 Why this exists: `moon.mod` names the versions the release builds against, but
-the repository also *states* those versions in prose -- 55 places as of
-2026-10-31, across 19 files: the two READMEs, AGENTS.md, the architecture DOT
+the repository also *states* those versions in prose -- 56 literals across 19 files
+as of 2026-10-31: the two READMEs, AGENTS.md, the architecture DOT
 and DSL files, the package doc comments, the rendered face text ("依赖：
 `riantr/moonbit_doubleML@0.164.56`"), the plugin's face catalog, and both
 skill copies. Every one of those is a SECOND COPY of the pin.
@@ -15,7 +15,7 @@ dependencies, then run the gate") silently created a trap: bump the pin in
 never against what the repository says -- and the repository starts lying about
 which version it was built against. It has already happened in this repo: the
 `multi` face catalog said `R1-R12` while the module printed `R1-R14`, and the
-four dependency versions are restated in 19 files by hand.
+four dependency versions are restated in 19 files by hand -- 56 literals in all.
 
 So: every `package@version` literal in a tracked file must equal the version
 `moon.mod` pins for that package. For a transitive dependency (one we do not
@@ -49,6 +49,14 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Files whose contents are generated or vendored; their version strings are
 # the generator's business, not the pin's.
 SKIP_SUFFIXES = (".zip", ".wasm", ".js.map", ".png", ".jpg", ".pdf", ".mbti")
+
+# How the tree TALKS ABOUT its own literal count. "literals" is the word this
+# quantity is always called; "places" and "files" are not, and matching those
+# would sweep in unrelated counts (the READMEs say "3 places", "34 places",
+# "91 files", "29 files"). So the literal count has its own word, and the file
+# count is only read on a line that already claims a literal count.
+LITERAL_COUNT_CLAIM = re.compile(r"(\d+)\s+(?:such\s+)?literals?\b", re.I)
+FILE_COUNT_CLAIM = re.compile(r"(\d+)\s+files\b", re.I)
 
 
 def fail(message):
@@ -84,22 +92,33 @@ def tracked_files():
 
 
 def flatten(text):
-    """Return (flat_text, line_of_index).
+    """Return (compact_text, line_of_index).
 
-    Lines are joined WITHOUT a separator, so a literal that a wrapped line
-    splits in two ("...`riantr/" on one line, "moonbit_static_analysis@0.4.33`"
-    on the next) is still found as one string. The cost is that adjacent lines
-    are treated as continuous text; every match is reported with its line
-    number, so a false join is visible rather than silent.
+    All whitespace is removed, so a literal that a wrapped line splits in two
+    ("...`riantr/moonbit_double" on one line, "ML@0.164.56`" on the next) is
+    still found as one string. The cost is that adjacent lines are treated as
+    continuous text; every match is reported with the line it starts on, so a
+    false join is visible rather than silent.
+
+    Keeping the newline instead -- which is what this used to do -- left the
+    text unchanged, so a literal broken across two lines stayed two strings
+    and never matched: measured, 0 found where the same literal on one line
+    was found once. Dropping the newline alone was not enough either, because
+    the continuation line's indentation still separated the package name from
+    its version. A detector that does not do what it says is worse than one
+    that admits a gap, because the gap is then invisible.
     """
     chars = []
     lines = []
     line = 1
     for char in text:
-        chars.append(char)
-        lines.append(line)
         if char == "\n":
             line += 1
+            continue
+        if char.isspace():
+            continue
+        chars.append(char)
+        lines.append(line)
     return "".join(chars), lines
 
 
@@ -131,6 +150,68 @@ def scan_file(rel_path, packages):
     return found, False
 
 
+def check_count_claims(literal_count, file_count):
+    """Assert every "N literals" claim in the tree equals the measured count.
+
+    A claim of the shape "N literals" states how many dependency-version
+    literals the tree holds. That number moves whenever a release bumps a pin
+    and adds or removes a copy -- so the claim is a SECOND COPY of a measured
+    number, exactly the thing this file exists to catch. It rotted for real:
+    three places in the tree said 53 while this scan measured 55, and nothing
+    was watching, because the number itself was never checked. (It measured 56
+    once the scan could see a literal split across two lines -- one of the 55
+    was a stale copy hiding in a wrap.)
+
+    The check is by pattern over EVERY occurrence, not by reading one blessed
+    location: a check that read only the first claim would happily accept a
+    stale second one. And the file count is read only on a line that already
+    makes a literal claim, so it cannot pick up an unrelated "N files" -- this
+    tree has several (91 estimator files, 29 architecture files, 21
+    interfaces), and a detector that compared those against this file's count
+    would report a disagreement that is not one.
+
+    Every line is checked, including lines inside fenced code blocks: the
+    AGENTS.md claim that rotted sits in a console transcript, and a detector
+    that skipped code would not have seen it.
+
+    Returns a list of problem strings; empty means every claim agrees.
+    """
+    problems = []
+    for rel_path in tracked_files():
+        if rel_path.endswith(SKIP_SUFFIXES):
+            continue
+        full = os.path.join(ROOT, rel_path)
+        try:
+            with open(full, "rb") as handle:
+                raw = handle.read()
+        except OSError:
+            continue
+        if b"\0" in raw:
+            continue
+        try:
+            text = raw.decode("utf-8")
+        except UnicodeDecodeError:
+            continue
+        for number, line in enumerate(text.splitlines(), 1):
+            claim = LITERAL_COUNT_CLAIM.search(line)
+            if not claim:
+                continue
+            claimed = int(claim.group(1))
+            if claimed != literal_count:
+                problems.append(
+                    "%s:%d claims %d literals, the tree has %d"
+                    % (rel_path, number, claimed, literal_count)
+                )
+            for files_claim in FILE_COUNT_CLAIM.finditer(line):
+                files_claimed = int(files_claim.group(1))
+                if files_claimed != file_count:
+                    problems.append(
+                        "%s:%d claims %d files, the tree has %d"
+                        % (rel_path, number, files_claimed, file_count)
+                    )
+    return problems
+
+
 def main():
     verbose = "--verbose" in sys.argv
     tree_json_path = None
@@ -160,6 +241,7 @@ def main():
     problems = []
     checked = 0
     per_package = {name: 0 for name in expected}
+    files_with_literals = set()
 
     print("=== Dependency version literals ===")
     print("pins from moon.mod: %s" % (", ".join(
@@ -172,6 +254,8 @@ def main():
         matches, skipped = scan_file(rel_path, expected)
         if skipped:
             continue
+        if matches:
+            files_with_literals.add(rel_path)
         for package, version, line in matches:
             checked += 1
             per_package[package] += 1
@@ -188,18 +272,29 @@ def main():
     for name in sorted(expected):
         print("  %-36s pin %-12s %d literal(s) checked" % (name, expected[name], per_package[name]))
     print("  %d literal(s) in total" % checked)
+    print("  across %d file(s)" % len(files_with_literals))
 
     if not checked:
         # A scan that found nothing is a scan that found nothing, not a pass.
         fail("no `package@version` literal was found in the tracked tree -- the scan is broken, not the tree")
 
+    count_problems = check_count_claims(checked, len(files_with_literals))
+
     if problems:
         print("\nFAILURES: %d" % len(problems))
         for problem in problems:
             print("  - " + problem)
+
+    if count_problems:
+        print("\nFAILURES: %d count claim(s) in the tree do not match the tree" % len(count_problems))
+        for problem in count_problems:
+            print("  - " + problem)
+
+    if problems or count_problems:
         return 1
 
     print("\nEvery dependency version literal matches the pin it copies.")
+    print("Every claim of how many there are matches the tree too.")
     return 0
 
 

@@ -98,7 +98,7 @@ jobs:
       - name: The resolved dependency tree must match the pins
         run: python tools/validate_resolved_deps.py
 
-      # The pins are also stated, in prose, all over the repository: 53
+      # The pins are also stated, in prose, all over the repository: 56
       # `package@version` literals across the READMEs, AGENTS.md, the
       # architecture files, the package doc comments, the rendered face text,
       # the plugin's face catalog and both skill copies. Every one of those is
@@ -236,3 +236,17 @@ jobs:
         # writes the diagnosis into the job summary, which IS readable without
         # credentials (check-runs -> output.summary).
         run: bash tools/ci_plugin_gate.sh
+
+      # ---- positive controls ----
+      #
+      # A detector that cannot fail is not a detector, and nothing in a green
+      # run says whether the pin-copy detector still has teeth: a future edit
+      # that narrows its pattern would leave this job green and the drift
+      # unwatched. So the control runs here and re-makes the proof on every
+      # push: break one thing, require the criterion to go red AND name the
+      # place it caught, then require the file back byte-for-byte.
+      #
+      # It runs LAST on purpose: it edits real files, and if its restore ever
+      # failed, the steps above would already have read the tree it touched.
+      - name: control · the pin-copy detector must still catch a broken copy
+        run: python tools/pin_copies_control.py

@@ -696,6 +696,56 @@ REPLAY = [
     ),
 ]
 
+# 「另一根轴」组。审的是 `exitable_slots`／`moving_slots`／`undecided_at` 这三条
+# 新查询：它们答的是**表的事实**，而下游（`riantr/MAKED`）曾经把这三件事在自
+# 己的数据副本上重建了一遍。判据是拿**独立枚举**对着核的，所以这里每一条都要
+# 把答案改坏——恒空、恒真、把「有边」与「会挪动」混作一谈、把「未定」与「同归」
+# 混作一谈——而判据必须变红。
+AXIS = [
+    (
+        "X1 可推动的槽恒空（下游拿到一份空清单）",
+        "src/loop.mbt",
+        'pub fn exitable_slots(state : SubjectState) -> Array[Slot] {\n  let out : Array[Slot] = []\n  for k in all_slots() {\n    if exitable(state, k) {\n      out.push(k)\n    }\n  }\n  out\n}',
+        'pub fn exitable_slots(state : SubjectState) -> Array[Slot] {\n  let out : Array[Slot] = []\n  out\n}',
+    ),
+    (
+        "X2 可推动的槽恒真（八槽全给，缺口被抹平）",
+        "src/loop.mbt",
+        'pub fn exitable_slots(state : SubjectState) -> Array[Slot] {\n  let out : Array[Slot] = []\n  for k in all_slots() {\n    if exitable(state, k) {\n      out.push(k)\n    }\n  }\n  out\n}',
+        'pub fn exitable_slots(state : SubjectState) -> Array[Slot] {\n  let out : Array[Slot] = []\n  for k in all_slots() {\n    out.push(k)\n  }\n  out\n}',
+    ),
+    (
+        "X3 可挪动的槽恒空（位置永远不动）",
+        "src/loop.mbt",
+        'pub fn moving_slots(state : SubjectState) -> Array[Slot] {\n  let out : Array[Slot] = []\n  for k in all_slots() {\n    match step(state, k) {\n      Moved(_, _) => out.push(k)\n      _ => ()\n    }\n  }\n  out\n}',
+        'pub fn moving_slots(state : SubjectState) -> Array[Slot] {\n  let out : Array[Slot] = []\n  out\n}',
+    ),
+    (
+        "X4 把未定也算成挪动（位置其实挪不动）",
+        "src/loop.mbt",
+        'pub fn moving_slots(state : SubjectState) -> Array[Slot] {\n  let out : Array[Slot] = []\n  for k in all_slots() {\n    match step(state, k) {\n      Moved(_, _) => out.push(k)\n      _ => ()\n    }\n  }\n  out\n}',
+        'pub fn moving_slots(state : SubjectState) -> Array[Slot] {\n  let out : Array[Slot] = []\n  for k in all_slots() {\n    match step(state, k) {\n      Moved(_, _) => out.push(k)\n      Open(_) => out.push(k)\n      _ => ()\n    }\n  }\n  out\n}',
+    ),
+    (
+        "X5 是否未定恒假（五处未定点不再被点名）",
+        "src/loop.mbt",
+        'pub fn undecided_at(state : SubjectState) -> Bool {\n  for k in all_slots() {\n    match step(state, k) {\n      Open(_) => return true\n      _ => ()\n    }\n  }\n  false\n}',
+        'pub fn undecided_at(state : SubjectState) -> Bool {\n  for k in all_slots() {\n    match step(state, k) {\n      Open(_) => return false\n      _ => ()\n    }\n  }\n  false\n}',
+    ),
+    (
+        "X6 把同归也算成未定（两个维度混成一种不确定）",
+        "src/loop.mbt",
+        'pub fn undecided_at(state : SubjectState) -> Bool {\n  for k in all_slots() {\n    match step(state, k) {\n      Open(_) => return true\n      _ => ()\n    }\n  }\n  false\n}',
+        'pub fn undecided_at(state : SubjectState) -> Bool {\n  for k in all_slots() {\n    match step(state, k) {\n      Open(_) => return true\n      Same(_, _, _) => return true\n      _ => ()\n    }\n  }\n  false\n}',
+    ),
+    (
+        "X7 有边与挪动混为一谈（可推动的槽只给会挪动的那几根）",
+        "src/loop.mbt",
+        'pub fn exitable_slots(state : SubjectState) -> Array[Slot] {\n  let out : Array[Slot] = []\n  for k in all_slots() {\n    if exitable(state, k) {\n      out.push(k)\n    }\n  }\n  out\n}',
+        'pub fn exitable_slots(state : SubjectState) -> Array[Slot] {\n  moving_slots(state)\n}',
+    ),
+]
+
 GROUPS = {
     "loop1": LOOP1,
     "loop2": LOOP2,
@@ -708,6 +758,7 @@ GROUPS = {
     "deontic": DEONTIC,
     "contract": CONTRACT,
     "replay": REPLAY,
+    "axis": AXIS,
     # 单条复查用的别名，**不进默认跑**：它与 loop5 里的一条重复，默认跑带上
     # 就会在留档里出现两行同名的判定，看起来像跑了两次。
     "l3": [LOOP5[2]],
@@ -725,6 +776,7 @@ DEFAULT_GROUPS = [
     "deontic",
     "contract",
     "replay",
+    "axis",
 ]
 
 # 变异条数**由表算出来**，不写死。我在这份头部里写死过「30 条」，而表里其实
@@ -738,7 +790,7 @@ LOG_HEADER = """# 变异表判定记录（生成物，勿手改）
 
 这张表是 `python tools/mutate_review.py` 的**输出留档**，为的是让
 「每条变异都被判据抓住」这句话不必靠重跑一次破坏工作树的运行来核对。
-重跑方式：`python tools/mutate_review.py`（%d 条变异 × 全量测试，约 20-30 分钟）。
+重跑方式：`python tools/mutate_review.py`（%d 条变异 × 全量测试，约 11-13 分钟）。
 本文件**只由全量跑生成**。`python tools/mutate_review.py loop3` 这样的单组跑会
 另写 `mutation_review_log.loop3.md`，不会碰这份——单组跑曾经把这份全量记录
 覆盖成自己那几行，而我把截断版提交了；工具静默毁掉自己的记录比没有工具更糟。

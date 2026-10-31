@@ -63,7 +63,7 @@
   `cmd/coord`（native 落盘）与 `tools/ifacescan`／`cmd/ifacescan`（`.mbti` 漂移
   绊线，native）；`riantr/moonbit_doubleML@0.164.56` → `dmlref` /
   `causal`；`riantr/snn_mbt@0.166.2` → `snnref`（native）；`riantr/
-  moonbit_static_analysis@0.4.33` → `audit`。其余包只用官方 `moonbitlang/*`。
+  moonbit_static_analysis@0.4.39` → `audit`。其余包只用官方 `moonbitlang/*`。
 
 ## 你拿到什么
 
@@ -74,6 +74,9 @@
 |---|---|---|
 | `@src.step(位置, 槽)` | 五种回执之一 | `Moved` / `Held` / `Open` / `Same` / `Block` |
 | `@src.step_by_trigger(位置, 触发句)` | 同样五种，但点名是哪一句 | 枚举 |
+| `@src.exitable_slots(位置)` | 这个位置上**真的**有出边的那些槽 | `Array[Slot]` |
+| `@src.moving_slots(位置)` | 回执是 `Moved` 的那些槽——真挪得动的那几根 | `Array[Slot]` |
+| `@src.undecided_at(位置)` | 有没有哪根槽让「去哪儿」悬着 | `Bool` |
 | `@multi.encounter(me, other, discourse, claim)` | 一次遭遇的判词 | `Verdict`（6 种） |
 | `@src.spec_json()` | 整台机器作为一份文档 | 约 10 KB 的 JSON 字符串 |
 | `@src.render_report()` / `render_mermaid()` / `render_dot()` | 人读的渲染 | `String` |
@@ -151,6 +154,50 @@
 （`cmd/coord` 把一个检查点经真实磁盘 I/O 往返，并断言它回来时逐字节相同）。这里
 *没有*的是模型：「想」这一步仍是确定性替身。这一层决定什么算改进、什么不许改；做
 思考的模型接在它上面。
+
+### 一个真实的下游使用者：MAKED
+
+上面那三道接缝不是假想的。[`riantr/MAKED`](https://github.com/riantr/MAKED)
+是一个把它们真跑起来的科研服务器，也是本模块有些地方写成今天这个样子的原因。
+
+**MAKED 驱的是什么。** 它的五个域（Model／Data／Experience／Attack／Knowledge）各自
+拥有**一台主体状态机**：34 位置 × 8 驱动槽 × 53 迁移；群体机（20 状态）负责跨域
+协调，社会机（13 位置）托住集体。从 arXiv 取来的论文由关键词启发式映射到 49 个
+触发器之一，那一句驱动一步：
+
+```
+arxiv 论文
+   │  关键词启发式
+   ▼
+49 个触发器之一                       ← 行为标注
+   │  @src.step(位置, 槽)
+   ▼
+Moved／Held／Open／Same／Block         ← 执行反馈
+   │  环指针推进；群体状态协调各域
+   ▼
+DoubleML 闸门：θ̂ > 0 且 95% 下界 > 0   ← 自我修改的准入
+   │  采纳／拒绝／回滚
+   ▼
+只追加账本，然后下一轮
+```
+
+**它从本模块取什么。** 表的事实与表的词汇：`@src.all_states`／`all_slots`／
+`all_triggers` 给位置、槽与边；`label()` 与 `gloss()` 给表自己的中文，`en_*` 一族
+给读者自己的英文（MAKED 的用户可见字符串全部取自英文层，而中文保留下来，因为
+**中文是表的**，不是英文的翻译）；`@src.after_open(位置, 槽, 3)` 回答「接下来可能
+发生什么」；`@src.step_by_trigger` 点名候选边背后那一句；群体与社会两包给集体。
+
+**它付过的学费，也就是本模块坚持「以表为准」的原因。** MAKED 的五个域各自**按语义
+硬编码**了一根驱动槽——「Model 域遇到数据，那么共在是自然的那一槽」。那五根槽在
+迁移表里**全是 `Block`**。十八步之后，没有任何一个位置动过，而页面看上去完全正常：
+环指针在转，历史在长，什么都没发生。这个毛病既不是崩溃，也不是数字算错——它是一台
+看起来活着、其实停在那里的系统。
+
+所以本模块围绕的那条规矩，是 MAKED 用代价换来的：**输出必须是表的事实，不是建模者
+的愿望。**「从这儿、用这根槽，表里有没有路、有路通到哪」是可答的，也答了；「这个
+位置*应该*做什么」不是表的问题，而替表回答它的消费者会以一种没人报告的方式错
+掉。这就是为什么 `Block` 是一等回执、为什么机器不替主体在几条去处里择一、为什么
+消费者拿到的回执是表里那条边，而不是从它推断出来的东西。
 
 ### 因果结论的前提
 
@@ -314,10 +361,38 @@ doubleml-for-py 的替代品——那个 22 个估计器的移植版是本仓消
 
 ### 执行契约（五种结果）
 
-迁 Moved · 守 Held · 未定 Undecided · 同归 Same · 无路 No-way
+| 回执 | 变体名 | English | 原文 |
+|---|---|---|---|
+| 迁 | `Moved` | Moved | 迁 |
+| 守 | `Held` | Held | 守 |
+| 未定 | `Open` | Undecided | 未定 |
+| 同归 | `Same` | Converge | 同归 |
+| 无路 | `Block` | No-way | 无路 |
+
+有两行值得读两遍，因为**变体名与英文读法不是同一个词**：未定的变体是 `Open` 而不是
+`Undecided`，同归的英文是 `Converge` 而不是 `Same`。按英文措辞去匹配变体的消费者编译
+不过——而这个命名不是随意的：`Open` 说的是*表*把去处留开着，`Undecided` 说的是*主体*
+还没决定，而机器不替主体决定。
 
 槽粒度下，多条触发句从同一位置通向同一目标时，机器回「同归」：去处已定，
 但**不点名是哪一句**——因为认不出来，所以不编。要知道是哪一句，用 `step_by_trigger`。
+
+### 同一张表的另一根轴
+
+`exitable_slots(位置)` 对于位置，正如 `positions_reachable_by(槽)` 对于槽：**从这个
+位置真的出得去的那几根槽**，顺序照表。`moving_slots(位置)` 把它收窄到回执是 `Moved`
+的那几根——真把主体挪到别处、而不是挪回原处的那些。`undecided_at(位置)` 问有没有
+哪根槽让「去哪儿」悬着。
+
+这三样是**表的事实**，而且是消费者在**驱动任何东西之前**就需要的。它们之所以在这里
+而不是各 consumer 自己写一份，是因为自己重建的消费者等于做了**第二个副本**，而
+第二个副本是那种没人看得见它何时变错的东西。真有过下游消费者把三样都重建了一遍
+（`riantr/MAKED` 的 `Model::exitable_slots` 那一族），那三样才搬到这里。
+
+在当前真表上：272 个「位置 × 槽」组合里 44 个有边，其中 29 个真挪得动；8 个位置给出
+多于一根槽；而有**恰好一根槽却不挪动**的位置是 5 个——那 5 个正是五处未定
+（自由 × 处境、自身 × 持存、立序 × 反馈、激情 × 反馈、平衡 × 取向）。表在那五处
+给了一条路，却不肯说走哪一条。
 
 ### 群体——阶段（9）
 
@@ -501,7 +576,7 @@ behavior)* · 往返一致 *round-trips identically*。
 
 ```
 moon add riantr/pyroduct
-moon test             # Total tests: 247, passed: 247, failed: 0.
+moon test             # Total tests: 250, passed: 250, failed: 0.
 ```
 
 在本仓库里，每一层都打印一份报告：
@@ -552,7 +627,7 @@ let same : Bool = restored.round_trips()
 
 ## 门禁与漂移检测
 
-基线是 `moon check`、`moon fmt --check`、`moon test`（wasm 247 个测试），
+基线是 `moon check`、`moon fmt --check`、`moon test`（wasm 250 个测试），
 外加两个只跑 native 的包（`snnref`、`tools/ifacescan`）。其上还有六个检测器——
 因为**测试全绿并不说明写在文档里的那句话还对**：
 
@@ -570,6 +645,11 @@ let same : Bool = restored.round_trips()
 
 ## 被谁使用
 
+- [`riantr/MAKED`](https://github.com/riantr/MAKED) — 一个把上面那些接缝真跑起来的
+  科研服务器：每个域一台主体状态机，跨域一台群体机，集体一台社会机；它用 49 个触发器
+  标注行为，把回执当执行反馈，并给自己的自我修改设一道 DoubleML 因果闸门。它也是
+  `exitable_slots` / `moving_slots` / `undecided_at` 留在本模块、而不是各 consumer
+  自己写一份的原因：MAKED 先在自己的数据副本里把这三样都重建了一遍。
 - `cmd/main` — 上面每一层的报告入口：`report` / `slots` / `loop` / `multi` /
   `group` / `society` / `evolution` / `cycle` / `coordinator`，
   `dmlref` / `causal` / `audit` / `fleet` / `mutants` / `mbti`，外加

@@ -12,7 +12,7 @@ Long-form context lives in `README.mbt.md` (English) and `README.zh.mbt.md`
 
 ```console
 moon test                              # all tests (default target: wasm); currently
-                                       # 247/247 on wasm + 2 snnref on native
+                                       # 250/250 on wasm + 2 snnref on native
                                        # + 4 ifacescan on native
 moon test --target native snnref       # spike-sediment experiment (native only)
 moon test --target native tools/ifacescan  # .mbti drift tripwire (native only)
@@ -81,7 +81,8 @@ python tools/mutate_review.py          # review harness: mutation table for all
                                        # Groups: loop1..loop6, props (the predicate
                                        # census), audit (the gate audit), deontic
                                        # (the rule base), contract (DbC), replay
-                                       # (deterministic replay). The harness also
+                                       # (deterministic replay), axis (the other
+                                       # axis of the same table). The harness also
                                        # snapshots and restores the generated
                                        # `pkg.generated.mbti` after every mutation —
                                        # `moon test` rewrites them in place, and a
@@ -123,11 +124,20 @@ python tools/readme_control.py        # positive control for the two README
                                        # and requires the criterion to go RED
                                        # and name the line, then restores the
                                        # file byte-for-byte (sha256).
+python tools/pin_copies_control.py    # positive control for the pin-copy
+                                       # detector: breaks the tree's own count
+                                       # of its literals, and splits a literal
+                                       # across two lines; both must go RED and
+                                       # name the place they caught, and the
+                                       # files must come back byte-for-byte.
+                                       # Wired into gate.yml — a detector whose
+                                       # pattern is narrowed later would
+                                       # otherwise stay green and toothless.
 python tools/validate_pin_copies.py   # asserts every `package@version` literal
                                        # in the tracked tree equals the pin it
                                        # copies (moon.mod for a pinned package,
                                        # the resolved tree for a transitive
-                                       # one). 53 literals, 19 files. Exit 0 if
+                                       # one). 56 literals, 19 files. Exit 0 if
                                        # they agree, 1 if any copy is stale.
 node plugin/tools/validate-plugin.mjs  # plugin anti-drift (the harness prints
                                        # its own count — do not transcribe it:
@@ -234,12 +244,21 @@ Six drift detectors run in CI on every push and PR:
 - **`python tools/validate_pin_copies.py`** — asserts every `package@version` literal in the
   tracked tree equals the version it copies: the pin in `moon.mod` for a pinned package, the
   resolved tree for a transitive one (`riantr/moonbit_image`, which `riantr/snn_mbt` pulls in).
-  There are 53 such literals across 19 files — both READMEs, `AGENTS.md`, the architecture DOT
+  There are 56 such literals across 19 files — both READMEs, `AGENTS.md`, the architecture DOT
   and DSL files, the package doc comments, the rendered face text, the plugin's face catalog and
   both skill copies — and nothing bound them to the pin. So bumping a pin, which the release
   policy does on every release, left the repository still saying the old version with a green
   gate. A version mentioned in words (`0.163.3 深用`, a deliberate feature-depth marker) is not
-  a copy and is left alone.
+  a copy and is left alone. Two things it now also does, both paid for by real drift:
+  it reads the tree with **whitespace removed**, so a literal that a hard-wrapped line splits
+  in two is still one literal (it used to keep the newline, so such a literal was two strings
+  and never matched — which is how `README.zh.mbt.md` kept naming
+  `riantr/moonbit_static_analysis` at 0.4.33 after the pin moved to 0.4.39, in a
+  **published** README, with a green gate); and it asserts the tree's own claim of **how many**
+  literals it holds, because three places said 53 while the scan measured 56 — a count is a copy
+  too. Note what that means for prose: a version named as a *bare number* (`0.163.3 深用`) is
+  left alone, but one written as `package@version` is a copy of the pin and must equal it — so
+  you cannot even quote an old version in that form.
 - **`python tools/validate_readme_facts.py`** — parses both READMEs for numerical claims
   about states, transitions, phases, triggers and slots, and compares them against the
   ground truth extracted from source. Catches the drift where the model enums moved and
@@ -266,6 +285,14 @@ Six drift detectors run in CI on every push and PR:
 
 All six are in `gate.yml` (every push/PR) and `publish.yml` (before release). A drift
 failure is a CI failure — it cannot merge.
+
+On top of the six detectors, `gate.yml` and `publish.yml` also run the **positive
+control** for the pin-copy detector (`python tools/pin_copies_control.py`). A detector
+is only worth its teeth if something proves it still has them, and a green run says
+nothing about that: a later edit that narrows the detector's pattern would leave the
+job green and the drift unwatched. The control breaks one thing per case, requires the
+criterion to go red **and name the place it caught**, and requires the file back
+byte-for-byte.
 
 When you change a `moon.pkg` import, update the DOT diagrams. When you change the test
 count or add/remove a face, update the plugin descriptions. The validators catch it if

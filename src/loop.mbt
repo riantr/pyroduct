@@ -580,6 +580,70 @@ pub fn exitable(state : SubjectState, slot : Slot) -> Bool {
 }
 
 ///|
+/// 该位置**有出边**的槽（顺序照 `all_slots`）。
+///
+/// 这是 `positions_reachable_by` 的**另一根轴**：那一个问「这一槽能推动哪些位置」，
+/// 这一个问「这个位置能被哪些槽推动」。合起来才是「位置 × 槽」那张表的**两侧**
+/// ——`gaps()` 报的是两侧都没连上的格子。
+///
+/// 为什么要列表，而光有 `exitable(state, slot)` 这个逐对判据不够：下游要回答
+/// 「此处能往哪走」时，只能自己把八槽扫一遍才能凑出那份清单，而扫出来的那份
+/// 是**第二个副本**——副本会悄悄过期，且没有人看得见。下游真这么做过一次：
+/// 它把表读成自己的一份数据，然后在数据上重建了这个列表（`riantr/MAKED`
+/// 的 `Model::exitable_slots`）。表既然已经有这个事实，就该由表给出。
+///
+/// 判据是**有边**，不是「会挪动」：`Held`（出路回到自身）与 `Same`（多条来处
+/// 归到同一去处）也是边，只是它们不挪位置。要挪动的槽见 `moving_slots`。
+pub fn exitable_slots(state : SubjectState) -> Array[Slot] {
+  let out : Array[Slot] = []
+  for k in all_slots() {
+    if exitable(state, k) {
+      out.push(k)
+    }
+  }
+  out
+}
+
+///|
+/// 该位置上**回执是 `Moved`** 的槽（顺序照 `all_slots`）。
+///
+/// `Moved` 是五回执里唯一的「唯一出路、且去处不是自身」那一种，所以它才是
+/// 「这一步真挪动了位置」的槽。`Held` 出路回到自身（位置不变）、`Same` 去处
+/// 确定但来处不名、`Open` 未定不落地、`Block` 无路——四种都不算挪动。
+///
+/// 「有边」与「挪动」分开，是为了让下游不必把五种回执各自判一遍。下游若要
+/// 自己的策略（例如优先选会挪动的槽，退而选有边的槽，都没有就报缺口），
+/// 那是**它的**策略：表只负责把事实给全，不替调用方做决定。
+pub fn moving_slots(state : SubjectState) -> Array[Slot] {
+  let out : Array[Slot] = []
+  for k in all_slots() {
+    match step(state, k) {
+      Moved(_, _) => out.push(k)
+      _ => ()
+    }
+  }
+  out
+}
+
+///|
+/// 该位置是否是**未定**（任一槽给 `Open`）。
+///
+/// 「未定」是**去哪儿**没定，要主体决断；它与 `Same`（从哪句来没定而去处已定）
+/// 分开，因为两者的不确定不在一个维度上——`Same` 无需决断，只需不编造。
+///
+/// 全表的未定点清单见 `open_points`；本函数问的是**单个位置**是不是决策点，
+/// 供下游决定「列出候选并等待」还是「照走」。
+pub fn undecided_at(state : SubjectState) -> Bool {
+  for k in all_slots() {
+    match step(state, k) {
+      Open(_) => return true
+      _ => ()
+    }
+  }
+  false
+}
+
+///|
 /// 哪些位置有「由该槽驱动」的出边（顺序照 `all_states`；出边取自邻接索引，
 /// 见 `index.mbt`）。
 pub fn positions_reachable_by(slot : Slot) -> Array[SubjectState] {
@@ -693,6 +757,40 @@ pub fn render_loop_report() -> String {
       "- \{k.designation()}　\{positions_reachable_by(k).length()} 处",
     )
   }
+  lines.push("")
+  lines.push("## 每位置可推动的槽（同一张表的另一根轴）")
+  lines.push(
+    "上一节问「这一槽能推动哪些位置」，这一节反过来问「这个位置能被哪些槽推动」。",
+  )
+  lines.push(
+    "两者都是**表的事实**，不是推断：下游自己把八槽扫一遍重建这份清单，那份清单就是第二个副本。",
+  )
+  let mut stuck = 0
+  for s in all_states() {
+    let ex = exitable_slots(s)
+    if ex.length() == 0 {
+      stuck += 1
+    }
+    let ex_names : Array[String] = []
+    for k in ex {
+      ex_names.push(k.designation())
+    }
+    let mv_names : Array[String] = []
+    for k in moving_slots(s) {
+      mv_names.push(k.designation())
+    }
+    let mover_txt = if mv_names.length() == 0 {
+      "无"
+    } else {
+      mv_names.join("·")
+    }
+    lines.push(
+      "- \{s.designation()}　可推动 \{ex.length()} 槽（\{ex_names.join("·")}）　其中挪动：\{mover_txt}",
+    )
+  }
+  lines.push(
+    "一个出边都没有的位置：\{stuck} 个。此处「出不去」是表的事实，不是缺陷——机器不编造下一步。",
+  )
   lines.push("")
   lines.push("## 只能由「行动」离开的位置")
   for s in only_act_exits() {

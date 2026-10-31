@@ -28,7 +28,7 @@ const BRIDGE_RELATIVE = path.join('_build', 'js', 'debug', 'build', 'cmd', 'json
 const PROVENANCE_FILE = path.join(PLUGIN_ROOT, 'vendor', 'BUILD.json')
 
 const SERVER_NAME = 'pyroduct-model'
-const SERVER_VERSION = '0.3.5'
+const SERVER_VERSION = '0.3.6'
 const DEFAULT_TIMEOUT_MS = 120_000
 const GATE_TIMEOUT_MS = 900_000
 
@@ -249,7 +249,7 @@ const TOOLS = [
   {
     name: 'pyroduct_gates',
     description:
-      'Run the pyroduct module gate suite in a configured checkout: moon check + moon fmt --check + moon test (wasm target, 247 tests), returning per-command exit codes and the tail of each output. Requires PYRODUCT_PROJECT_DIR to point at a riantr/pyroduct checkout; with only the bundled snapshot it reports that the gate is unavailable instead of failing. Use it before and after changing the model.',
+      'Run the pyroduct module gate suite in a configured checkout: moon check + moon fmt --check + moon test (wasm target, 250 tests), returning per-command exit codes and the tail of each output. Requires PYRODUCT_PROJECT_DIR to point at a riantr/pyroduct checkout; with only the bundled snapshot it reports that the gate is unavailable instead of failing. Use it before and after changing the model.',
     inputSchema: { type: 'object', properties: {}, additionalProperties: false },
     readOnly: true,
   },
@@ -343,7 +343,7 @@ async function callTool(name, args, signal) {
             '',
             '要用门禁请在本会话的环境里设 PYRODUCT_PROJECT_DIR 指向 riantr/pyroduct 的 checkout，',
             '然后重试；首次调用会自动跑 `moon build --target js`。',
-            '要跑哪些：moon check、moon fmt --check、moon test（wasm target，247 个测试）。',
+            '要跑哪些：moon check、moon fmt --check、moon test（wasm target，250 个测试）。',
           ].join('\n'),
         )
       }

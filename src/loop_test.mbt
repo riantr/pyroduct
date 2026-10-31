@@ -688,3 +688,159 @@ test "缺口清单上的组合一律走不出（exitable 的反例侧）" {
   // 迁移表里确实有这一处：宁静不因共在而动。
   assert_true(!@src.exitable(@src.Tranquility, @src.CoBeing))
 }
+
+///|
+/// 独立枚举：某位置按每根槽，从迁移表**自己**数出「有几条边」「去处有几个」。
+///
+/// 不调 `step`／`candidates`／`exitable`——那三样正是被验的东西，拿它们当判据
+/// 等于自己判自己。同一份语义、另一条取料路径：两处对不上，就是有一处错了。
+fn axis_oracle(state : @src.SubjectState) -> (Array[Int32], Array[Int32]) {
+  let edge_counts : Array[Int32] = []
+  let target_counts : Array[Int32] = []
+  for k in @src.all_slots() {
+    let edges : Array[@src.SubjectState] = []
+    for t in @src.transitions() {
+      if t.from == state && t.trigger.slot() == k {
+        edges.push(t.to)
+      }
+    }
+    edge_counts.push(edges.length())
+    let distinct : Array[@src.SubjectState] = []
+    for to in edges {
+      if !has_state(distinct, to) {
+        distinct.push(to)
+      }
+    }
+    target_counts.push(distinct.length())
+  }
+  (edge_counts, target_counts)
+}
+
+///|
+/// 「另一根轴」的三条查询，逐条对着**独立枚举**核对。
+///
+/// 判据的来历是下游的用法（`riantr/MAKED`）：它把表读成自己的一份数据，然后在
+/// 数据上重建了 `exitable_slots`／`drive_slot`／`is_undecided` 三件事。这三条查询
+/// 就是那三件事在**表这一侧**的样子，所以判据得盯住它们真的答对了，而不只是
+/// 「有东西返回」。
+///
+/// 三条各自的语义（别混）：
+/// - `exitable_slots`：**有边**的槽。`Held`（回到自身）与 `Same`（来处多而去处一）
+///   也是边。
+/// - `moving_slots`：**回执是 `Moved`** 的槽，即唯一出路且去处不是自身。
+/// - `undecided_at`：任一槽给 `Open`——**去哪儿**没定。与 `Same`（从哪句来没定）
+///   不是一回事，故 `Same` 不算未定。
+test "另一根轴：可推动的槽、可挪动的槽、是否未定——逐条对着独立枚举" {
+  for s in @src.all_states() {
+    let (edge_counts, target_counts) = axis_oracle(s)
+    let slots = @src.all_slots()
+    let want_exitable : Array[@src.Slot] = []
+    let want_moving : Array[@src.Slot] = []
+    let mut want_undecided = false
+    for i = 0; i < slots.length(); i = i + 1 {
+      let k = slots[i]
+      if edge_counts[i] > 0 {
+        want_exitable.push(k)
+        // 唯一一条边且去处不是自身 → `step` 给 `Moved`。
+        if edge_counts[i] == 1 && target_counts[i] == 1 {
+          let only : Array[@src.SubjectState] = []
+          for t in @src.transitions() {
+            if t.from == s && t.trigger.slot() == k {
+              only.push(t.to)
+            }
+          }
+          if only[0] != s {
+            want_moving.push(k)
+          }
+        }
+        // 去处多于一处 → `step` 给 `Open`（未定）。
+        if target_counts[i] > 1 {
+          want_undecided = true
+        }
+      }
+    }
+    let got_exitable = @src.exitable_slots(s)
+    let got_moving = @src.moving_slots(s)
+    assert_eq(got_exitable.length(), want_exitable.length())
+    for i = 0; i < want_exitable.length(); i = i + 1 {
+      assert_true(got_exitable[i] == want_exitable[i])
+    }
+    assert_eq(got_moving.length(), want_moving.length())
+    for i = 0; i < want_moving.length(); i = i + 1 {
+      assert_true(got_moving[i] == want_moving[i])
+    }
+    assert_true(@src.undecided_at(s) == want_undecided)
+  }
+}
+
+///|
+/// 这三条查询答的是**真表**的形状，所以数字本身也要钉住——上面那条只管「答得对不对」，
+/// 这条管「答的是不是这张表」。数字全部实测自 `moon run cmd/main -- loop` 的输出。
+///
+/// 44 = 272 − 228（有一根出边的「位置 × 槽」组合数），与 `gaps()` 的口径必须
+/// 对得上：两条取料路径，一致才算数。
+test "另一根轴的数字：44 根有边、29 根挪动、8 个位置多于一根、5 个位置未定" {
+  let mut exitable_total = 0
+  let mut moving_total = 0
+  let mut multi = 0
+  let mut undecided = 0
+  for s in @src.all_states() {
+    let ex = @src.exitable_slots(s)
+    let mv = @src.moving_slots(s)
+    exitable_total += ex.length()
+    moving_total += mv.length()
+    if ex.length() > 1 {
+      multi += 1
+    }
+    if @src.undecided_at(s) {
+      undecided += 1
+    }
+    // 挪动的槽必是有边的槽：两个清单不许互相越界。
+    for k in mv {
+      assert_true(ex.contains(k))
+    }
+  }
+  // 有边的组合数与缺口清单互补：272 − 228 = 44。
+  assert_eq(exitable_total, 272 - @src.gaps().length())
+  assert_eq(exitable_total, 44)
+  assert_eq(moving_total, 29)
+  assert_eq(multi, 8)
+  assert_eq(undecided, 5)
+  // 没有哪个位置一根出边都没有（那是「缺口」那一侧的说法，见 `gaps()`）。
+  for s in @src.all_states() {
+    assert_true(@src.exitable_slots(s).length() > 0)
+  }
+}
+
+///|
+/// 未定的五处，与「唯一一根出边却不挪动」的五处**是同一批**。
+///
+/// 这是表的一条真性质，不是巧合：出边只有一根且去处唯一，若去处不是自身就是
+/// `Moved`（挪动），否则是 `Held`（回到自身）；而这五处给的是 `Open`（未定）。
+/// 换句话说，**这五处正是表拒绝替主体决定的地方**——有路可走，但走哪条不点名。
+/// 判据把这层关系钉住：把 `undecided_at` 改成恒假，或把 `moving_slots` 把
+/// `Open` 也算成挪动，这里立刻变红。
+test "未定的五处，正是唯一一根出边却不挪动的五处" {
+  let undecided : Array[@src.SubjectState] = []
+  for s in @src.all_states() {
+    if @src.undecided_at(s) {
+      undecided.push(s)
+    }
+  }
+  assert_eq(undecided.length(), 5)
+  for s in undecided {
+    // 唯一一根出边，且那根槽不给 `Moved`。
+    assert_eq(@src.exitable_slots(s).length(), 1)
+    assert_eq(@src.moving_slots(s).length(), 0)
+    // 且那根槽的候选边确有两条、去处确有两处。
+    let k = @src.exitable_slots(s)[0]
+    assert_eq(@src.candidates(s, k).length(), 2)
+  }
+  // 反过来：唯一一根出边却不挪动的，必是未定的那一处。
+  for s in @src.all_states() {
+    if @src.exitable_slots(s).length() == 1 &&
+      @src.moving_slots(s).length() == 0 {
+      assert_true(@src.undecided_at(s))
+    }
+  }
+}

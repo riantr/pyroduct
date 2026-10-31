@@ -194,6 +194,10 @@ jobs:
           python tools/validate_cli_faces.py
           python tools/validate_pin_copies.py
           bash tools/ci_plugin_gate.sh
+          # The positive control for that detector, for the same reason
+          # gate.yml runs it: a release must not ship with a detector whose
+          # pattern has been narrowed into something that cannot fail.
+          python tools/pin_copies_control.py
 
       - name: Publish to Mooncakes
         run: |

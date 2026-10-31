@@ -94,6 +94,9 @@ reports**, not a running service. Concretely:
 |---|---|---|
 | `@src.step(position, slot)` | one of five receipts | `Moved` / `Held` / `Open` / `Same` / `Block` |
 | `@src.step_by_trigger(position, sentence)` | the same five, but the trigger is named | enum |
+| `@src.exitable_slots(position)` | the slots that actually have an edge out of this position | `Array[Slot]` |
+| `@src.moving_slots(position)` | the slots whose receipt is `Moved` — the ones that move you | `Array[Slot]` |
+| `@src.undecided_at(position)` | whether any slot leaves the destination undecided | `Bool` |
 | `@multi.encounter(me, other, discourse, claim)` | a verdict for one exchange | `Verdict` (6 values) |
 | `@src.spec_json()` | the whole machine as one document | a ~10 KB JSON string |
 | `@src.render_report()` / `render_mermaid()` / `render_dot()` | human-readable renderings | `String` |
@@ -188,6 +191,62 @@ disk I/O and asserts it comes back identical). What is *not* here is a model:
 the "think" step is a deterministic stand-in. This layer decides what counts
 as an improvement and what may not be changed; the model that does the
 thinking plugs in above it.
+
+### A real consumer: MAKED
+
+The three seams above are not a hypothetical. [`riantr/MAKED`](https://github.com/riantr/MAKED)
+is a research server that runs them, and it is the reason some of this module
+reads the way it does.
+
+**What MAKED drives.** Its five domains (Model, Data, Experience, Attack,
+Knowledge) each own *a subject state machine*: 34 positions × 8 drive slots ×
+53 transitions, with the group machine (20 states) coordinating across domains
+and the society machine (13 positions) holding the collective. A paper
+fetched from arXiv is mapped by keyword onto one of the 49 triggers, and that
+trigger drives the step:
+
+```
+arxiv paper
+   │  keyword heuristic
+   ▼
+a trigger out of the 49                     ← behaviour labelling
+   │  @src.step(position, slot)
+   ▼
+Moved / Held / Open / Same / Block          ← execution feedback
+   │  ring pointer advances; group state coordinates the domains
+   ▼
+DoubleML gate: θ̂ > 0 and the 95% lower bound > 0   ← admission to self-modification
+   │  accept / reject / roll back
+   ▼
+append-only ledger, then the next round
+```
+
+**What it takes from this module.** The table's facts and its vocabulary:
+`@src.all_states` / `all_slots` / `all_triggers` for the positions, slots and
+edges; `label()` and `gloss()` for the table's own Chinese and the `en_*`
+family for the reader's own English (MAKED renders every user-visible string
+from the English layer and keeps the Chinese because *the Chinese is the
+table's*, not a translation of it); `@src.after_open(position, slot, 3)` for
+"what could happen next"; `@src.step_by_trigger` to name the sentence behind a
+candidate edge; and the `group` and `society` packages for the collective.
+
+**The lesson it paid for, which is the reason this module insists on the
+table.** MAKED's five domains each hard-coded a drive slot by *semantic
+correspondence* — "the Model domain meets data, so co-being is the natural
+slot". Every one of those five slots was `Block` in the table. Eighteen steps
+later, not one position had moved, and the page looked completely normal:
+the ring pointer rotated, the history grew, and nothing was happening. The
+bug was not a crash or a wrong number; it was a system that looked alive and
+was inert.
+
+So the rule this module is built around is the one MAKED learned the hard
+way: **the output must be a fact of the table, not a wish of the modeller.**
+"Does the table have a road from here, in this slot, and where does it go" is
+answerable and is answered; "what *should* this position do" is not the
+table's question, and a consumer that answers it for the table will be wrong
+in a way nothing reports. That is why `Block` is a first-class receipt, why
+the machine never picks one of several destinations for you, and why the
+receipt a consumer gets is the table's edge and not an inference from it.
 
 ### What the causal claim assumes
 
@@ -380,11 +439,47 @@ distinguishes them, it should.
 
 ### Step contract (5 outcomes)
 
-迁 Moved · 守 Held · 未定 Undecided · 同归 Same · 无路 No-way
+| Receipt | Variant | English | Chinese |
+|---|---|---|---|
+| moved | `Moved` | Moved | 迁 |
+| held | `Held` | Held | 守 |
+| undecided | `Open` | Undecided | 未定 |
+| same target | `Same` | Converge | 同归 |
+| no way | `Block` | No-way | 无路 |
+
+Two rows are worth reading twice, because the **variant name and the English
+label differ**: the variant for 未定 is `Open`, not `Undecided`, and the English
+for 同归 is `Converge`, not `Same`. A consumer that matches on the English
+wording rather than the variant will not compile — and the naming is not
+arbitrary: `Open` says the *table* leaves the destination open, while `Undecided`
+says the *subject* has not decided, and the machine does not decide for it.
 
 `Same` is what a slot-granular step returns when several triggers leave one
 position for one target: the destination is settled, the *sentence* is not named,
 so nothing is invented. Use `step_by_trigger` when you need to know which one.
+
+### The other axis of the same table
+
+`exitable_slots(position)` is to a position what `positions_reachable_by(slot)`
+is to a slot: **the slots that actually have an edge out of this position**, in
+the table's own order. `moving_slots(position)` narrows it to the slots whose
+receipt is `Moved` — the ones that take the subject somewhere else rather than
+back to where it was. `undecided_at(position)` asks whether any slot leaves the
+destination undecided.
+
+Those three are facts of the table, and they are facts a consumer needs *before*
+it drives anything. The reason they exist here rather than in each consumer is
+that a consumer who rebuilds them has made a second copy of the table, and a
+second copy is one that can be wrong without anybody noticing. A downstream
+consumer did rebuild all three (`riantr/MAKED`, `Model::exitable_slots` and
+friends) before they were here.
+
+On the current table: 44 of the 272 position × slot pairs have an edge, 29 of
+those actually move the subject, 8 positions offer more than one slot, and 5
+positions offer exactly one slot that **does not move them** — and those five
+are exactly the five undecided points (自由 × 处境, 自身 × 持存, 立序 × 反馈,
+激情 × 反馈, 平衡 × 取向). The table gives you a road there and refuses to say
+which one.
 
 ### Group — phases (9)
 
@@ -578,7 +673,7 @@ Add the module, then run the suite:
 
 ```
 moon add riantr/pyroduct
-moon test             # Total tests: 247, passed: 247, failed: 0.
+moon test             # Total tests: 250, passed: 250, failed: 0.
 ```
 
 From this repository, every layer prints a report:
@@ -629,7 +724,7 @@ let same : Bool = restored.round_trips()
 
 ## Gates and drift detectors
 
-`moon check`, `moon fmt --check`, `moon test` (247 wasm tests) plus the two
+`moon check`, `moon fmt --check`, `moon test` (250 wasm tests) plus the two
 native-only suites (`snnref`, `tools/ifacescan`) are the baseline. Six
 detectors run on top, because a green suite says nothing about a claim written
 in prose:
@@ -649,6 +744,13 @@ every push and PR, and again in `publish.yml` before a release.
 
 ## Used By
 
+- [`riantr/MAKED`](https://github.com/riantr/MAKED) — a research server that runs
+  one subject state machine per domain, the group machine across domains and the
+  society machine for the collective; it labels behaviour with the 49 triggers,
+  takes the receipts as execution feedback, and gates its own self-modification
+  on a DoubleML causal effect. It is also why `exitable_slots` /
+  `moving_slots` / `undecided_at` are here rather than in each consumer: MAKED
+  rebuilt all three in its own data copy first.
 - `cmd/main` — the report entry for every layer above: `report` / `slots` /
   `loop` / `multi` / `group` / `society` / `evolution` / `cycle` / `coordinator`,
   `dmlref` / `causal` / `audit` / `fleet` / `mutants` / `mbti`, plus

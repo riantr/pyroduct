@@ -150,7 +150,7 @@ from the usage header, and the CLI could not dispatch a face the bridge knew.
 - Every `package@version` literal in a tracked file must equal the version it
   copies: the pin in `moon.mod` for a pinned package, the resolved tree for a
   transitive one (`riantr/moonbit_image`)
-- 53 literals across 19 files: both READMEs, `AGENTS.md`, the architecture DOT
+- 56 literals across 19 files: both READMEs, `AGENTS.md`, the architecture DOT
   and DSL files, the package doc comments, the rendered face text, the plugin's
   face catalog, and both skill copies
 - A version mentioned in words (`0.163.3 深用`, a deliberate feature-depth

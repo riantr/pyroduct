@@ -62,6 +62,8 @@ pub fn every_phase_has_non_act_of(Array[Phase], Array[Phase]) -> Bool
 
 pub fn exitable(SubjectState, Slot) -> Bool
 
+pub fn exitable_slots(SubjectState) -> Array[Slot]
+
 pub fn expand(SubjectState, Array[Slot], Int32) -> Expansion
 
 pub fn freedom_text(Int32) -> String
@@ -89,6 +91,8 @@ pub fn kind_of_check(Check) -> ContractKind
 pub fn min_steps(SubjectState, SubjectState) -> Int32?
 
 pub fn minimal_quotient() -> (Int32, Array[String])
+
+pub fn moving_slots(SubjectState) -> Array[Slot]
 
 pub fn one_edge_each(Array[(SubjectState, Trigger)]) -> Bool
 
@@ -179,6 +183,8 @@ pub fn successors(SubjectState) -> Array[(Trigger, SubjectState)]
 pub fn terminal() -> SubjectState
 
 pub fn transitions() -> Array[Transition]
+
+pub fn undecided_at(SubjectState) -> Bool
 
 pub fn unreachable_of(Array[String], Array[String]) -> Array[String]
 

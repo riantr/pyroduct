@@ -88,7 +88,7 @@ systemModel {
         }
     }
 
-    container(dmlref, "外部交叉验证 (dmlref)", "MoonBit package", "与riantr/moonbit_doubleML@0.164.56互校") {
+    container(dmlref, "外部交叉验证 (dmlref)", "MoonBit package", "与riantr/moonbit_doubleML@0.164.60互校") {
         parent(analysisTools)
         metadata {
             sourceRef("dmlref/moon.pkg")

@@ -5,7 +5,7 @@ Why this exists: `moon.mod` names the versions the release builds against, but
 the repository also *states* those versions in prose -- 56 literals across 19 files
 as of 2026-10-31: the two READMEs, AGENTS.md, the architecture DOT
 and DSL files, the package doc comments, the rendered face text ("依赖：
-`riantr/moonbit_doubleML@0.164.56`"), the plugin's face catalog, and both
+`riantr/moonbit_doubleML@0.164.60`"), the plugin's face catalog, and both
 skill copies. Every one of those is a SECOND COPY of the pin.
 
 Nothing bound the copies to the pin, so the release policy ("bump the

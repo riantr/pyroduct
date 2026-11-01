@@ -81,7 +81,7 @@ One society: 13 · 28 · 8. Two subjects: 14 normative rules.
   Four named third-party dependencies, each confined to its consumer:
   `moonbitlang/async@0.22.7` → `cmd/coord` (native disk I/O) and
   `tools/ifacescan` / `cmd/ifacescan` (the `.mbti` drift tripwire, native);
-  `riantr/moonbit_doubleML@0.164.56` → `dmlref` / `causal`;
+  `riantr/moonbit_doubleML@0.164.60` → `dmlref` / `causal`;
   `riantr/snn_mbt@0.166.2` → `snnref` (native); `riantr/moonbit_static_analysis@0.4.39`
   → `audit`. Every other package uses official `moonbitlang/*` only.
 

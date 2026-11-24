@@ -116,8 +116,9 @@ jobs:
       # The two .mbti skip lists -- the generator's and the scanner's -- must be
       # the same rule. They are two copies of one decision, and they decide
       # WHICH files the "snapshot == disk" criterion compares. Measured
-      # 2026-11-24: a fetched dependency tree (.repos/, gitignored) brought 64
-      # extra .mbti files, so the local gate saw 85 files while CI saw 21 --
+      # 2026-11-24: a fetched dependency tree (.mooncakes/, gitignored -- the
+      # toolchain's extraction root; `moon fetch` drops one in .repos/) brought 67
+      # extra .mbti files, so the local gate saw 88 files while CI saw 21 --
       # the same commit, two different answers.
       - name: The two .mbti skip lists must be the same rule
         run: python tools/validate_iface_skip_lists.py

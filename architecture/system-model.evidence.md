@@ -55,8 +55,8 @@
 | Node ID | Label | Type | Confidence | Source Refs | Notes |
 |---------|-------|------|------------|-------------|-------|
 | `moonbitlang/core` | 官方标准库 | external | high | `moon.mod` | 所有包可用 |
-| `moonbitlang/async@0.22.7` | 异步库 | external | high | `moon.mod` | 仅cmd/coord, tools/ifacescan, cmd/ifacescan |
-| `riantr/moonbit_doubleML@0.164.60` | 外部DoubleML | external | high | `moon.mod` | 仅dmlref, causal |
+| `moonbitlang/async@0.22.10` | 异步库 | external | high | `moon.mod` | 仅cmd/coord, tools/ifacescan, cmd/ifacescan |
+| `riantr/moonbit_doubleML@0.164.66` | 外部DoubleML | external | high | `moon.mod` | 仅dmlref, causal |
 | `riantr/snn_mbt@0.166.2` | 脉冲神经网络 | external | high | `moon.mod` | 仅snnref；native only |
 | `riantr/moonbit_static_analysis@0.5.3` | 静态分析库 | external | high | `moon.mod` | 仅audit |
 | `MiniMax Code Desktop` | 插件宿主 | external | high | `AGENTS.md` | 加载本地插件 |

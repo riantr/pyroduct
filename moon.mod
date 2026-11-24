@@ -36,8 +36,8 @@ description = "把《伽达默尔与哈贝马斯真理观比较》与《通往�
 // 见 https://moonbitlang.com 了解 moon.mod。
 
 import {
-  "moonbitlang/async@0.22.7",
-  "riantr/moonbit_doubleML@0.164.60",
+  "moonbitlang/async@0.22.10",
+  "riantr/moonbit_doubleML@0.164.66",
   "riantr/snn_mbt@0.166.2",
   "riantr/moonbit_static_analysis@0.5.3",
 }

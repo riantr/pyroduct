@@ -9,12 +9,13 @@ which is exactly the shape that drifts.
 
 What went wrong on 2026-11-24, measured rather than argued:
 
-  * `riantr/moonbit_static_analysis` is fetched into `.repos/` (gitignored) the
-    moment the analyzer runs, and the dependency carries its own `.mbti` files;
-  * the filesystem walk therefore saw 85 `.mbti` files, 64 of them belonging to
+  * the dependency tree is fetched into `.mooncakes/` (gitignored -- the
+    toolchain's extraction root; `moon fetch` drops one in `.repos/`) the moment
+    the build runs, and the dependency carries its own `.mbti` files;
+  * the filesystem walk therefore saw 88 `.mbti` files, 67 of them belonging to
     the dependency tree, while the module owns 21;
-  * the snapshot was regenerated with all 85, so the local native gate went
-    green -- and CI, which has no `.repos/`, would have compared an 85-row
+  * the snapshot was regenerated with all 88, so the local native gate went
+    green -- and CI, which has no fetched tree, would have compared an 88-row
     snapshot against a 21-file disk and gone red.
 
 A count that moves with whatever is lying in the working directory is not a

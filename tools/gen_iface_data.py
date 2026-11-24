@@ -23,9 +23,10 @@ OUT = os.path.join(ROOT, "audit", "iface_data.mbt")
 # 审到不同的文件集合，而漂移判据会误报（或漏报）。改一处就改两处。
 #
 # 而「一致」不只是名字一致，还要**规则一致**：两边都跳过所有以 `.` 开头的目录。
-# 2026-11-24 实测：`riantr/moonbit_static_analysis` 被取到 `.repos/`（gitignored
-# 的依赖树）下，依赖自己带着 64 个 `.mbti`——磁盘上共 85 个，本仓库自己的只有
-# 21 个。判据是「快照 ≡ 磁盘」双向相等，于是本机绿、CI 红。一条随工作目录而变
+# 2026-11-24 实测：依赖树被取到 `.mooncakes/`（gitignored，工具链的解压根目录；
+# `moon fetch` 取到 `.repos/`）下，依赖自己带着 67 个 `.mbti`——判据视野里共 88
+# 个，本仓库自己的只有 21 个。判据是「快照 ≡ 磁盘」双向相等，于是本机绿、CI 红。
+# 一条随工作目录而变
 # 的判据不是判据。两侧的一致性由 tools/validate_iface_skip_lists.py 守着。
 SKIP = {
     "_build",

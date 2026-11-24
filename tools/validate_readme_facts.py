@@ -169,8 +169,8 @@ def wasm_test_count(root: Path) -> Optional[int]:
     lying in the working directory.
 
     This used to walk the filesystem and skip `_build`, `.mooncakes`,
-    `node_modules` and `.git`. But `riantr/moonbit_static_analysis` is fetched
-    into `.repos/` (gitignored) the moment the analyzer runs, and THAT tree
+    `node_modules` and `.git`. But the dependency tree is fetched into
+    `.mooncakes/` (gitignored) the moment the build runs, and THAT tree
     carries its own test suite: measured 2026-11-24, the filesystem walk saw
     687 test files / 4931 test functions, of which 655 files / 4675 functions
     belonged to the fetched dependency. The number it produced was therefore a

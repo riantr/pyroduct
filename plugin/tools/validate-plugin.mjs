@@ -474,8 +474,8 @@ check('naming row no longer claims a provenance layer',
   // lying in the working directory.
   //
   // This walk used to skip `_build`, `.mooncakes` and `node_modules` and take
-  // everything else. But `riantr/moonbit_static_analysis` is fetched into
-  // `.repos/` (gitignored) the moment the analyzer runs, and THAT tree carries
+  // everything else. But the dependency tree is fetched into `.mooncakes/`
+  // (gitignored) the moment the build runs, and THAT tree carries
   // its own test suite: measured 2026-11-24, the filesystem walk saw 687 test
   // files / 4931 test functions, of which 655 files / 4675 functions belonged
   // to the fetched dependency. The check then compared the description's 250

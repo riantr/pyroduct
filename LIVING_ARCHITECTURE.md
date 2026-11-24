@@ -170,8 +170,10 @@ bump left 53 restatements of the old version behind with a green gate.
   the explicit build-output names plus **every dot-prefixed directory**
 - Both sides decide *which files* the "snapshot == disk" criterion compares, so a
   disagreement makes the criterion answer a different question on each machine
-- Measured 2026-11-24: a fetched dependency tree (`.repos/`, gitignored) brought 64
-  extra `.mbti` files — 85 on disk against the module's own 21 — so the local gate
+- Measured 2026-11-24: a fetched dependency tree (`.mooncakes/`, gitignored — the
+  toolchain's extraction root; `moon fetch` drops one in `.repos/`) brought 67 extra
+  `.mbti` files — 88 in the criterion's universe against the module's own 21 — so the
+  local gate
   saw one set and CI another
 
 **Why**: the criterion is set-equality in both directions, and the set is decided by

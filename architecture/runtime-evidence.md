@@ -108,7 +108,7 @@
 | Item | Value | Source |
 |------|-------|--------|
 | Plugin name | `pyroduct-model` | `plugin/.minimax-plugin/plugin.json:3` |
-| Plugin version | `0.3.8` | `plugin/.minimax-plugin/plugin.json:5` |
+| Plugin version | `0.3.9` | `plugin/.minimax-plugin/plugin.json:5` |
 | Install path | `~/.minimax/plugins/pyroduct-model/` | `plugin/tools/sync-install.mjs:42` |
 | MCP config | `pyroduct.mcp.json` | `plugin/.minimax-plugin/plugin.json:14` |
 | MCP server | `server.mjs` (stdio JSON-RPC) | `plugin/pyroduct.mcp.json:5-8` |

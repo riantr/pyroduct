@@ -11,7 +11,7 @@
 | Item | Value | Source |
 |------|-------|--------|
 | Plugin name | `pyroduct-model` | `plugin/.minimax-plugin/plugin.json:3` |
-| Plugin version | `0.3.8` | `plugin/.minimax-plugin/plugin.json:5` |
+| Plugin version | `0.3.9` | `plugin/.minimax-plugin/plugin.json:5` |
 | MCP server ref | `pyroduct.mcp.json` | `plugin/.minimax-plugin/plugin.json:14` |
 | Skill ref | `skills/pyroduct-model/SKILL.md` | `plugin/.minimax-plugin/plugin.json:15` |
 
@@ -24,7 +24,7 @@
 | Step | Code Location | Description |
 |------|---------------|-------------|
 | Server name | `plugin/server.mjs:1` | `SERVER_NAME = 'pyroduct-model'` |
-| Server version | `plugin/server.mjs:31` | `SERVER_VERSION = '0.3.8'` (must match plugin.json) |
+| Server version | `plugin/server.mjs:31` | `SERVER_VERSION = '0.3.9'` (must match plugin.json) |
 | JSON-RPC handler | `plugin/server.mjs:~350` | `handle(message)` routes by `method` |
 | Protocol methods | `plugin/server.mjs:~355-390` | `initialize`, `ping`, `tools/list`, `tools/call` |
 

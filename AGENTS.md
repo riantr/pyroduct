@@ -547,6 +547,17 @@ node plugin\tools\sync-install.mjs push <checkout> # install, then rebuild + re-
   never from a copy pasted into the plugin.
 - A live MCP server keeps the old code until it restarts, so a description fix shows up in the
   next session, not the current one.
+- **The bundle's SHA-256 says WHICH bytes were pinned, not WHAT they were built against.**
+  `vendor/jsoncli.js` embeds the module, so it embeds the module's *dependencies* too — the
+  bundle shipped in 0.1.35 was built while a stale fetch of the analyzer was on disk, and it
+  carried the old audit library's `0.4.39` inside it while the repo pinned the newer one.
+  (Written as a bare version on purpose: a version written as `package@version` is a copy
+  of the pin, and the detector would hold *this* sentence to the pin it names.)
+  Nothing objected: the pin matched the file, the file matched the pin, and the gate was
+  green. The version strings *inside* the artifact are the evidence of what it was built
+  against, so read them: `rg -o '0\.(4|5)\.[0-9]+' plugin/vendor/jsoncli.js`. A bundle that
+  does not match a fresh build is stale, and `node plugin/tools/update-bundle.mjs <checkout>`
+  re-pins it (build → copy → rewrite → validate, 43 checks).
 
 ## Layout
 

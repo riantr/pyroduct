@@ -110,12 +110,12 @@
 
 | Location | Version | Purpose | Match |
 |----------|---------|---------|-------|
-| `moon.mod:3` | `0.1.29` | Module version | ✓ |
-| `plugin/vendor/BUILD.json:3` | `0.1.29` | Bundled snapshot built from this module version | ✓ |
-| `plugin/.minimax-plugin/plugin.json:6` | `0.3.0` | Plugin SemVer (independent) | ✓ |
-| `plugin/server.mjs:31` (SERVER_VERSION) | `0.3.0` | Must match plugin.json | ✓ |
+| `moon.mod:3` | `0.1.35` | Module version | ✓ |
+| `plugin/vendor/BUILD.json:3` | `0.1.35` | Bundled snapshot built from this module version | ✓ |
+| `plugin/.minimax-plugin/plugin.json:5` | `0.3.8` | Plugin SemVer (independent) | ✓ |
+| `plugin/server.mjs:31` (SERVER_VERSION) | `0.3.8` | Must match plugin.json | ✓ |
 
-Two independent version tracks (module 0.1.29, plugin 0.3.0) — both internally consistent.
+Two independent version tracks (module 0.1.35, plugin 0.3.8) — both internally consistent.
 
 ---
 

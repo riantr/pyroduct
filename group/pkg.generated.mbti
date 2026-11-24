@@ -63,25 +63,28 @@ pub fn walk(GroupState, Array[GroupTrigger]) -> GroupTrace
 // Errors
 
 // Types and methods
+#derive(Eq)
 pub(all) enum GroupLean {
   Supra
   Inter
-} derive(Eq)
+}
 pub fn GroupLean::equal(Self, Self) -> Bool
 pub fn GroupLean::label(Self) -> String
 pub fn GroupLean::not_equal(Self, Self) -> Bool
 
+#derive(Eq)
 pub(all) enum GroupOutcome {
   Moved(GroupTrigger, GroupState)
   Held(GroupTrigger, GroupState)
   Open(GroupTrigger, Array[GroupState])
   Block(String)
-} derive(Eq)
+}
 pub fn GroupOutcome::equal(Self, Self) -> Bool
 pub fn GroupOutcome::label(Self) -> String
 pub fn GroupOutcome::landing(Self) -> GroupState?
 pub fn GroupOutcome::not_equal(Self, Self) -> Bool
 
+#derive(Eq)
 pub(all) enum GroupPhase {
   Gathering
   Bodied
@@ -92,12 +95,13 @@ pub(all) enum GroupPhase {
   Impaired
   Cultivating
   Resting
-} derive(Eq)
+}
 pub fn GroupPhase::en_label(Self) -> String
 pub fn GroupPhase::equal(Self, Self) -> Bool
 pub fn GroupPhase::label(Self) -> String
 pub fn GroupPhase::not_equal(Self, Self) -> Bool
 
+#derive(Eq)
 pub(all) enum GroupState {
   Scattered
   Converging
@@ -119,7 +123,7 @@ pub(all) enum GroupState {
   Widening
   Attuned
   Settled
-} derive(Eq)
+}
 pub fn GroupState::claims_closure(Self) -> Bool
 pub fn GroupState::designation(Self) -> String
 pub fn GroupState::en_designation(Self) -> String
@@ -129,10 +133,11 @@ pub fn GroupState::gloss(Self) -> String
 pub fn GroupState::not_equal(Self, Self) -> Bool
 pub fn GroupState::phase(Self) -> GroupPhase
 
+#derive(Eq)
 pub struct GroupTrace {
   start : GroupState
   steps : Array[(GroupTrigger, GroupOutcome)]
-} derive(Eq)
+}
 pub fn GroupTrace::at(Self) -> GroupState
 pub fn GroupTrace::equal(Self, Self) -> Bool
 pub fn GroupTrace::not_equal(Self, Self) -> Bool
@@ -144,6 +149,7 @@ pub struct GroupTransition {
   to : GroupState
 }
 
+#derive(Eq)
 pub(all) enum GroupTrigger {
   Appear
   Attention
@@ -167,7 +173,7 @@ pub(all) enum GroupTrigger {
   MutualCheng
   Settle
   Reenter
-} derive(Eq)
+}
 pub fn GroupTrigger::equal(Self, Self) -> Bool
 pub fn GroupTrigger::label(Self) -> String
 pub fn GroupTrigger::not_equal(Self, Self) -> Bool

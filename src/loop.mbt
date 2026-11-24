@@ -25,13 +25,14 @@
 /// `Open` 是**去哪儿**没定，要主体决断；`Same` 是**从哪句来**没定而去哪儿已定，
 /// 无需决断，只需不编造（0.1.26 增；此前 `step` 在这种组合上直接报出迁移表
 /// 里第一条，等于替环境说了一句它没说过的话）。
+#derive(Eq, Debug)
 pub(all) enum Outcome {
   Moved(Trigger, SubjectState) // 唯一出路：由该触发迁到该位置
   Held(Trigger, SubjectState) // 出路回到自身：位置不变（沉淀、静待）
   Open(Array[(Trigger, SubjectState)]) // 多条出路并存：未定，不替主体决断
   Same(Slot, Array[Trigger], SubjectState) // 同归：多条触发归到同一目标，只给槽与目标
   Block(String) // 此槽在此位置无路：缺口，不许强行推进
-} derive(Eq, Debug)
+}
 
 ///|
 /// 让 `==` 在 `Outcome` 上以方法形式可用（显式 extend，避免隐式提升）。
@@ -310,10 +311,11 @@ pub fn open_points() -> Array[(SubjectState, Slot, Int32)] {
 ///|
 /// 一段行走的记录。`steps` 只追加；`Open`／`Block` 之后位置不变——
 /// 未定与缺口都不许被写成「已经过去了」。
+#derive(Eq, Debug)
 pub struct Trace {
   start : SubjectState
   steps : Array[(Slot, Outcome)]
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Trace with Eq::{not_equal, equal}
@@ -354,11 +356,12 @@ pub fn Trace::at(self : Trace) -> SubjectState {
 /// 一步的明细：从哪个位置出发、经哪个驱动槽、得到什么回执。
 /// `Trace.steps` 只记「槽 + 回执」，位置要靠重放才知道；`detailed` 把重放
 /// 一次做完，供行程视图与上层逐条引用（模型整理：出处仍全在迁移表）。
+#derive(Eq, Debug)
 pub(all) struct Step {
   from : SubjectState
   slot : Slot
   outcome : Outcome
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Step with Eq::{not_equal, equal}
@@ -398,10 +401,11 @@ pub fn Trace::outcome_labels(self : Trace) -> Array[String] {
 /// 件事写在结果里而不是只写在文档里：静默截断的结果会被读成「所有可能的后续」，
 /// 而它其实不是——这正是本层一路在防的那类误读（不编造下一步、不编造上一步、
 /// 不把「停住」说成「走完了」）。
+#derive(Eq, Debug)
 pub(all) struct Expansion {
   leaves : Array[Trace]
   truncated : Bool
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Expansion with Eq::{not_equal, equal}

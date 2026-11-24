@@ -143,11 +143,12 @@ fn rt_trigger(label : String) -> @src.Trigger? {
 
 ///|
 /// 重建出来的一条迁移。
+#derive(Eq, Debug)
 struct RtEdge {
   from : @src.SubjectState
   trigger : @src.Trigger
   to : @src.SubjectState
-} derive(Eq, Debug)
+}
 
 ///|
 /// 从规格的迁移行重建整张表。任一条读不出对应物就当场 `panic`——规格里有

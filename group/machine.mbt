@@ -10,6 +10,7 @@
 
 ///|
 /// 群体所处的状态（20 个，两字）。
+#derive(Eq)
 pub(all) enum GroupState {
   Scattered // 散在：众人只是一群，尚无关联
   Converging // 趋同：注意开始汇聚，尚未成体
@@ -31,13 +32,14 @@ pub(all) enum GroupState {
   Widening // 扩界：界域扩大，新的东西被纳入
   Attuned // 相契：每一对成员皆双诚俱足
   Settled // 宁定：不再把任何结论绝对化，静待下一刻
-} derive(Eq)
+}
 
 ///|
 pub extend GroupState with Eq::{not_equal, equal}
 
 ///|
 /// 群体阶段（九个，两字）。
+#derive(Eq)
 pub(all) enum GroupPhase {
   Gathering // 聚散
   Bodied // 成体
@@ -48,13 +50,14 @@ pub(all) enum GroupPhase {
   Impaired // 受损
   Cultivating // 修习
   Resting // 宁定
-} derive(Eq)
+}
 
 ///|
 pub extend GroupPhase with Eq::{not_equal, equal}
 
 ///|
 /// 推动群体迁移的触发。
+#derive(Eq)
 pub(all) enum GroupTrigger {
   Appear // 众人出现
   Attention // 注意汇聚
@@ -78,7 +81,7 @@ pub(all) enum GroupTrigger {
   MutualCheng // 双诚俱足
   Settle // 不再绝对化，静待下一刻
   Reenter // 界域重开，环节重入
-} derive(Eq)
+}
 
 ///|
 pub extend GroupTrigger with Eq::{not_equal, equal}

@@ -119,6 +119,21 @@ python tools/validate_cli_faces.py    # asserts the three copies of the face
                                        # error message publishes, and the counts
                                        # both READMEs quote. Exit 0 if they
                                        # agree, 1 if they drift.
+python tools/validate_iface_skip_lists.py # asserts the two .mbti skip lists are
+                                       # one rule: the generator's
+                                       # (tools/gen_iface_data.py) and the
+                                       # scanner's (tools/ifacescan/scan.mbt).
+                                       # They decide WHICH files the "snapshot
+                                       # == disk" criterion compares, so a
+                                       # disagreement makes it answer a
+                                       # different question on each machine.
+python tools/iface_skip_lists_control.py # positive control for that detector:
+                                       # breaks the two sides apart in three
+                                       # ways (a name only one side skips, the
+                                       # dot-prefix rule gone from each side)
+                                       # and requires the detector to go RED and
+                                       # name the place, then restores the files
+                                       # byte-for-byte.
 python tools/readme_control.py        # positive control for the two README
                                        # criteria: breaks one number per case
                                        # and requires the criterion to go RED
@@ -139,12 +154,24 @@ python tools/pin_copies_control.py    # positive control for the pin-copy
                                        # and no count claim: it breaks both
                                        # kinds on purpose, so a string in the
                                        # control would be the thing breaking
-                                       # the tree it is testing.
+                                       # the tree it is testing. So the count
+                                       # it breaks is MEASURED (from the
+                                       # detector's own output) and located
+                                       # with the detector's own pattern, and
+                                       # EVERY claim of it is broken — not
+                                       # just the first: a control that broke
+                                       # one claim would still pass if the
+                                       # detector had been narrowed to look
+                                       # at one place. A count written in the
+                                       # control was the same rot one layer
+                                       # up, and it went stale once: the case
+                                       # stopped applying and vanished
+                                       # instead of failing.
 python tools/validate_pin_copies.py   # asserts every `package@version` literal
                                        # in the tracked tree equals the pin it
                                        # copies (moon.mod for a pinned package,
                                        # the resolved tree for a transitive
-                                       # one). 56 literals, 19 files. Exit 0 if
+                                       # one). 60 literals, 19 files. Exit 0 if
                                        # they agree, 1 if any copy is stale.
 node plugin/tools/validate-plugin.mjs  # plugin anti-drift (the harness prints
                                        # its own count — do not transcribe it:
@@ -251,7 +278,7 @@ Six drift detectors run in CI on every push and PR:
 - **`python tools/validate_pin_copies.py`** — asserts every `package@version` literal in the
   tracked tree equals the version it copies: the pin in `moon.mod` for a pinned package, the
   resolved tree for a transitive one (`riantr/moonbit_image`, which `riantr/snn_mbt` pulls in).
-  There are 56 such literals across 19 files — both READMEs, `AGENTS.md`, the architecture DOT
+  There are 60 such literals across 19 files — both READMEs, `AGENTS.md`, the architecture DOT
   and DSL files, the package doc comments, the rendered face text, the plugin's face catalog and
   both skill copies — and nothing bound them to the pin. So bumping a pin, which the release
   policy does on every release, left the repository still saying the old version with a green
@@ -295,12 +322,21 @@ Six drift detectors run in CI on every push and PR:
   face-count anti-drift, test-count anti-drift (the `pyroduct_gates` description must state
   the real wasm test count), model-fact anti-drift, version consistency (`plugin.json` =
   `server.mjs` SERVER_VERSION), content invariants, and a page-citation anti-drift rule.
+- **`python tools/validate_iface_skip_lists.py`** — asserts that the two `.mbti` skip
+  lists are the same rule: the generator's (`tools/gen_iface_data.py`) and the
+  scanner's (`tools/ifacescan/scan.mbt`). They are two copies of one decision, and the
+  decision is *which files the "snapshot == disk" criterion compares*. Measured
+  2026-11-24: a fetched dependency tree (`.repos/`, gitignored) brought 64 extra
+  `.mbti` files, so the local gate saw 85 files and CI saw 21 — the same commit, two
+  different answers. Both sides now skip every dot-prefixed directory, and this
+  detector holds them to that.
 
-All six are in `gate.yml` (every push/PR) and `publish.yml` (before release). A drift
+All seven are in `gate.yml` (every push/PR) and `publish.yml` (before release). A drift
 failure is a CI failure — it cannot merge.
 
-On top of the six detectors, `gate.yml` and `publish.yml` also run the **positive
-control** for the pin-copy detector (`python tools/pin_copies_control.py`). A detector
+On top of the seven detectors, `gate.yml` and `publish.yml` also run the **positive
+controls** for the pin-copy detector (`python tools/pin_copies_control.py`) and for the
+skip-list detector (`python tools/iface_skip_lists_control.py`). A detector
 is only worth its teeth if something proves it still has them, and a green run says
 nothing about that: a later edit that narrows the detector's pattern would leave the
 job green and the drift unwatched. The control breaks one thing per case, requires the
@@ -384,6 +420,81 @@ are not part of `cmd/jsoncli`). CI never asserted those bytes anyway:
 keeping the behavioural suite fatal — "Do not 'fix' this by re-pinning from CI". The next
 release's `update-bundle.mjs` run will re-pin it and bump the plugin version; that belongs
 to the release, not to a toolchain move.
+
+### moon 0.1.20261119 deprecated `derive(...)` (migrated 2026-11-24)
+
+The tree was measured on **moon 0.1.20261028** until 0.1.20261119 came out — and that
+release **deprecated the `derive(...)` syntax**: the trait derivation moved from
+`} derive(Eq, Debug)` after the declaration to `#derive(Eq, Debug)` **before** it. The
+compiler reports it as `deprecated_syntax`, so `moon check --deny-warn` promoted **47
+warnings to errors** across 21 files, and the new formatter rewrote all **49** derive
+sites in **22** files (two of them are `derive(Eq)` next to a hand-written
+`extend ... with Eq`, which the compiler does not warn about).
+
+This time the failure was **loud** rather than fatal — the tree still compiled — which is
+worse in one way: a red gate that only shows up when someone runs the gate. The
+`MOON_VERSION` assertion did its job: CI would have died at "Install moon" with
+`this tree was measured on moon 0.1.20261028; the runner has 0.1.20261119`.
+
+**What the migration was**:
+- apply the formatter's canonical copies over all **49** `derive(...)` sites in **22**
+  files (`python tools/apply_fmt.py`);
+- regenerate the tracked interfaces (the `.mbti` files carry `#derive(...)` now);
+- bump `MOON_VERSION` to `0.1.20261119` in `gate.yml` **and** `publish.yml`;
+- bump `riantr/moonbit_static_analysis` from `0.4.39` to **`0.5.3`** — the two are
+  **coupled**: 0.5.3's README states its floor is *moon 0.1.20261117 or later*, so the
+  analyzer cannot be upgraded before the toolchain, and the toolchain cannot be claimed
+  while the analyzer pin is still 0.4.39.
+
+**What it did not touch**: no `Int` → `Int32` rewrite happened here (this tree already
+used `Int32`); the rendered faces are **byte-identical** before and after — 12 faces
+hashed, 12/12 unchanged — and the wasm test count stayed **250**. The public interface
+surface is unchanged too: stripping the derive annotations from the old and new
+`.mbti` files leaves them identical for all 7 packages, so the rewrite is syntactic
+only.
+
+**Three traps this migration walked into — all of them cost real time, so they are
+written down:**
+
+1. **`moon fmt --check` aborts partway, and the copies it leaves behind are stale.**
+   moonfmt shells out to `git --no-pager diff --color=always --no-index <src> <copy>`
+   and treats a **non-zero exit as "failed to execute"** — but git's `--no-index` diff
+   exits **1 when the files differ**, which is exactly the case moonfmt is reporting.
+   So the run dies on the first file that needs formatting and leaves the remaining
+   canonical copies under `_build/<target>/release/format/` **from an earlier run**.
+   Measured: the first attempt refreshed 16 files and left 6 stale, and `apply_fmt.py`'s
+   "copy is older than the source" guard would then have skipped those 6 — a **partial
+   migration** that still fails `moon check --deny-warn`. The fix is a `git` shim on
+   `PATH` that forces exit 0 for `--no-index` diffs and forwards everything else; with
+   it the run completes all 131 tasks. **Always check the copy count and the mtimes
+   before applying** — the copies, not the exit code, are what you are about to trust.
+
+2. **A fetched dependency tree changes what the disk holds.** `riantr/moonbit_static_analysis`
+   is fetched into `.repos/` (gitignored) the moment the analyzer runs, and it ships its
+   own `.mbti` files. The `.mbti` snapshot generator and the scanner both walked the disk
+   and took **64 extra files** from there: 85 `.mbti` on disk, **21** of them ours. The
+   criterion is "snapshot == disk" in **both** directions, so the local gate went green
+   with an 85-row snapshot while CI — which has no `.repos/` — would have compared 85
+   rows against 21 files and gone red. **A count that moves with whatever is lying in
+   the working directory is not a fact about the tree.** Both sides now skip every
+   dot-prefixed directory (a rule, not a list of names), and
+   `tools/validate_iface_skip_lists.py` holds the two sides to that one rule; its
+   positive control is `tools/iface_skip_lists_control.py`.
+
+3. **A reader that insists on the old spelling stops seeing the table.**
+   `tools/extract_model_facts.py` matched enums as `enum X { ... } derive`, so the
+   migration made it fail with "Could not find enum SubjectState" — the extractor had
+   stopped reading the *model* because a piece of *syntax sugar* moved. The derive
+   annotation is now not part of the pattern at all.
+
+The same class of defect showed up in the **test count**: the plugin harness and
+`tools/validate_readme_facts.py` counted wasm test functions by walking the filesystem,
+and the fetched dependency tree carries **4675** test functions of its own — so the
+harness reported 4925 where the truth is 250, and the number it reported depended on
+whether the analyzer had ever been run on that machine. Both now count the module's own
+tracked files (plus untracked-but-not-ignored ones), so the answer is the same on every
+machine: `git ls-files` decides what is ignored, and this script does not re-implement
+an ignore matcher.
 
 ## MiniMax Code plugin (`plugin/`)
 
@@ -477,7 +588,7 @@ package's purpose — those comments are package-level docs, keep them accurate.
   (spike-sediment experiment, cross-check only). `snn_mbt` declares native as its only
   target, so `snnref` and `examples/sediment` are `+native`: the wasm gate skips them,
   run `moon test --target native snnref` separately.
-- `riantr/moonbit_static_analysis@0.4.39` — sole consumer `audit` (three-lens
+- `riantr/moonbit_static_analysis@0.5.3` — sole consumer `audit` (three-lens
   static audit of the subject machine: the library's moon.mod names pyroduct
   its reference consumer; `src` stays zero-import — `audit` converts the real
   tables into a plain-data `MachineSpec` above it).

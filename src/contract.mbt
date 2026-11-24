@@ -27,11 +27,12 @@
 
 ///|
 /// 契约的求值点。
+#derive(Eq)
 pub(all) enum ContractKind {
   AlwaysMachine // 恒真（整机）：求值一次
   AlwaysPhase // 恒真（阶段）：每个阶段求值一次
   AfterStep // 事后（位置 × 槽）：每个位置 × 槽的求值点上求值一次
-} derive(Eq)
+}
 
 ///|
 pub extend ContractKind with Eq::{not_equal, equal}
@@ -51,12 +52,13 @@ pub fn ContractKind::label(self : ContractKind) -> String {
 ///
 /// `match` 一律**穷举**（不写 `_` 臂）：加一个新判据而不给它求值方式，编译器
 /// 就会拒绝——这把「契约表里没人求值」从运行时的失败闭合提前到编译期。
+#derive(Eq)
 pub(all) enum Check {
   Reachable // 有入边的位置，必自起点可达
   HasIncoming // 自起点可达的位置（起点除外），必有入边
   PhaseHasNonAct // 该阶段至少有一条非「行动」的出边
   ReceiptExact // 回执点名的边与迁移表**完全相符**（不多不少）
-} derive(Eq)
+}
 
 ///|
 pub extend Check with Eq::{not_equal, equal}

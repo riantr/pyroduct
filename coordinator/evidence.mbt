@@ -6,11 +6,12 @@
 
 ///|
 /// 凭据强弱。
+#derive(Eq)
 pub(all) enum Warrant {
   FromData // 单次数据
   FromReplication // 多次复现且同号
   FromDialogue // 仅对话（未做实验）
-} derive(Eq)
+}
 
 ///|
 pub extend Warrant with Eq::{not_equal, equal}
@@ -40,12 +41,13 @@ pub struct Binding {
 
 ///|
 /// 由证据得到的判词（不是投票结果）。
+#derive(Eq)
 pub(all) enum EvidenceVerdict {
   Supported // 支持
   Refuted // 反驳
   Inconclusive // 不确定
   Replicated // 复现成立
-} derive(Eq)
+}
 
 ///|
 pub extend EvidenceVerdict with Eq::{not_equal, equal}

@@ -165,15 +165,55 @@ def wasm_test_count(root: Path) -> Optional[int]:
     sibling `moon.pkg` declares `supported_targets = "+native"` -- the wasm gate
     never executes those, so quoting them as wasm tests is wrong twice over.
 
+    THE COUNT MUST BE A FACT ABOUT THE MODULE, not about whatever happens to be
+    lying in the working directory.
+
+    This used to walk the filesystem and skip `_build`, `.mooncakes`,
+    `node_modules` and `.git`. But `riantr/moonbit_static_analysis` is fetched
+    into `.repos/` (gitignored) the moment the analyzer runs, and THAT tree
+    carries its own test suite: measured 2026-11-24, the filesystem walk saw
+    687 test files / 4931 test functions, of which 655 files / 4675 functions
+    belonged to the fetched dependency. The number it produced was therefore a
+    fact about a cache directory -- and it DIFFERED between a machine that had
+    run the analyzer and one that had not, so the local gate and CI could
+    disagree about the same commit.
+
+    The rule is now: count the module's own tracked files plus
+    untracked-but-not-ignored ones, so a test you just wrote still counts (it
+    is not ignored) and a fetched dependency tree does not (it is). git decides
+    what is ignored -- this script does not re-implement an ignore matcher.
+    `plugin/tools/validate-plugin.mjs` counts the same way, because two
+    detectors counting one number by two rules is its own drift waiting to
+    happen.
+
     Returns None when no `*_test.mbt` is visible at all. A check that cannot see
     its subject must say so rather than report zero: "no tests" and "cannot
     count here" are different findings, and conflating them manufactures a pass.
     """
-    skip_dirs = {'_build', '.mooncakes', 'node_modules', '.git'}
+    skip_dirs = {'_build', '.mooncakes', 'node_modules', '.git', '.repos'}
+
+    def git_test_files() -> Optional[List[Path]]:
+        try:
+            proc = subprocess.run(
+                ['git', 'ls-files', '--cached', '--others', '--exclude-standard',
+                 '--', '*_test.mbt'],
+                cwd=str(root), capture_output=True, text=True, timeout=120,
+            )
+        except (OSError, subprocess.SubprocessError):
+            return None
+        if proc.returncode != 0 or not proc.stdout.strip():
+            return None
+        return [root / rel for rel in proc.stdout.splitlines() if rel.strip()]
+
+    listed = git_test_files()
+    if listed is not None:
+        paths = listed
+    else:
+        paths = [p for p in root.rglob('*_test.mbt')
+                 if not any(part in skip_dirs for part in p.parts)]
+
     counts = {}
-    for path in root.rglob('*_test.mbt'):
-        if any(part in skip_dirs for part in path.parts):
-            continue
+    for path in paths:
         text = path.read_text(encoding='utf-8', errors='replace')
         counts[path] = len(re.findall(r'^\s*(?:async\s+)?test\s+"', text, re.MULTILINE))
 

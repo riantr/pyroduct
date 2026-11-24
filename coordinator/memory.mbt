@@ -7,13 +7,14 @@
 
 ///|
 /// 发现的状态。
+#derive(Eq)
 pub(all) enum FindingStatus {
   Pending // 待证据
   Established // 被数据支持
   Overturned // 被数据反驳
   Replaced // 被新发现取代
   Retracted // 撤回
-} derive(Eq)
+}
 
 ///|
 pub extend FindingStatus with Eq::{not_equal, equal}

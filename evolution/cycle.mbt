@@ -24,10 +24,11 @@
 
 ///|
 /// 循环里一个瞬间的主体：机器上的位置 + 可变配置。
+#derive(Eq)
 pub struct CycleState {
   state : @sm.SubjectState
   genome : Genome
-} derive(Eq)
+}
 
 ///|
 pub extend CycleState with Eq::{not_equal, equal}

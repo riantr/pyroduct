@@ -43,11 +43,21 @@ test "绊线是活的：给历程人为接一步无路，行为层立刻报警" 
 }
 
 ///|
+/// 报告对称：三鉴小节、出处层标注、判读齐全。
+///
+/// 出处层要跟着**实际在跑的版本**走（见 `audit.mbt` 的出处纪律），所以判据比的是
+/// **「报告点了名分析器」**，**不是某个写死的版本号**。
+///
+/// 写死一个版本号，它就会在下次换分析器时变成一条**假红**：它证明的是字面量，
+/// 不是行为——2026-11-24 实测过，`report.contains("0.4.39")` 在 pin 升到 0.5.3
+/// 之后把**每一条变异**都多判红一个测试，看起来像判据变强了，其实是判据在过期。
+/// 版本本身由 `tools/validate_pin_copies.py` 拿 pin 看着（`package@version` 形式）。
 test "报告对称：三鉴小节、出处层标注、判读齐全" {
   let report = @audit.render_report()
   assert_true(report.contains("三鉴"))
   assert_true(report.contains("已知设计"))
   assert_true(report.contains("未预期"))
   assert_true(report.contains("设计使然"))
-  assert_true(report.contains("0.4.39"))
+  assert_true(report.contains("riantr/moonbit_static_analysis@"))
+  assert_true(report.contains("审计已验证"))
 }

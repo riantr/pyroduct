@@ -150,7 +150,7 @@ from the usage header, and the CLI could not dispatch a face the bridge knew.
 - Every `package@version` literal in a tracked file must equal the version it
   copies: the pin in `moon.mod` for a pinned package, the resolved tree for a
   transitive one (`riantr/moonbit_image`)
-- 56 literals across 19 files: both READMEs, `AGENTS.md`, the architecture DOT
+- 60 literals across 19 files: both READMEs, `AGENTS.md`, the architecture DOT
   and DSL files, the package doc comments, the rendered face text, the plugin's
   face catalog, and both skill copies
 - A version mentioned in words (`0.163.3 深用`, a deliberate feature-depth
@@ -158,6 +158,25 @@ from the usage header, and the CLI could not dispatch a face the bridge knew.
 
 **Why**: the release policy bumps the dependencies on every release, and every
 bump left 53 restatements of the old version behind with a green gate.
+
+#### 4d. The two `.mbti` skip lists are one rule
+
+**Validator**: `python tools/validate_iface_skip_lists.py`
+**Positive control**: `python tools/iface_skip_lists_control.py`
+**CI**: `gate.yml` step "The two .mbti skip lists must be the same rule"
+
+- The generator (`tools/gen_iface_data.py`) and the scanner
+  (`tools/ifacescan/scan.mbt`) must skip the same directories by the same rule:
+  the explicit build-output names plus **every dot-prefixed directory**
+- Both sides decide *which files* the "snapshot == disk" criterion compares, so a
+  disagreement makes the criterion answer a different question on each machine
+- Measured 2026-11-24: a fetched dependency tree (`.repos/`, gitignored) brought 64
+  extra `.mbti` files — 85 on disk against the module's own 21 — so the local gate
+  saw one set and CI another
+
+**Why**: the criterion is set-equality in both directions, and the set is decided by
+two copies of one rule. A count that moves with whatever is lying in the working
+directory is not a fact about the tree.
 
 ---
 
@@ -241,6 +260,7 @@ All files in `architecture/` are version-controlled. They fall into three catego
 | Face count & list | **HIGH** | CI-enforced by `validate-plugin.mjs` |
 | CLI face list & count | **HIGH** | CI-enforced by `validate_cli_faces.py` |
 | Dependency version literals | **HIGH** | CI-enforced by `validate_pin_copies.py` |
+| `.mbti` skip lists agree | **HIGH** | CI-enforced by `validate_iface_skip_lists.py` |
 | Resolved dependency tree | **HIGH** | CI-enforced by `validate_resolved_deps.py` |
 | Test count in descriptions | **HIGH** | CI-enforced by `validate-plugin.mjs` |
 | Model facts in descriptions | **HIGH** | CI-enforced by `validate-plugin.mjs` |

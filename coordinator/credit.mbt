@@ -3,6 +3,7 @@
 
 ///|
 /// 贡献角色。
+#derive(Eq)
 pub(all) enum Role {
   Question // 提出问题
   Data // 数据
@@ -10,7 +11,7 @@ pub(all) enum Role {
   Analysis // 分析
   Writing // 写作
   Review // 审阅
-} derive(Eq)
+}
 
 ///|
 pub extend Role with Eq::{not_equal, equal}

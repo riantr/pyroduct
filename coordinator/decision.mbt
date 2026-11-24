@@ -15,12 +15,13 @@ pub(all) struct Deliberation {
 
 ///|
 /// 交付状态。
+#derive(Eq)
 pub(all) enum Commitment {
   Draft // 草稿
   Adopted // 采纳
   Superseded // 被取代
   Withdrawn // 撤回
-} derive(Eq)
+}
 
 ///|
 pub extend Commitment with Eq::{not_equal, equal}

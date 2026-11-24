@@ -1,6 +1,6 @@
 # Deployment Topology — Summary
 
-> **Project**: riantr/pyroduct v0.1.29
+> **Project**: riantr/pyroduct v0.1.35
 > **Type**: Pure MoonBit library + local plugin (no cloud hosting, no containers, no microservices)
 > **Date**: 2026-10-11
 
@@ -42,7 +42,7 @@ commit → push gitee (日常) + github (CI)
               ↓
          门禁通过 ✓
               ↓
-    git tag v0.1.29 → push github v0.1.29
+    git tag v0.1.35 → push github v0.1.35
               ↓
          publish.yml (v* tag)
               ↓

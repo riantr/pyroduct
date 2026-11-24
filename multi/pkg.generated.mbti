@@ -91,29 +91,32 @@ pub struct Cheng {
 }
 pub fn Cheng::is_complete(Self) -> Bool
 
+#derive(Eq)
 pub(all) enum ClaimKind {
   Truthfulness
   Legitimacy
   Authenticity
   Sincerity
-} derive(Eq)
+}
 pub fn ClaimKind::equal(Self, Self) -> Bool
 pub fn ClaimKind::label(Self) -> String
 pub fn ClaimKind::not_equal(Self, Self) -> Bool
 
+#derive(Eq)
 pub(all) enum ClaimPhase {
   Before
   During
   After
-} derive(Eq)
+}
 pub fn ClaimPhase::equal(Self, Self) -> Bool
 pub fn ClaimPhase::label(Self) -> String
 pub fn ClaimPhase::not_equal(Self, Self) -> Bool
 
+#derive(Eq)
 pub(all) struct Defeated {
   target : String
   by : String
-} derive(Eq)
+}
 pub fn Defeated::equal(Self, Self) -> Bool
 pub fn Defeated::not_equal(Self, Self) -> Bool
 
@@ -123,6 +126,7 @@ pub(all) struct Defeater {
   when : Premise
 }
 
+#derive(Eq)
 pub(all) struct Derivation {
   fired : Array[String]
   defeated : Array[Defeated]
@@ -131,16 +135,17 @@ pub(all) struct Derivation {
   verdict : Verdict
   winner : String
   note : String
-} derive(Eq)
+}
 pub fn Derivation::equal(Self, Self) -> Bool
 pub fn Derivation::not_equal(Self, Self) -> Bool
 
+#derive(Eq)
 pub(all) enum DiscourseType {
   Theoretical
   Practical
   Aesthetic
   Faith
-} derive(Eq)
+}
 pub fn DiscourseType::equal(Self, Self) -> Bool
 pub fn DiscourseType::label(Self) -> String
 pub fn DiscourseType::not_equal(Self, Self) -> Bool
@@ -178,10 +183,11 @@ pub(all) struct Norm {
   effect : String
 }
 
+#derive(Eq)
 pub(all) enum NormStrength {
   Strict
   Defeasible
-} derive(Eq)
+}
 pub fn NormStrength::equal(Self, Self) -> Bool
 pub fn NormStrength::label(Self) -> String
 pub fn NormStrength::not_equal(Self, Self) -> Bool
@@ -191,14 +197,16 @@ pub struct OpenProblem {
   note : String
 }
 
+#derive(Eq)
 pub(all) struct Outranked {
   loser : String
   winner : String
   loser_verdict : Verdict
-} derive(Eq)
+}
 pub fn Outranked::equal(Self, Self) -> Bool
 pub fn Outranked::not_equal(Self, Self) -> Bool
 
+#derive(Eq)
 pub(all) enum Premise {
   ClaimOutOfPhase
   ClaimNotJointReview
@@ -208,7 +216,7 @@ pub(all) enum Premise {
   MonologicGap
   BothChengComplete
   SeekingConsensus
-} derive(Eq)
+}
 pub fn Premise::equal(Self, Self) -> Bool
 pub fn Premise::label(Self) -> String
 pub fn Premise::not_equal(Self, Self) -> Bool
@@ -229,13 +237,14 @@ pub struct Subject {
   residue : Int32
 }
 
+#derive(Eq)
 pub(all) enum TruthRegime {
   Immanent
   Logos
   SuperSubjective
   InterSubjective
   ChengRan
-} derive(Eq)
+}
 pub fn TruthRegime::basis(Self) -> String
 pub fn TruthRegime::equal(Self, Self) -> Bool
 pub fn TruthRegime::label(Self) -> String
@@ -249,6 +258,7 @@ pub(all) struct ValidityClaim {
   phase : ClaimPhase
 }
 
+#derive(Eq)
 pub(all) enum Verdict {
   OutOfPhase
   NotSought
@@ -256,7 +266,7 @@ pub(all) enum Verdict {
   Monologic
   Provisional
   Attuned
-} derive(Eq)
+}
 pub fn Verdict::equal(Self, Self) -> Bool
 pub fn Verdict::label(Self) -> String
 pub fn Verdict::not_equal(Self, Self) -> Bool

@@ -51,17 +51,19 @@ pub fn walk(State, Array[Trigger]) -> Trace
 // Errors
 
 // Types and methods
+#derive(Eq)
 pub(all) enum Outcome {
   Moved(Trigger, State)
   Held(Trigger, State)
   Open(Trigger, Array[State])
   Block(String)
-} derive(Eq)
+}
 pub fn Outcome::equal(Self, Self) -> Bool
 pub fn Outcome::label(Self) -> String
 pub fn Outcome::landing(Self) -> State?
 pub fn Outcome::not_equal(Self, Self) -> Bool
 
+#derive(Eq)
 pub(all) enum Phase {
   Life
   Language
@@ -71,11 +73,12 @@ pub(all) enum Phase {
   Instrument
   Domination
   Rebuild
-} derive(Eq)
+}
 pub fn Phase::equal(Self, Self) -> Bool
 pub fn Phase::label(Self) -> String
 pub fn Phase::not_equal(Self, Self) -> Bool
 
+#derive(Eq)
 pub(all) enum State {
   World
   Suprasubjective
@@ -90,7 +93,7 @@ pub(all) enum State {
   Colony
   Distortion
   Reconstruction
-} derive(Eq)
+}
 pub fn State::designation(Self) -> String
 pub fn State::equal(Self, Self) -> Bool
 pub fn State::gloss(Self) -> String
@@ -98,10 +101,11 @@ pub fn State::not_equal(Self, Self) -> Bool
 pub fn State::phase(Self) -> Phase
 pub fn State::residue(Self) -> Int32
 
+#derive(Eq)
 pub struct Trace {
   start : State
   steps : Array[(Trigger, Outcome)]
-} derive(Eq)
+}
 pub fn Trace::at(Self) -> State
 pub fn Trace::equal(Self, Self) -> Bool
 pub fn Trace::not_equal(Self, Self) -> Bool
@@ -113,6 +117,7 @@ pub struct Transition {
   to : State
 }
 
+#derive(Eq)
 pub(all) enum Trigger {
   SpeakLanguage
   BuildIntersubjective
@@ -132,7 +137,7 @@ pub(all) enum Trigger {
   Hinder
   Reconstruct
   Circulate
-} derive(Eq)
+}
 pub fn Trigger::equal(Self, Self) -> Bool
 pub fn Trigger::label(Self) -> String
 pub fn Trigger::not_equal(Self, Self) -> Bool

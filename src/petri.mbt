@@ -30,9 +30,10 @@
 
 ///|
 /// 标识：库所（位置的定名）→ 托肯数。不可变；发火返回新标识。
+#derive(Eq)
 pub(all) struct PetriMarking {
   counts : Map[String, Int32]
-} derive(Eq)
+}
 
 ///|
 pub extend PetriMarking with Eq::{not_equal, equal}
@@ -76,11 +77,12 @@ pub fn PetriMarking::total(self : PetriMarking) -> Int32 {
 
 ///|
 /// Petri 变迁：迁移表的一行（一对一：一个输入库所、一个输出库所）。
+#derive(Eq)
 pub(all) struct PetriTransition {
   from : SubjectState
   trigger : Trigger
   to : SubjectState
-} derive(Eq)
+}
 
 ///|
 pub extend PetriTransition with Eq::{not_equal, equal}
@@ -109,10 +111,11 @@ pub fn PetriMarking::enabled(self : PetriMarking) -> Array[PetriTransition] {
 
 ///|
 /// 发生的一次效果：从库所收一托肯 / 向库所放一托肯。
+#derive(Eq)
 pub(all) enum PetriEffect {
   Consume(SubjectState) // 从库所移除一托肯
   Produce(SubjectState) // 向库所加入一托肯
-} derive(Eq)
+}
 
 ///|
 pub extend PetriEffect with Eq::{not_equal, equal}

@@ -13,12 +13,13 @@
 
 ///|
 /// 一个改动落在 agent 的哪一层（四类候选改动）。
+#derive(Eq)
 pub(all) enum Locus {
   Prompt // 提示
   Strategy // 策略
   Memory // 记忆
   Code // 代码
-} derive(Eq)
+}
 
 ///|
 pub extend Locus with Eq::{not_equal, equal}
@@ -36,11 +37,12 @@ pub fn Locus::label(self : Locus) -> String {
 
 ///|
 /// 发言框架：把结论说成终局，还是建议，还是保留（R14）。
+#derive(Eq)
 pub(all) enum Voice {
   Declarative // 宣告：把结论说成终局（违反 R2，属宪法级禁令）
   Suggestive // 建议：共识只作建议
   Withholding // 保留：不说出结论
-} derive(Eq)
+}
 
 ///|
 pub extend Voice with Eq::{not_equal, equal}
@@ -60,6 +62,7 @@ pub fn Voice::label(self : Voice) -> String {
 ///
 /// 注意：宪法级不变量**不在其中**（见 `gate.mbt`）——因此没有任何变异能触到它，
 /// 每一个后代都自动原样继承。
+#derive(Eq)
 pub struct Genome {
   voice : Voice // 提示层：发言框架
   regime : @multi.TruthRegime // 策略层：如何对待主体性
@@ -67,7 +70,7 @@ pub struct Genome {
   toward_self : Int32 // 策略层：己之诚（意向—行为之契合），0..100
   carry : Int32 // 记忆层：携带的谬误残余（R10）
   reason : Int32 // 代码层：共同理性（R13 纵向），0..100
-} derive(Eq)
+}
 
 ///|
 pub extend Genome with Eq::{not_equal, equal}
@@ -228,12 +231,13 @@ pub fn default_world() -> Array[Opponent] {
 ///|
 /// **适应度**：四个分量。分数只由 `Objective` 把它们压成一个数——分量本身永远
 /// 一起打印，免得一个标量把取舍藏起来。
+#derive(Eq)
 pub struct Fitness {
   consensus : Int32 // 共识度 0..100，越高越好
   stability : Int32 // 稳定度 0..100，越高越好（无病理决断）
   residue : Int32 // 残余，越低越好
   cost : Int32 // 代价，越低越好
-} derive(Eq)
+}
 
 ///|
 pub extend Fitness with Eq::{not_equal, equal}

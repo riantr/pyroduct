@@ -57,9 +57,9 @@ jobs:
         # the release then turns the gate red with a message naming both
         # versions, instead of silently changing what "the gate passed" means.
         # The local toolchain on the day of this measurement was
-        # moon 0.1.20261028 (build e1e1f15) with moonc v0.10.18+6c83a7f62.
+        # moon 0.1.20261119 (build 738607b) with moonc v0.10.22+124d61d05.
         env:
-          MOON_VERSION: "0.1.20261028"
+          MOON_VERSION: "0.1.20261119"
         run: |
           set -euo pipefail
           curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
@@ -112,6 +112,21 @@ jobs:
       # instead, since we do not pin it ourselves.
       - name: Every dependency version literal must match the pin it copies
         run: python tools/validate_pin_copies.py
+
+      # The two .mbti skip lists -- the generator's and the scanner's -- must be
+      # the same rule. They are two copies of one decision, and they decide
+      # WHICH files the "snapshot == disk" criterion compares. Measured
+      # 2026-11-24: a fetched dependency tree (.repos/, gitignored) brought 64
+      # extra .mbti files, so the local gate saw 85 files while CI saw 21 --
+      # the same commit, two different answers.
+      - name: The two .mbti skip lists must be the same rule
+        run: python tools/validate_iface_skip_lists.py
+
+      # The positive control for that detector, for the same reason
+      # gate.yml runs the pin-copy one: a detector whose pattern is narrowed
+      # later leaves the job green and toothless.
+      - name: Positive control for the .mbti skip-list detector
+        run: python tools/iface_skip_lists_control.py
 
       # --deny-warn per the official package-configuration guidance: without it
       # this gate passes on a warning regression while the docs claim zero.

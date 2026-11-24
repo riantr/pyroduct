@@ -29,6 +29,7 @@
 
 ///|
 /// 推动一次迁移的结构位置（八槽，定名一律两字）。
+#derive(Eq, Debug)
 pub(all) enum Slot {
   Occasion // 处境：不由主体发起的给予
   Orientation // 取向：目标被立下、复杂化、更换
@@ -38,7 +39,7 @@ pub(all) enum Slot {
   Hold // 持存：沉淀与位置不变者
   CoBeing // 共在：他者维度，绝不并入处境或行动
   Unveil // 揭蔽：解蔽—遮蔽（R3）
-} derive(Eq, Debug)
+}
 
 ///|
 /// 让 `==` 在 `Slot` 上以方法形式可用（显式 extend，避免隐式提升）。

@@ -10,9 +10,11 @@ import {
 // Errors
 
 // Types and methods
-type Reply derive(ToJson)
+#derive(@json.ToJson)
+type Reply
 
-type Request derive(@json.FromJson)
+#derive(@json.FromJson)
+type Request
 
 // Type aliases
 

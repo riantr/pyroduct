@@ -27,14 +27,20 @@ def count_enum_variants(file_path: Path, enum_name: str) -> int:
           Variant1 // comment
           Variant2 // comment
           ...
-        } derive(...)
-    
+        }
+
+    The derive annotation is deliberately NOT part of the pattern: the
+    toolchain moved `} derive(...)` to `#derive(...)` before the declaration
+    (moon 0.1.20261119), and a reader that insists on one spelling stops
+    seeing the table the moment the toolchain moves.  The enum body is what
+    this is counting.
+
     Returns the number of variant lines between the opening { and closing }.
     """
     content = file_path.read_text(encoding='utf-8')
-    
+
     # Find the enum definition
-    pattern = rf'pub(?:\(all\))?\s+enum\s+{enum_name}\s*\{{([^}}]+)\}}\s*derive'
+    pattern = rf'pub(?:\(all\))?\s+enum\s+{enum_name}\s*\{{([^}}]+)\}}'
     match = re.search(pattern, content, re.DOTALL)
     
     if not match:

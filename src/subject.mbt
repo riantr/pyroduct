@@ -14,6 +14,7 @@
 /// "自由刻度"（可为负，表示受缚），是为阅读方便所加，并非原文原有。
 ///
 /// 主体所处的状态。通用定名（修订后）见 `designation`，原文名见 `label`。
+#derive(Eq, Debug)
 pub(all) enum SubjectState {
   NoPast // 失忆的人没有过去
   NoFuture // 浑浑噩噩的人无所谓未来
@@ -49,7 +50,7 @@ pub(all) enum SubjectState {
   Marking // 标记：好坏路标与地图
   Discipline // 修养：忍受暂时的痛苦，消除暗礁
   Tranquility // 宁静：暗礁不再成其为暗礁，一片光明
-} derive(Eq, Debug)
+}
 
 ///|
 /// 让 `==` 在 SubjectState 上以方法形式可用（显式 extend，避免隐式提升）。
@@ -60,6 +61,7 @@ pub extend SubjectState with Debug::{to_repr}
 
 ///|
 /// 道德发生的阶段：把状态聚成原文的若干段落，便于分组阅读与渲染。
+#derive(Eq, Debug)
 pub(all) enum Phase {
   Natural // 本然
   Release // 自由的发生
@@ -72,7 +74,7 @@ pub(all) enum Phase {
   Recollection // 反思
   Upbringing // 修养之路
   Serenity // 宁静
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Phase with Eq::{not_equal, equal}
@@ -83,6 +85,7 @@ pub extend Phase with Debug::{to_repr}
 ///|
 /// 推动主体迁移的触发。构造子的名字即原文的动作，`Trigger::label` 给出
 /// 原文措辞。
+#derive(Eq, Debug)
 pub(all) enum Trigger {
   TakeStand // 立足现在
   ActInFreedom // 基于行动的自由，反驳即创造
@@ -133,7 +136,7 @@ pub(all) enum Trigger {
   Ascend // 自由再次提升
   WaitNext // 静待下一刻
   ReopenByHorizon // 界域重开：新的下一刻重新打开整个环节
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Trigger with Eq::{not_equal, equal}

@@ -10,17 +10,32 @@
 
 ///|
 /// 不进扫描的目录名（构建产物与工具元数据）。
+///
+/// **这里是一条规则，不是一张清单**：凡是以 `.` 开头的目录名一律不进。
+///
+/// 为什么不能只列名字：`riantr/moonbit_static_analysis` 被取到 `.repos/` 下
+/// （gitignored 的依赖树），而**依赖自己带着一整套 `.mbti`**。实测 2026-11-24：
+/// 磁盘上 85 个 `.mbti`，其中 **64 个属于依赖树**，本仓库自己的只有 21 个。
+/// 而本包的判据是「快照 ≡ 磁盘」**双向相等**（快照里有而磁盘上没有、磁盘上有
+/// 而快照里没有，都算漂移），于是本机绿、CI 红——CI 上没有 `.repos/`，磁盘只有
+/// 21 个 `.mbti`，快照却有 85 行。
+///
+/// 一条**随工作目录而变**的判据不是判据：它在本机答一个题、在 CI 答另一个题。
+/// 所以规则写成「点开头的目录不进」，而不是「把已知的那几个写下来」——后者每多
+/// 一个新 scratch 目录就要记得改一次，忘了就是一次静默的分歧。
+///
+/// `tools/gen_iface_data.py` 必须用同一条规则（生成器与扫描器看不同的文件集合
+/// 时，判据会误报或漏报）；两侧的一致性由 `tools/validate_iface_skip_lists.py`
+/// 守着。
 fn skipped(name : String) -> Bool {
-  let skip = [
-    "_build", ".mooncakes", ".git", "target", "node_modules", ".openseek", ".mavis",
-    ".idea", ".vscode",
-  ]
+  let skip = ["_build", "target", "node_modules"]
   for s in skip {
     if name == s {
       return true
     }
   }
-  false
+  // 以 `.` 开头的一律不进：工具元数据与取回来的依赖都在这类目录里。
+  name.has_prefix(".")
 }
 
 ///|

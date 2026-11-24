@@ -2,7 +2,7 @@
 
 **Date**: 2026-10-11  
 **Skill**: system-modeler + c4model/graphviz  
-**Version**: 0.1.29
+**Version**: 0.1.35
 
 ---
 
@@ -15,7 +15,7 @@ Pyroduct 是一个纯 MoonBit 模块，把两部中国哲学文本建模为可�
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                     Pyroduct Module                          │
-│  riantr/pyroduct@0.1.29                                      │
+│  riantr/pyroduct@0.1.35                                      │
 │  https://gitee.com/ren-yongxiang/pyroduct.git               │
 ├─────────────────────────────────────────────────────────────┤
 │  状态机家族    │  智能体层    │  分析工具    │  CLI/插件     │
@@ -71,7 +71,7 @@ Pyroduct 是一个纯 MoonBit 模块，把两部中国哲学文本建模为可�
 | `ml` | 自研 DoubleML (PLR/交叉拟合/正交分数) | src, core/math | 无——完全自包含 |
 | `dmlref` | 与 `moonbit_doubleML@0.164.34` 互校 | ml | `riantr/moonbit_doubleML` |
 | `causal` | 敏感性/多重检验/异质性 (0.163.3深用) | ml | `riantr/moonbit_doubleML` |
-| `audit` | 三鉴自审计 (结构/类型/行为) | src, group, society | `riantr/moonbit_static_analysis@0.4.39` |
+| `audit` | 三鉴自审计 (结构/类型/行为) | src, group, society | `riantr/moonbit_static_analysis@0.5.3` |
 | `snnref` | 脉冲沉淀实验 (native only) | src | `riantr/snn_mbt@0.166.2` |
 | `viz` | Mermaid/HTML 可视化 | src, group, society | 无 |
 

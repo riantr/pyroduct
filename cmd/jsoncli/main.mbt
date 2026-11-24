@@ -13,18 +13,20 @@
 
 ///|
 /// 回信信封：rendered 是报告全文；faces 是支持的 kind 清单（防漂移）。
+#derive(ToJson)
 struct Reply {
   ok : Bool
   error : String?
   kind : String
   rendered : String
   faces : Array[String]
-} derive(ToJson)
+}
 
 ///|
+#derive(FromJson)
 struct Request {
   kind : String?
-} derive(FromJson)
+}
 
 ///|
 /// 本机分析面的稳定清单（新增面时同步此表、cmd/main 与插件 README）。

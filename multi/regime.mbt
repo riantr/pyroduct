@@ -10,13 +10,14 @@
 
 ///|
 /// 真理体制。
+#derive(Eq)
 pub(all) enum TruthRegime {
   Immanent // 古埃及：真理是内在于世界的永恒秩序，人本来就在其中，不必寻求
   Logos // 古希腊：真理是永恒的言说，靠理性灵魂保障（对话→回忆→独白的退化史）
   SuperSubjective // 伽达默尔：理解与语言均为超主体事件
   InterSubjective // 哈贝马斯：真理即主体间有效性主张，横纵交织成网
   ChengRan // 作者方案：诚然的诠释学，统于「自性内照」
-} derive(Eq)
+}
 
 ///|
 pub extend TruthRegime with Eq::{not_equal, equal}
@@ -69,12 +70,13 @@ pub fn TruthRegime::needs_cheng(self : TruthRegime) -> Bool {
 
 ///|
 /// 商谈类型。
+#derive(Eq)
 pub(all) enum DiscourseType {
   Theoretical // 理论商谈：命题真实性
   Practical // 实践商谈：正当性
   Aesthetic // 表达性商谈：真诚性
   Faith // 信仰商谈：宗教真理可纳入共识真理
-} derive(Eq)
+}
 
 ///|
 pub extend DiscourseType with Eq::{not_equal, equal}
@@ -97,12 +99,13 @@ pub fn DiscourseType::label(self : DiscourseType) -> String {
 /// 主观世界那一支又可分两部分：「他之诚」（Authentizität）与「己之诚」
 /// （Wahrhaftigkeit）（第三章第二节，P.23-24）。本模型把两者分列，以承载 P.50 的
 /// 那条区别（见 `requires_joint_review`）。
+#derive(Eq)
 pub(all) enum ClaimKind {
   Truthfulness // 真实性：客观世界
   Legitimacy // 正当性：社会世界
   Authenticity // 本真性＝他之诚：内心所言与诉说之言契合
   Sincerity // 真诚性＝己之诚：行为与意向契合
-} derive(Eq)
+}
 
 ///|
 pub extend ClaimKind with Eq::{not_equal, equal}
@@ -120,11 +123,12 @@ pub fn ClaimKind::label(self : ClaimKind) -> String {
 
 ///|
 /// 时间位置。
+#derive(Eq)
 pub(all) enum ClaimPhase {
   Before // 事前
   During // 事中
   After // 事后
-} derive(Eq)
+}
 
 ///|
 pub extend ClaimPhase with Eq::{not_equal, equal}

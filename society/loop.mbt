@@ -14,12 +14,13 @@
 
 ///|
 /// 一次 `step` 的回执。
+#derive(Eq)
 pub(all) enum Outcome {
   Moved(Trigger, State) // 唯一出路：由该触发迁到该状态
   Held(Trigger, State) // 出路回到自身：位置不变（沉淀、静待）
   Open(Trigger, Array[State]) // 一句触发、多个去处：不替表挑一个（本表暂无此形）
   Block(String) // 此状态无此触发：缺口，不许编造
-} derive(Eq)
+}
 
 ///|
 pub extend Outcome with Eq::{not_equal, equal}
@@ -181,10 +182,11 @@ pub fn no_dead_end() -> Bool {
 
 ///|
 /// 一段行走的记录。`Open`／`Block` 之后位置不变。
+#derive(Eq)
 pub struct Trace {
   start : State
   steps : Array[(Trigger, Outcome)]
-} derive(Eq)
+}
 
 ///|
 pub extend Trace with Eq::{not_equal, equal}

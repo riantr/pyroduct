@@ -38,6 +38,7 @@
 
 ///|
 /// 模型中的状态（13 个，两字）。
+#derive(Eq)
 pub(all) enum State {
   World // 世界：生活世界（语言层）
   Suprasubjective // 超体：超主体性（与间体等量齐观，见文件头「波粒二象性」）
@@ -52,7 +53,7 @@ pub(all) enum State {
   Colony // 殖民：内在殖民化
   Distortion // 扭曲：被扭曲的交往
   Reconstruction // 重建
-} derive(Eq)
+}
 
 ///|
 /// 让 `==` 在 `State` 上以方法形式可用（显式 extend，避免隐式提升）。
@@ -71,6 +72,7 @@ pub extend State with Eq::{not_equal, equal}
 /// 既不合商谈作为**受验程序**的特性（哈贝马斯比作洗衣机），又和相邻的语言
 /// 阶段 `Language` 概念相撞。现在它读 `Discourse`，与商谈位置同名——此处
 /// 中文定名与原文措辞都相同，两个构造本就该是同一个词。
+#derive(Eq)
 pub(all) enum Phase {
   Life // 生活
   Language // 语言
@@ -80,13 +82,14 @@ pub(all) enum Phase {
   Instrument // 系统
   Domination // 殖民
   Rebuild // 复建
-} derive(Eq)
+}
 
 ///|
 pub extend Phase with Eq::{not_equal, equal}
 
 ///|
 /// 推动模型迁移的触发。
+#derive(Eq)
 pub(all) enum Trigger {
   SpeakLanguage // 语言在言说我们（伽达默尔）
   BuildIntersubjective // 主体间性是用语言建立起来的（哈贝马斯）
@@ -106,7 +109,7 @@ pub(all) enum Trigger {
   Hinder // 阻碍非强制共识的产生
   Reconstruct // 重建被扭曲的交往领域
   Circulate // 循环过程取代对立关系
-} derive(Eq)
+}
 
 ///|
 pub extend Trigger with Eq::{not_equal, equal}

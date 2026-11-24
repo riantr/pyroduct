@@ -156,10 +156,11 @@ pub struct CycleEvent {
   remainder : String
 }
 
+#derive(Eq)
 pub struct CycleState {
   state : @src.SubjectState
   genome : Genome
-} derive(Eq)
+}
 pub fn CycleState::equal(Self, Self) -> Bool
 pub fn CycleState::not_equal(Self, Self) -> Bool
 
@@ -180,12 +181,13 @@ pub struct Episodes {
   n : Int32
 }
 
+#derive(Eq)
 pub struct Fitness {
   consensus : Int32
   stability : Int32
   residue : Int32
   cost : Int32
-} derive(Eq)
+}
 pub fn Fitness::equal(Self, Self) -> Bool
 pub fn Fitness::not_equal(Self, Self) -> Bool
 
@@ -199,6 +201,7 @@ pub struct GateAudit {
 }
 pub fn GateAudit::ok(Self) -> Bool
 
+#derive(Eq)
 pub struct Genome {
   voice : Voice
   regime : @multi.TruthRegime
@@ -206,18 +209,19 @@ pub struct Genome {
   toward_self : Int32
   carry : Int32
   reason : Int32
-} derive(Eq)
+}
 pub fn Genome::decode(String) -> Self
 pub fn Genome::encode(Self) -> String
 pub fn Genome::equal(Self, Self) -> Bool
 pub fn Genome::not_equal(Self, Self) -> Bool
 
+#derive(Eq)
 pub(all) enum Judgement {
   Accepted
   RejectedConstitutional
   RevertedRegression
   Tie
-} derive(Eq)
+}
 pub fn Judgement::equal(Self, Self) -> Bool
 pub fn Judgement::label(Self) -> String
 pub fn Judgement::not_equal(Self, Self) -> Bool
@@ -244,12 +248,13 @@ pub fn Ledger::serialize(Self) -> String
 pub fn Ledger::tree_faults(Self) -> Array[String]
 pub fn Ledger::tree_ok(Self) -> Bool
 
+#derive(Eq)
 pub(all) enum Locus {
   Prompt
   Strategy
   Memory
   Code
-} derive(Eq)
+}
 pub fn Locus::equal(Self, Self) -> Bool
 pub fn Locus::label(Self) -> String
 pub fn Locus::not_equal(Self, Self) -> Bool
@@ -303,11 +308,12 @@ pub struct Trail {
   gate : String
 }
 
+#derive(Eq)
 pub(all) enum Voice {
   Declarative
   Suggestive
   Withholding
-} derive(Eq)
+}
 pub fn Voice::equal(Self, Self) -> Bool
 pub fn Voice::label(Self) -> String
 pub fn Voice::not_equal(Self, Self) -> Bool

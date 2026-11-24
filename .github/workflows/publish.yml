@@ -99,9 +99,9 @@ jobs:
         # a toolchain nobody measured it on. Asserting the version turns that
         # silent drift into a red run that names both versions.
         # The local toolchain on the day of this measurement was
-        # moon 0.1.20261028 (build e1e1f15) with moonc v0.10.18+6c83a7f62.
+        # moon 0.1.20261119 (build 738607b) with moonc v0.10.22+124d61d05.
         env:
-          MOON_VERSION: "0.1.20261028"
+          MOON_VERSION: "0.1.20261119"
         run: |
           set -euo pipefail
           curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
@@ -193,11 +193,13 @@ jobs:
           python tools/validate_readme_facts.py
           python tools/validate_cli_faces.py
           python tools/validate_pin_copies.py
+          python tools/validate_iface_skip_lists.py
           bash tools/ci_plugin_gate.sh
           # The positive control for that detector, for the same reason
           # gate.yml runs it: a release must not ship with a detector whose
           # pattern has been narrowed into something that cannot fail.
           python tools/pin_copies_control.py
+          python tools/iface_skip_lists_control.py
 
       - name: Publish to Mooncakes
         run: |

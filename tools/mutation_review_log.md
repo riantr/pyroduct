@@ -114,25 +114,25 @@
 | X5 是否未定恒假（五处未定点不再被点名） | CAUGHT | Total tests: 250, passed: 247, failed: 3 |
 | X6 把同归也算成未定（两个维度混成一种不确定） | CAUGHT | Total tests: 250, passed: 247, failed: 3 |
 | X7 有边与挪动混为一谈（可推动的槽只给会挪动的那几根） | CAUGHT | Total tests: 250, passed: 247, failed: 3 |
-| RESTORED src/loop.mbt | OK | 20a630911309adac |
-| RESTORED group/loop.mbt | OK | 0aaad459c0a9fe3f |
-| RESTORED society/loop.mbt | OK | 531318c2eda055b9 |
+| RESTORED src/loop.mbt | OK | a5b2ca6203d1e325 |
+| RESTORED group/loop.mbt | OK | 1f82a21bc875f792 |
+| RESTORED society/loop.mbt | OK | 6ad6a957407a9d3d |
 | RESTORED src/spec.mbt | OK | 9a2fd03641fccd42 |
 | RESTORED audit/fleet.mbt | OK | 91f37693e3e15266 |
 | RESTORED audit/mutants.mbt | OK | b90e294c8dffe26c |
 | RESTORED ml/design.mbt | OK | fc0d26c9f8b898f7 |
-| RESTORED src/petri.mbt | OK | f70a47da197ab09b |
+| RESTORED src/petri.mbt | OK | 51036ca48682c6d6 |
 | RESTORED src/en.mbt | OK | 6c3fead6beb5a2bc |
 | RESTORED group/en.mbt | OK | 148d9fb456ec08cc |
 | RESTORED src/buchi.mbt | OK | 9dc87ccf3eb376c8 |
 | RESTORED src/paths.mbt | OK | d5e9f180d2e5e64a |
-| RESTORED society/state.mbt | OK | f1da179cc86377d4 |
-| RESTORED evolution/cycle.mbt | OK | 8f3f8ceb94db6e0f |
-| RESTORED group/machine.mbt | OK | 5fb036c76f123d02 |
+| RESTORED society/state.mbt | OK | 71ff6fbb041cdba9 |
+| RESTORED evolution/cycle.mbt | OK | cfdf197d7bfa66d2 |
+| RESTORED group/machine.mbt | OK | 37ea9eaee2320c2f |
 | RESTORED evolution/audit.mbt | OK | 09275377c01f96ad |
-| RESTORED multi/deontic.mbt | OK | e1c5617f06cb0cae |
-| RESTORED src/contract.mbt | OK | 590cc982d66ff9d5 |
+| RESTORED multi/deontic.mbt | OK | 8bcdadf5552072ba |
+| RESTORED src/contract.mbt | OK | 931f23414544b977 |
 | RESTORED coordinator/replay.mbt | OK | d6e5b5af689b0635 |
 | RESTORED coordinator/runtime.mbt | OK | b1ef34379c0c1fdf |
-| RESTORED coordinator/memory.mbt | OK | aa5671f417cec80c |
+| RESTORED coordinator/memory.mbt | OK | 4b63930877ac5cb2 |
 | RESTORED generated interfaces | OK | 21 files |

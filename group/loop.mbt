@@ -30,12 +30,13 @@
 
 ///|
 /// 一次 `step` 的回执。
+#derive(Eq)
 pub(all) enum GroupOutcome {
   Moved(GroupTrigger, GroupState) // 唯一出路：由该触发迁到该状态
   Held(GroupTrigger, GroupState) // 出路回到自身：位置不变（沉淀、静待）
   Open(GroupTrigger, Array[GroupState]) // 一句触发、多个去处：不替表挑一个
   Block(String) // 此状态无此触发：缺口，不许编造
-} derive(Eq)
+}
 
 ///|
 pub extend GroupOutcome with Eq::{not_equal, equal}
@@ -50,10 +51,11 @@ pub extend GroupOutcome with Eq::{not_equal, equal}
 /// 发生，结果就还没定，这正是判据成立之前的样子，不该由机器补上。
 ///
 /// 命名沿用两字纪律，只指称结构关系：
+#derive(Eq)
 pub(all) enum GroupLean {
   Supra // 超体：超主体性显影（共同语言／传统承担理解）
   Inter // 间体：主体间性显影（相互提出有效性主张）
-} derive(Eq)
+}
 
 ///|
 pub extend GroupLean with Eq::{not_equal, equal}
@@ -229,10 +231,11 @@ pub fn no_dead_end() -> Bool {
 ///|
 /// 一段行走的记录。`steps` 只追加；`Open`／`Block` 之后位置不变——未定与缺口
 /// 都不许被写成「已经过去了」。
+#derive(Eq)
 pub struct GroupTrace {
   start : GroupState
   steps : Array[(GroupTrigger, GroupOutcome)]
-} derive(Eq)
+}
 
 ///|
 pub extend GroupTrace with Eq::{not_equal, equal}

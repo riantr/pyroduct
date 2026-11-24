@@ -91,7 +91,7 @@
 |------|-------|--------|
 | Registry | mooncakes.io | `moon.mod:1`, `publish.yml:204` |
 | Module | `riantr/pyroduct` | `moon.mod:1` |
-| Version | `0.1.29` | `moon.mod:3` |
+| Version | `0.1.35` | `moon.mod:3` |
 | License | MIT | `moon.mod:9` |
 | Skills link | skills.mooncakes.io | `AGENTS.md` "CI" section |
 
@@ -108,13 +108,13 @@
 | Item | Value | Source |
 |------|-------|--------|
 | Plugin name | `pyroduct-model` | `plugin/.minimax-plugin/plugin.json:3` |
-| Plugin version | `0.3.0` | `plugin/.minimax-plugin/plugin.json:6` |
+| Plugin version | `0.3.8` | `plugin/.minimax-plugin/plugin.json:5` |
 | Install path | `~/.minimax/plugins/pyroduct-model/` | `plugin/tools/sync-install.mjs:42` |
 | MCP config | `pyroduct.mcp.json` | `plugin/.minimax-plugin/plugin.json:14` |
 | MCP server | `server.mjs` (stdio JSON-RPC) | `plugin/pyroduct.mcp.json:5-8` |
-| Bridge | `vendor/jsoncli.js` (1.38 MB) | `plugin/vendor/BUILD.json:4` |
+| Bridge | `vendor/jsoncli.js` (1.88 MB) | `plugin/vendor/BUILD.json:4,9` |
 | Pin | SHA-256 in `vendor/BUILD.json` | `plugin/vendor/BUILD.json:10` |
-| Built with | `moon 0.1.20260920 / moonc v0.10.14+7d59c7ec9` | `plugin/vendor/BUILD.json:5` |
+| Built with | `moon 0.1.20261119 / moonc v0.10.22+124d61d05` | `plugin/vendor/BUILD.json:5` |
 
 **Deployment steps** (manual):
 1. `node plugin/tools/update-bundle.mjs <checkout>` — rebuild bridge, re-pin SHA-256, run validate-plugin.mjs

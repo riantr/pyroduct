@@ -100,13 +100,14 @@ pub struct Artifact {
   digest : String
 }
 
+#derive(Eq)
 pub(all) enum ArtifactKind {
   Paper
   Figure
   Code
   Data
   Note
-} derive(Eq)
+}
 pub fn ArtifactKind::equal(Self, Self) -> Bool
 pub fn ArtifactKind::label(Self) -> String
 pub fn ArtifactKind::not_equal(Self, Self) -> Bool
@@ -129,12 +130,13 @@ pub struct Citation {
   locator : String
 }
 
+#derive(Eq)
 pub(all) enum Commitment {
   Draft
   Adopted
   Superseded
   Withdrawn
-} derive(Eq)
+}
 pub fn Commitment::equal(Self, Self) -> Bool
 pub fn Commitment::label(Self) -> String
 pub fn Commitment::not_equal(Self, Self) -> Bool
@@ -170,12 +172,13 @@ pub(all) struct Deliberation {
   open_remainder : String
 }
 
+#derive(Eq)
 pub(all) enum EvidenceVerdict {
   Supported
   Refuted
   Inconclusive
   Replicated
-} derive(Eq)
+}
 pub fn EvidenceVerdict::equal(Self, Self) -> Bool
 pub fn EvidenceVerdict::label(Self) -> String
 pub fn EvidenceVerdict::not_equal(Self, Self) -> Bool
@@ -194,13 +197,14 @@ pub(all) struct Finding {
   at : Int32
 }
 
+#derive(Eq)
 pub(all) enum FindingStatus {
   Pending
   Established
   Overturned
   Replaced
   Retracted
-} derive(Eq)
+}
 pub fn FindingStatus::equal(Self, Self) -> Bool
 pub fn FindingStatus::label(Self) -> String
 pub fn FindingStatus::not_equal(Self, Self) -> Bool
@@ -263,6 +267,7 @@ pub struct Result {
 }
 pub fn Result::is_bound(Self) -> Bool
 
+#derive(Eq)
 pub(all) enum Role {
   Question
   Data
@@ -270,7 +275,7 @@ pub(all) enum Role {
   Analysis
   Writing
   Review
-} derive(Eq)
+}
 pub fn Role::equal(Self, Self) -> Bool
 pub fn Role::label(Self) -> String
 pub fn Role::not_equal(Self, Self) -> Bool
@@ -313,11 +318,12 @@ pub struct Task {
   deadline : Int32
 }
 
+#derive(Eq)
 pub(all) enum Warrant {
   FromData
   FromReplication
   FromDialogue
-} derive(Eq)
+}
 pub fn Warrant::equal(Self, Self) -> Bool
 pub fn Warrant::label(Self) -> String
 pub fn Warrant::not_equal(Self, Self) -> Bool

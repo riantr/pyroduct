@@ -2,7 +2,7 @@
 """Assert every dependency-version literal in the tree matches the pin in moon.mod.
 
 Why this exists: `moon.mod` names the versions the release builds against, but
-the repository also *states* those versions in prose -- 56 literals across 19 files
+the repository also *states* those versions in prose -- 60 literals across 19 files
 as of 2026-10-31: the two READMEs, AGENTS.md, the architecture DOT
 and DSL files, the package doc comments, the rendered face text ("依赖：
 `riantr/moonbit_doubleML@0.164.60`"), the plugin's face catalog, and both
@@ -15,7 +15,7 @@ dependencies, then run the gate") silently created a trap: bump the pin in
 never against what the repository says -- and the repository starts lying about
 which version it was built against. It has already happened in this repo: the
 `multi` face catalog said `R1-R12` while the module printed `R1-R14`, and the
-four dependency versions are restated in 19 files by hand -- 56 literals in all.
+four dependency versions are restated in 19 files by hand -- 60 literals in all.
 
 So: every `package@version` literal in a tracked file must equal the version
 `moon.mod` pins for that package. For a transitive dependency (one we do not

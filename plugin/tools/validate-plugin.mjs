@@ -11,7 +11,7 @@
  * actually prints — the drift that produced two wrong tool descriptions
  * (page citations and provenance layers) before they were measured.
  */
-import { spawn } from 'node:child_process'
+import { spawn, spawnSync } from 'node:child_process'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -470,6 +470,35 @@ check('naming row no longer claims a provenance layer',
   const projectRoot =
     candidate && es(path.join(candidate, 'moon.mod')) ? candidate : path.dirname(PLUGIN)
 
+  // THE COUNT MUST BE A FACT ABOUT THE MODULE, not about whatever happens to be
+  // lying in the working directory.
+  //
+  // This walk used to skip `_build`, `.mooncakes` and `node_modules` and take
+  // everything else. But `riantr/moonbit_static_analysis` is fetched into
+  // `.repos/` (gitignored) the moment the analyzer runs, and THAT tree carries
+  // its own test suite: measured 2026-11-24, the filesystem walk saw 687 test
+  // files / 4931 test functions, of which 655 files / 4675 functions belonged
+  // to the fetched dependency. The check then compared the description's 250
+  // against 4925 and went red -- and the number it reported was a fact about
+  // a cache directory, not about this module. Worse, the same walk gave
+  // DIFFERENT answers on a machine that had run the analyzer and on one that
+  // had not, so the local gate and CI could disagree about the same commit.
+  //
+  // The rule is now the same one `tools/validate_readme_facts.py` uses: count
+  // the module's own tracked files plus untracked-but-not-ignored ones. A test
+  // you just wrote is still counted (it is not ignored), and a fetched
+  // dependency tree is not (it is). `git ls-files` is asked, so git decides
+  // what is ignored -- this script does not re-implement an ignore matcher.
+  function gitTestFiles(root) {
+    const r = spawnSync(
+      'git',
+      ['ls-files', '--cached', '--others', '--exclude-standard', '--', '*_test.mbt'],
+      { cwd: root, encoding: 'utf8', windowsHide: true },
+    )
+    if (r.status !== 0 || !r.stdout || !r.stdout.trim()) return null
+    return r.stdout.split('\n').filter(Boolean).map((p) => path.join(root, p))
+  }
+
   function walkTests(dir, out) {
     for (const entry of rd(dir, { withFileTypes: true })) {
       const full = path.join(dir, entry.name)
@@ -478,8 +507,14 @@ check('naming row no longer claims a provenance layer',
       else if (entry.name.endsWith('_test.mbt')) out.push(full)
     }
   }
-  const testFiles = []
-  walkTests(projectRoot, testFiles)
+  // Not a git checkout (e.g. the installed plugin copy): fall back to the
+  // filesystem walk, but still skip the scratch directories that hold fetched
+  // dependencies, so the fallback cannot reintroduce the same contamination.
+  const gitListed = gitTestFiles(projectRoot)
+  const testFiles = gitListed ?? []
+  if (!gitListed) {
+    walkTests(projectRoot, testFiles)
+  }
 
   // A check that cannot see its subject must say so, not report a finding.
   if (testFiles.length === 0) {

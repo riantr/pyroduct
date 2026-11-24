@@ -41,10 +41,11 @@
 
 ///|
 /// 规则强度。照 DL 的惯例分成两类。
+#derive(Eq)
 pub(all) enum NormStrength {
   Strict // 严格规则：不可被击败（结构性事实）
   Defeasible // 可辩规则：可被显式击败
-} derive(Eq)
+}
 
 ///|
 pub extend NormStrength with Eq::{not_equal, equal}
@@ -62,6 +63,7 @@ pub fn NormStrength::label(self : NormStrength) -> String {
 /// 前提：可机读的事实名。规则的「条件」不再是一段散文，而是一个可判的谓词。
 ///
 /// 八个前提覆盖遭遇层的全部判据分支；新增分支必须同时新增前提，否则推不动。
+#derive(Eq)
 pub(all) enum Premise {
   ClaimOutOfPhase // 主张落在错误的时间位置（R4）
   ClaimNotJointReview // 该主张不进入共同检讨（R5，第四章第五节 P.50）
@@ -71,7 +73,7 @@ pub(all) enum Premise {
   MonologicGap // 逻各斯体制下诚的差距过大（R5）
   BothChengComplete // 诚然体制下双诚俱足（R12）
   SeekingConsensus // 双方体制都寻求共识（R13）
-} derive(Eq)
+}
 
 ///|
 pub extend Premise with Eq::{not_equal, equal}
@@ -119,21 +121,23 @@ pub(all) struct Defeater {
 
 ///|
 /// 一次让位（软关系）：`loser` 前提齐备、无人击败，却按优先序让给了 `winner`。
+#derive(Eq)
 pub(all) struct Outranked {
   loser : String
   winner : String
   loser_verdict : Verdict
-} derive(Eq)
+}
 
 ///|
 pub extend Outranked with Eq::{not_equal, equal}
 
 ///|
 /// 一次被击败（硬关系）：`target` 退出推演。
+#derive(Eq)
 pub(all) struct Defeated {
   target : String
   by : String
-} derive(Eq)
+}
 
 ///|
 pub extend Defeated with Eq::{not_equal, equal}
@@ -144,6 +148,7 @@ pub extend Defeated with Eq::{not_equal, equal}
 /// `fired` 是前提齐备的规范；`defeated` 是被显式击败的；`outranked` 是让位的；
 /// `accepted` 是**判词一致**的存活规范（可能不止一条——两条规范给出同一个判词时，
 /// 它们互相印证，不是冲突）；`verdict` 是胜出者的判词。
+#derive(Eq)
 pub(all) struct Derivation {
   fired : Array[String]
   defeated : Array[Defeated]
@@ -152,7 +157,7 @@ pub(all) struct Derivation {
   verdict : Verdict
   winner : String
   note : String
-} derive(Eq)
+}
 
 ///|
 pub extend Derivation with Eq::{not_equal, equal}

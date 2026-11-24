@@ -21,23 +21,30 @@ OUT = os.path.join(ROOT, "audit", "iface_data.mbt")
 
 # 与 tools/ifacescan/scan.mbt 的 skipped() **必须一致**——不一致的话两边会
 # 审到不同的文件集合，而漂移判据会误报（或漏报）。改一处就改两处。
+#
+# 而「一致」不只是名字一致，还要**规则一致**：两边都跳过所有以 `.` 开头的目录。
+# 2026-11-24 实测：`riantr/moonbit_static_analysis` 被取到 `.repos/`（gitignored
+# 的依赖树）下，依赖自己带着 64 个 `.mbti`——磁盘上共 85 个，本仓库自己的只有
+# 21 个。判据是「快照 ≡ 磁盘」双向相等，于是本机绿、CI 红。一条随工作目录而变
+# 的判据不是判据。两侧的一致性由 tools/validate_iface_skip_lists.py 守着。
 SKIP = {
     "_build",
-    ".mooncakes",
-    ".git",
     "target",
     "node_modules",
-    ".openseek",
-    ".mavis",
-    ".idea",
-    ".vscode",
 }
+
+
+def skipped(name: str) -> bool:
+    """The one rule: build output, tool metadata, and fetched dependencies."""
+    if name in SKIP:
+        return True
+    return name.startswith(".")
 
 
 def walk():
     out = []
     for dirpath, dirnames, filenames in os.walk(ROOT):
-        dirnames[:] = [d for d in dirnames if d not in SKIP]
+        dirnames[:] = [d for d in dirnames if not skipped(d)]
         for name in filenames:
             if name.endswith(".mbti"):
                 full = os.path.join(dirpath, name)

@@ -50,12 +50,13 @@ pub fn constitutional(g : Genome) -> Bool {
 
 ///|
 /// 闸门的判词。
+#derive(Eq)
 pub(all) enum Judgement {
   Accepted // 接收
   RejectedConstitutional // 拒收（违宪）
   RevertedRegression // 回滚（退步）
   Tie // 持平
-} derive(Eq)
+}
 
 ///|
 pub extend Judgement with Eq::{not_equal, equal}

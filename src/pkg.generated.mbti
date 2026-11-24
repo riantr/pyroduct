@@ -216,12 +216,13 @@ pub(all) struct AhoStats {
   deepest_branch_path : String
 }
 
+#derive(Eq)
 pub(all) enum Check {
   Reachable
   HasIncoming
   PhaseHasNonAct
   ReceiptExact
-} derive(Eq)
+}
 pub fn Check::equal(Self, Self) -> Bool
 pub fn Check::label(Self) -> String
 pub fn Check::not_equal(Self, Self) -> Bool
@@ -232,11 +233,12 @@ pub(all) struct Contract {
   text : String
 }
 
+#derive(Eq)
 pub(all) enum ContractKind {
   AlwaysMachine
   AlwaysPhase
   AfterStep
-} derive(Eq)
+}
 pub fn ContractKind::equal(Self, Self) -> Bool
 pub fn ContractKind::label(Self) -> String
 pub fn ContractKind::not_equal(Self, Self) -> Bool
@@ -256,21 +258,23 @@ pub(all) struct CoverageReport {
 }
 pub fn CoverageReport::ok(Self) -> Bool
 
+#derive(Eq, @debug.Debug)
 pub(all) struct Expansion {
   leaves : Array[Trace]
   truncated : Bool
-} derive(Eq, @debug.Debug)
+}
 pub fn Expansion::equal(Self, Self) -> Bool
 pub fn Expansion::not_equal(Self, Self) -> Bool
 pub fn Expansion::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum Outcome {
   Moved(Trigger, SubjectState)
   Held(Trigger, SubjectState)
   Open(Array[(Trigger, SubjectState)])
   Same(Slot, Array[Trigger], SubjectState)
   Block(String)
-} derive(Eq, @debug.Debug)
+}
 pub fn Outcome::en_label(Self) -> String
 pub fn Outcome::equal(Self, Self) -> Bool
 pub fn Outcome::forks_from(Self, SubjectState) -> Array[Self]
@@ -279,16 +283,18 @@ pub fn Outcome::landing(Self) -> SubjectState?
 pub fn Outcome::not_equal(Self, Self) -> Bool
 pub fn Outcome::to_repr(Self) -> @debug.Repr
 
+#derive(Eq)
 pub(all) enum PetriEffect {
   Consume(SubjectState)
   Produce(SubjectState)
-} derive(Eq)
+}
 pub fn PetriEffect::equal(Self, Self) -> Bool
 pub fn PetriEffect::not_equal(Self, Self) -> Bool
 
+#derive(Eq)
 pub(all) struct PetriMarking {
   counts : Map[String, Int32]
-} derive(Eq)
+}
 pub fn PetriMarking::at(Self, SubjectState) -> Int32
 pub fn PetriMarking::enabled(Self) -> Array[PetriTransition]
 pub fn PetriMarking::equal(Self, Self) -> Bool
@@ -297,14 +303,16 @@ pub fn PetriMarking::fire_by(Self, SubjectState, Trigger) -> (Array[PetriEffect]
 pub fn PetriMarking::not_equal(Self, Self) -> Bool
 pub fn PetriMarking::total(Self) -> Int32
 
+#derive(Eq)
 pub(all) struct PetriTransition {
   from : SubjectState
   trigger : Trigger
   to : SubjectState
-} derive(Eq)
+}
 pub fn PetriTransition::equal(Self, Self) -> Bool
 pub fn PetriTransition::not_equal(Self, Self) -> Bool
 
+#derive(Eq, @debug.Debug)
 pub(all) enum Phase {
   Natural
   Release
@@ -317,7 +325,7 @@ pub(all) enum Phase {
   Recollection
   Upbringing
   Serenity
-} derive(Eq, @debug.Debug)
+}
 pub fn Phase::designation(Self) -> String
 pub fn Phase::en_label(Self) -> String
 pub fn Phase::equal(Self, Self) -> Bool
@@ -332,6 +340,7 @@ pub(all) struct Point {
   out : Outcome
 }
 
+#derive(Eq, @debug.Debug)
 pub(all) enum Slot {
   Occasion
   Orientation
@@ -341,7 +350,7 @@ pub(all) enum Slot {
   Hold
   CoBeing
   Unveil
-} derive(Eq, @debug.Debug)
+}
 pub fn Slot::designation(Self) -> String
 pub fn Slot::en_designation(Self) -> String
 pub fn Slot::en_gloss(Self) -> String
@@ -361,15 +370,17 @@ pub struct StateInfo {
   gloss : String
 }
 
+#derive(Eq, @debug.Debug)
 pub(all) struct Step {
   from : SubjectState
   slot : Slot
   outcome : Outcome
-} derive(Eq, @debug.Debug)
+}
 pub fn Step::equal(Self, Self) -> Bool
 pub fn Step::not_equal(Self, Self) -> Bool
 pub fn Step::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum SubjectState {
   NoPast
   NoFuture
@@ -405,7 +416,7 @@ pub(all) enum SubjectState {
   Marking
   Discipline
   Tranquility
-} derive(Eq, @debug.Debug)
+}
 pub fn SubjectState::designation(Self) -> String
 pub fn SubjectState::en_gloss(Self) -> String
 pub fn SubjectState::en_label(Self) -> String
@@ -419,10 +430,11 @@ pub fn SubjectState::phase(Self) -> Phase
 pub fn SubjectState::qualified(Self) -> String
 pub fn SubjectState::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub struct Trace {
   start : SubjectState
   steps : Array[(Slot, Outcome)]
-} derive(Eq, @debug.Debug)
+}
 pub fn Trace::at(Self) -> SubjectState
 pub fn Trace::detailed(Self) -> Array[Step]
 pub fn Trace::equal(Self, Self) -> Bool
@@ -436,6 +448,7 @@ pub struct Transition {
   to : SubjectState
 }
 
+#derive(Eq, @debug.Debug)
 pub(all) enum Trigger {
   TakeStand
   ActInFreedom
@@ -486,7 +499,7 @@ pub(all) enum Trigger {
   Ascend
   WaitNext
   ReopenByHorizon
-} derive(Eq, @debug.Debug)
+}
 pub fn Trigger::en_label(Self) -> String
 pub fn Trigger::equal(Self, Self) -> Bool
 pub fn Trigger::label(Self) -> String

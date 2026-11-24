@@ -68,6 +68,7 @@ pub fn vertical_ready(subjects : Array[Subject]) -> Bool {
 
 ///|
 /// 遭遇的决断。
+#derive(Eq)
 pub(all) enum Verdict {
   OutOfPhase // 相位越界：主张落错了时间
   NotSought // 不寻求：真理已在世界之中
@@ -75,7 +76,7 @@ pub(all) enum Verdict {
   Monologic // 独白化：对话退化为独白
   Provisional // 暂时共识（可修订）
   Attuned // 相契：双诚俱足
-} derive(Eq)
+}
 
 ///|
 pub extend Verdict with Eq::{not_equal, equal}

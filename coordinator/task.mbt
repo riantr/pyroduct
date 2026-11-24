@@ -26,13 +26,14 @@ pub struct Dataset {
 
 ///|
 /// 产物种类。
+#derive(Eq)
 pub(all) enum ArtifactKind {
   Paper // 论文
   Figure // 图
   Code // 代码
   Data // 数据
   Note // 笔记
-} derive(Eq)
+}
 
 ///|
 pub extend ArtifactKind with Eq::{not_equal, equal}

@@ -42,9 +42,20 @@ here. Two reasons, both learned the hard way:
     the detector checks every count claim in the tree.
 
 So the package name and the versions are kept in separate variables, and the
-count claims are formatted from numbers. A previous version of this file broke
-both rules at once, and the CI run caught it: the control was red before it
-had ever been run.
+count of literals the tree claims is DISCOVERED at run time -- measured from
+the detector's own output and located with the detector's own pattern -- rather
+than written here. A previous version of this file broke both rules at once,
+and the CI run caught it: the control was red before it had ever been run.
+
+That discovery is not cosmetic. This file used to carry the tree's literal
+count as a number of its own, on the reasoning that "a release that moves the
+count must move this too". That reasoning is the rot the detector exists to
+catch, one layer up: the number here was a SECOND COPY of a measured number,
+it was not covered by any detector, and it went stale -- the control's first
+case then stopped applying, because the text it looks for no longer existed
+anywhere in the tree. The case did not fail; it vanished. Now the count is
+measured, so it cannot rot, and if the tree's claim cannot be found at all
+the control says so out loud instead of skipping quietly.
 
 Each case here breaks ONE thing and requires three things of the detector
 that is supposed to catch it:
@@ -74,6 +85,7 @@ otherwise.
 """
 import hashlib
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -83,6 +95,7 @@ BACKUP_DIR = os.path.join(ROOT, "_build", "pin_copies_control")
 sys.path.insert(0, os.path.join(ROOT, "tools"))
 
 from validate_resolved_deps import read_moon_mod  # noqa: E402
+from validate_pin_copies import LITERAL_COUNT_CLAIM  # noqa: E402
 
 CRITERION = "tools/validate_pin_copies.py"
 
@@ -90,12 +103,11 @@ CRITERION = "tools/validate_pin_copies.py"
 # next to it in this file -- see the note above the imports.
 PINNED_PACKAGE = "riantr/moonbit_doubleML"
 
-# The tree's own count of its literals, as the tree states it today. A
-# release that moves the count must move this too: the `old` text has to
-# occur exactly once in AGENTS.md, and the control says so out loud when it
-# does not, because a control that quietly does not apply is not a control.
-TREE_LITERALS = 56
-TREE_FILES = 19
+# Where the tree states how many dependency literals it holds. The NUMBER is
+# not written in this file: it is measured at run time from the detector's
+# own output (see `measured_counts`), so a release that moves the count does
+# not have to move this file for the control to keep applying.
+COUNT_CLAIM_FILE = "AGENTS.md"
 
 
 def pin_version(package):
@@ -116,14 +128,11 @@ STALE_VERSION = "0.0.1"
 GOOD_LITERAL = "%s@%s" % (PINNED_PACKAGE, GOOD_VERSION)
 STALE_LITERAL = "%s@%s" % (PINNED_PACKAGE, STALE_VERSION)
 
-# The count claim under test, and the broken one. Both are formatted from
-# numbers, so this file states no count claim of its own.
-GOOD_COUNT_CLAIM = "%d literals, %d files" % (TREE_LITERALS, TREE_FILES)
-BROKEN_COUNT_CLAIM = "%d literals, %d files" % (TREE_LITERALS - 1, TREE_FILES)
-COUNT_MISMATCH = "claims %d literals, the tree has %d" % (
-    TREE_LITERALS - 1,
-    TREE_LITERALS,
-)
+# The count claim under test is NOT built here -- it is measured at run time
+# and located in the tree by `build_count_case`. It used to be written in this
+# file as a pair of numbers, which is how it went stale without anybody
+# noticing: the control's first case then looked for text that no longer
+# existed anywhere in the tree, so it did not fail -- it vanished.
 
 # The README sentence that carries the literal, and the same sentence with the
 # literal broken across two lines and made stale.
@@ -137,14 +146,11 @@ README_NEW = "`%s` → `dmlref`" % (
 # The `old` text must occur EXACTLY ONCE in the file, or the case is skipped
 # and counted as a failure: a control that quietly does not apply is not a
 # control. The tool asserts the uniqueness rather than assuming it.
+#
+# The count-claim case is NOT in this list: it is built at run time by
+# `build_count_case()` and prepended to it, because it needs the measured
+# count before it can break anything.
 CASES = [
-    (
-        "the tree's own count of its literals",
-        "AGENTS.md",
-        [(GOOD_COUNT_CLAIM, BROKEN_COUNT_CLAIM)],
-        CRITERION,
-        ["AGENTS.md:", COUNT_MISMATCH],
-    ),
     (
         "a literal split across two lines -- the wrap the docstring promised to catch",
         "README.mbt.md",
@@ -198,6 +204,111 @@ def run_criterion(script):
     return proc.returncode, proc.stdout + proc.stderr
 
 
+class ControlSetupError(Exception):
+    """The control cannot be set up against the tree as it stands.
+
+    Reported loudly and never skipped silently: a control that quietly does
+    not apply is not a control, and one that applies to the wrong thing
+    (here: a claim that was already stale) is worse -- the detector would go
+    red for the wrong reason and the control would look like it works.
+    """
+
+
+def measured_counts():
+    """Ask the detector how many literals the tracked tree holds.
+
+    The counts are READ FROM THE DETECTOR'S OWN OUTPUT, never written in
+    this file. A hard-coded count here would be exactly the rot the detector
+    exists to catch, one layer up: the number moves whenever a release adds
+    or removes a copy, and a control that has to be edited in the same commit
+    as the tree is a control that quietly stops applying -- which is what
+    happened here once already.
+
+    Returns (literals, files); either is None when the output did not carry
+    it.
+    """
+    _, out = run_criterion(CRITERION)
+    literals = None
+    files = None
+    for line in out.splitlines():
+        found = re.search(r"(\d+)\s+literal\(s\)\s+in\s+total", line)
+        if found:
+            literals = int(found.group(1))
+        found = re.search(r"across\s+(\d+)\s+file\(s\)", line)
+        if found:
+            files = int(found.group(1))
+    return literals, files
+
+
+def build_count_case():
+    """Build the case that breaks the tree's own claim of how many literals it holds.
+
+    The claims are LOCATED with the detector's own pattern, and the number
+    that is broken is the number the detector MEASURED. Both halves matter:
+
+      - locating them with the detector's pattern means the control and the
+        detector agree on what a claim looks like, so a change to the
+        detector's notion of a claim cannot strand the control;
+      - breaking the MEASURED number means the case can only go red because
+        the claim now disagrees with the tree. Breaking a claim that was
+        already stale would go red for the wrong reason, and the control
+        would report success while testing nothing.
+
+    EVERY claim in the file is broken, not just the first one. The detector's
+    own rule is "by pattern over EVERY occurrence, not by reading one blessed
+    location"; a control that broke only the first claim would pass even if
+    the detector had been narrowed to look at one place. So the control
+    requires the detector to name EACH broken line -- that is the property
+    under test, not a detail.
+
+    Returns a case tuple, the same shape as the static cases.
+    """
+    literals, files = measured_counts()
+    if not literals or not files:
+        raise ControlSetupError(
+            "the detector did not report its literal and file counts, so the "
+            "count-claim case cannot be set up"
+        )
+
+    path = os.path.join(ROOT, COUNT_CLAIM_FILE)
+    with open(path, "rb") as handle:
+        text = handle.read().decode("utf-8")
+
+    edits = []
+    expected = []
+    for number, line in enumerate(text.splitlines(), 1):
+        claim = LITERAL_COUNT_CLAIM.search(line)
+        if not claim or int(claim.group(1)) != literals:
+            continue
+        broken = LITERAL_COUNT_CLAIM.sub(
+            lambda match: "%d literals" % (literals - 1), line, count=1
+        )
+        if broken == line:
+            raise ControlSetupError(
+                "the count claim in %s:%d did not change when it was broken"
+                % (COUNT_CLAIM_FILE, number)
+            )
+        edits.append((line, broken))
+        expected.append(
+            "%s:%d claims %d literals, the tree has %d"
+            % (COUNT_CLAIM_FILE, number, literals - 1, literals)
+        )
+
+    if not edits:
+        raise ControlSetupError(
+            "no line in %s claims %d literals, so the count-claim case cannot "
+            "be set up" % (COUNT_CLAIM_FILE, literals)
+        )
+
+    return (
+        "the tree's own count of its literals",
+        COUNT_CLAIM_FILE,
+        edits,
+        CRITERION,
+        expected,
+    )
+
+
 def take_backup(name, data):
     """A second copy on disk, so even a hard kill leaves a way back."""
     os.makedirs(BACKUP_DIR, exist_ok=True)
@@ -248,7 +359,14 @@ def run_untracked_case(verbose):
 def main():
     verbose = "--verbose" in sys.argv
 
-    touched = {case[1] for case in CASES}
+    try:
+        count_case = build_count_case()
+    except ControlSetupError as exc:
+        print("[FAIL] %s" % exc)
+        return 1
+    cases = [count_case] + CASES
+
+    touched = {case[1] for case in cases}
     dirty = dirty_files()
     for name in sorted(touched & dirty):
         print("note: %s has uncommitted changes; it will be restored to exactly those bytes" % name)
@@ -261,7 +379,7 @@ def main():
         take_backup(name, data)
 
     failures = []
-    for description, name, edits, script, expected in CASES:
+    for description, name, edits, script, expected in cases:
         path = os.path.join(ROOT, name)
         original, before = backups[name]
         text = original.decode("utf-8")
@@ -315,11 +433,11 @@ def main():
 
     print()
     if failures:
-        print("FAILED: %d of %d control(s): %s" % (len(failures), len(CASES) + 1, failures))
+        print("FAILED: %d of %d control(s): %s" % (len(failures), len(cases) + 1, failures))
         return 1
     print(
         "all %d controls went red, named the place they caught, and left the tree byte-for-byte"
-        % (len(CASES) + 1)
+        % (len(cases) + 1)
     )
     return 0
 
